@@ -1,0 +1,139 @@
+@import "tailwindcss";
+
+@theme {
+  /* ─── Color ───────────────────────────────────── */
+  --color-ink: #0a0a0a;
+  --color-ink-soft: #1a1a1a;
+  --color-paper: #fafafa;
+  --color-bone: #f1efe9;
+  --color-mute: #6b6b6b;
+  --color-line: #e5e5e5;
+  --color-line-soft: #efefef;
+  --color-volt: #fff501;
+  --color-volt-deep: #e0d700;
+  --color-volt-soft: #fffbcc;
+
+  /* ─── Tipografía ──────────────────────────────── */
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-display), "Times New Roman", serif;
+  --font-mono: var(--font-mono), ui-monospace, "JetBrains Mono", monospace;
+
+  --text-eyebrow: 0.6875rem;
+  --text-display: clamp(3rem, 8vw, 7.5rem);
+  --text-h1: clamp(2.25rem, 5vw, 4.25rem);
+  --text-h2: clamp(1.625rem, 3vw, 2.75rem);
+
+  /* ─── Motion ──────────────────────────────────── */
+  --ease-premium: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-snap: cubic-bezier(0.7, 0, 0.84, 0);
+
+  /* ─── Spacing ─────────────────────────────────── */
+  --spacing-section: clamp(4rem, 10vw, 9rem);
+  --spacing-gutter: clamp(1.25rem, 4vw, 2.5rem);
+
+  /* ─── Radii ──────────────────────────────────── */
+  --radius-sm: 4px;
+  --radius-md: 12px;
+  --radius-lg: 24px;
+  --radius-xl: 32px;
+}
+
+/* ─── Base ──────────────────────────────────────── */
+@layer base {
+  * {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  html {
+    background: var(--color-paper);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    text-rendering: optimizeLegibility;
+    scroll-behavior: smooth;
+  }
+
+  body {
+    min-height: 100dvh;
+    overflow-x: hidden;
+  }
+
+  ::selection {
+    background: var(--color-volt);
+    color: var(--color-ink);
+  }
+
+  /* Tipografía display por default en h1/h2 */
+  .font-display {
+    font-family: var(--font-display);
+    font-weight: 400;
+    letter-spacing: -0.02em;
+    line-height: 0.95;
+  }
+
+  .font-mono {
+    font-family: var(--font-mono);
+    letter-spacing: 0.02em;
+  }
+}
+
+/* ─── Utilidades custom ─────────────────────────── */
+@utility container-app {
+  width: 100%;
+  margin-inline: auto;
+  padding-inline: var(--spacing-gutter);
+  max-width: 90rem; /* 1440px */
+}
+
+@utility section-y {
+  padding-block: var(--spacing-section);
+}
+
+@utility eyebrow {
+  font-size: var(--text-eyebrow);
+  font-family: var(--font-mono);
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  color: var(--color-mute);
+}
+
+/* ─── Scrollbar ─────────────────────────────────── */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-track {
+  background: var(--color-paper);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--color-line);
+  border-radius: 999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-mute);
+}
+
+/* ─── Marquee animation ─────────────────────────── */
+@keyframes marquee {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+.animate-marquee {
+  animation: marquee 30s linear infinite;
+}
+
+/* ─── WhatsApp FAB pulse ────────────────────────── */
+@keyframes voltPulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(255, 245, 1, 0.7), 0 12px 32px -8px rgba(0,0,0,0.25); }
+  50%      { box-shadow: 0 0 0 16px rgba(255, 245, 1, 0), 0 12px 32px -8px rgba(0,0,0,0.25); }
+}
+.animate-volt-pulse {
+  animation: voltPulse 3s var(--ease-premium) infinite;
+}
+
+/* ─── Focus visible elegante ────────────────────── */
+*:focus-visible {
+  outline: 2px solid var(--color-volt);
+  outline-offset: 3px;
+  border-radius: 2px;
+}
