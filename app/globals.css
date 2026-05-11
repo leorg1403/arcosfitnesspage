@@ -1,44 +1,55 @@
 @import "tailwindcss";
 
 @theme {
-  /* ─── Color ───────────────────────────────────── */
-  --color-ink: #0a0a0a;
-  --color-ink-soft: #1a1a1a;
-  --color-paper: #fafafa;
-  --color-bone: #f1efe9;
-  --color-mute: #6b6b6b;
-  --color-line: #e5e5e5;
-  --color-line-soft: #efefef;
-  --color-volt: #fff501;
-  --color-volt-deep: #e0d700;
-  --color-volt-soft: #fffbcc;
+  /* ─── Color · v2 ──────────────────────────────── */
+  --color-ink:        #0A0A0A;
+  --color-graphite:   #141414;
+  --color-charcoal:   #1F1F1F;
+  --color-paper:      #F5F4F0;
+  --color-bone:       #ECEAE3;
+  --color-concrete:   #8A8A88;
+  --color-line:       #1F1F1F;
+  --color-line-soft:  #E5E3DC;
+  --color-wood:       #8B6F47;
+  --color-gold:       #C4A572;
+  --color-gold-soft:  #D4B884;
+  --color-gold-deep:  #A88A5B;
 
   /* ─── Tipografía ──────────────────────────────── */
-  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
-  --font-display: var(--font-display), "Times New Roman", serif;
-  --font-mono: var(--font-mono), ui-monospace, "JetBrains Mono", monospace;
+  --font-sans:    var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-serif:   var(--font-instrument-serif), "Times New Roman", serif;
+  --font-mono:    var(--font-mono), ui-monospace, "JetBrains Mono", monospace;
 
-  --text-eyebrow: 0.6875rem;
-  --text-display: clamp(3rem, 8vw, 7.5rem);
-  --text-h1: clamp(2.25rem, 5vw, 4.25rem);
-  --text-h2: clamp(1.625rem, 3vw, 2.75rem);
+  --text-display:  clamp(3.5rem, 11vw, 11rem);
+  --text-headline: clamp(2.25rem, 6vw, 5.5rem);
+  --text-h2:       clamp(1.875rem, 3.5vw, 3.25rem);
+  --text-lede:     clamp(1.125rem, 1.5vw, 1.375rem);
+  --text-body:     1rem;
+  --text-small:    0.875rem;
+  --text-eyebrow:  0.6875rem;
 
   /* ─── Motion ──────────────────────────────────── */
-  --ease-premium: cubic-bezier(0.22, 1, 0.36, 1);
-  --ease-snap: cubic-bezier(0.7, 0, 0.84, 0);
+  --ease-expo:    cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-power:   cubic-bezier(0.6, 0.05, 0.1, 1);
+  --ease-instant: cubic-bezier(0.2, 0, 0, 1);
+
+  --dur-fast:   200ms;
+  --dur-base:   600ms;
+  --dur-slow:   900ms;
+  --dur-cinema: 1400ms;
 
   /* ─── Spacing ─────────────────────────────────── */
-  --spacing-section: clamp(4rem, 10vw, 9rem);
-  --spacing-gutter: clamp(1.25rem, 4vw, 2.5rem);
+  --spacing-section: clamp(6rem, 12vw, 12rem);
+  --spacing-gutter:  clamp(1.25rem, 4vw, 2.5rem);
 
   /* ─── Radii ──────────────────────────────────── */
-  --radius-sm: 4px;
-  --radius-md: 12px;
-  --radius-lg: 24px;
-  --radius-xl: 32px;
+  --radius-none: 0;
+  --radius-sm:   2px;
+  --radius-md:   4px;
+  --radius-lg:   12px;
 }
 
-/* ─── Base ──────────────────────────────────────── */
 @layer base {
   * {
     -webkit-font-smoothing: antialiased;
@@ -46,29 +57,39 @@
   }
 
   html {
-    background: var(--color-paper);
-    color: var(--color-ink);
+    background: var(--color-ink);
+    color: var(--color-paper);
     font-family: var(--font-sans);
     text-rendering: optimizeLegibility;
     scroll-behavior: smooth;
+    /* Avoid jump on locked menu */
+    scrollbar-gutter: stable;
   }
 
   body {
     min-height: 100dvh;
     overflow-x: hidden;
-  }
-
-  ::selection {
-    background: var(--color-volt);
+    background: var(--color-paper);
     color: var(--color-ink);
   }
 
-  /* Tipografía display por default en h1/h2 */
+  ::selection {
+    background: var(--color-gold);
+    color: var(--color-ink);
+  }
+
   .font-display {
     font-family: var(--font-display);
-    font-weight: 400;
-    letter-spacing: -0.02em;
+    font-weight: 800;
+    letter-spacing: -0.03em;
     line-height: 0.95;
+  }
+
+  .font-serif-italic {
+    font-family: var(--font-serif);
+    font-style: italic;
+    font-weight: 400;
+    letter-spacing: -0.01em;
   }
 
   .font-mono {
@@ -77,12 +98,19 @@
   }
 }
 
-/* ─── Utilidades custom ─────────────────────────── */
+/* ─── Utilidades ─────────────────────────────────── */
 @utility container-app {
   width: 100%;
   margin-inline: auto;
   padding-inline: var(--spacing-gutter);
-  max-width: 90rem; /* 1440px */
+  max-width: 96rem;
+}
+
+@utility container-wide {
+  width: 100%;
+  margin-inline: auto;
+  padding-inline: var(--spacing-gutter);
+  max-width: 120rem;
 }
 
 @utility section-y {
@@ -93,47 +121,67 @@
   font-size: var(--text-eyebrow);
   font-family: var(--font-mono);
   text-transform: uppercase;
-  letter-spacing: 0.18em;
-  color: var(--color-mute);
+  letter-spacing: 0.22em;
+  color: var(--color-concrete);
 }
 
 /* ─── Scrollbar ─────────────────────────────────── */
 ::-webkit-scrollbar {
-  width: 10px;
-  height: 10px;
+  width: 8px;
+  height: 8px;
 }
 ::-webkit-scrollbar-track {
-  background: var(--color-paper);
+  background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: var(--color-line);
+  background: var(--color-line-soft);
   border-radius: 999px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--color-mute);
+  background: var(--color-concrete);
 }
 
-/* ─── Marquee animation ─────────────────────────── */
-@keyframes marquee {
-  from { transform: translateX(0); }
-  to   { transform: translateX(-50%); }
+/* ─── Subtle FAB pulse ──────────────────────────── */
+@keyframes goldPulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(196, 165, 114, 0.45), 0 12px 32px -8px rgba(0,0,0,0.4); }
+  50%      { box-shadow: 0 0 0 14px rgba(196, 165, 114, 0), 0 12px 32px -8px rgba(0,0,0,0.4); }
 }
-.animate-marquee {
-  animation: marquee 30s linear infinite;
+.animate-gold-pulse {
+  animation: goldPulse 7s var(--ease-expo) infinite;
 }
 
-/* ─── WhatsApp FAB pulse ────────────────────────── */
-@keyframes voltPulse {
-  0%, 100% { box-shadow: 0 0 0 0 rgba(255, 245, 1, 0.7), 0 12px 32px -8px rgba(0,0,0,0.25); }
-  50%      { box-shadow: 0 0 0 16px rgba(255, 245, 1, 0), 0 12px 32px -8px rgba(0,0,0,0.25); }
+/* ─── Subtle scroll hint ────────────────────────── */
+@keyframes scrollHint {
+  0%, 100% { transform: translateY(0); opacity: 0.4; }
+  50%      { transform: translateY(8px); opacity: 1; }
 }
-.animate-volt-pulse {
-  animation: voltPulse 3s var(--ease-premium) infinite;
+.animate-scroll-hint {
+  animation: scrollHint 2.4s var(--ease-expo) infinite;
 }
 
 /* ─── Focus visible elegante ────────────────────── */
 *:focus-visible {
-  outline: 2px solid var(--color-volt);
-  outline-offset: 3px;
+  outline: 1px solid var(--color-gold);
+  outline-offset: 4px;
   border-radius: 2px;
+}
+
+/* ─── Image grain texture (optional) ────────────── */
+.grain::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' /%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.4'/%3E%3C/svg%3E");
+  opacity: 0.05;
+  mix-blend-mode: overlay;
+}
+
+/* ─── Filter rail no-scrollbar ──────────────────── */
+.scrollbar-none {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.scrollbar-none::-webkit-scrollbar {
+  display: none;
 }

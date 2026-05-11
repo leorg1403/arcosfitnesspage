@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
-import { PageHero } from "@/components/sections/PageHero";
+import { FullBleedHero } from "@/components/sections/FullBleedHero";
 import { ScheduleGrid } from "@/components/sections/ScheduleGrid";
-import { InstructorsGrid } from "@/components/sections/InstructorsGrid";
-import { CTASection } from "@/components/sections/CTASection";
-import { Marquee } from "@/components/primitives/Marquee";
+import { InstructorsRow } from "@/components/sections/InstructorsRow";
+import { FullBleedCTA } from "@/components/sections/FullBleedCTA";
+import { CLASES, HEROES } from "@/lib/content";
 
 export const metadata: Metadata = {
   title: "Clases & Reservas",
@@ -14,31 +14,26 @@ export const metadata: Metadata = {
 export default function ClasesReservasPage() {
   return (
     <>
-      <PageHero
-        number="01"
-        eyebrow="Agenda semanal"
-        title={
-          <>
-            Reserva tu
-            <br />
-            <span className="italic">próxima clase.</span>
-          </>
-        }
-        subtitle="Más de 25 clases por semana en seis disciplinas. Filtra, elige y reserva en menos de un minuto. Sin app, sin contraseñas."
+      <FullBleedHero
+        image={HEROES.clases}
+        alt="Clase en Arcos Fitness"
+        eyebrow={CLASES.hero.eyebrow}
+        headline={CLASES.hero.headline}
+        italicWord={CLASES.hero.italicWord}
+        height="tall"
       />
 
-      <section className="bg-paper pt-10 pb-24">
-        <ScheduleGrid />
-      </section>
+      <ScheduleGrid />
 
-      <Marquee
-        items={["Yoga", "Funcional", "Hyrox", "Spinning", "Pilates", "Box"]}
-        variant="volt"
+      <InstructorsRow />
+
+      <FullBleedCTA
+        image={HEROES.ctaClases}
+        eyebrow={CLASES.cierre.eyebrow}
+        headline={CLASES.cierre.headline}
+        italicWord={CLASES.cierre.italicWord}
+        cta={CLASES.cierre.cta}
       />
-
-      <InstructorsGrid />
-
-      <CTASection />
     </>
   );
 }

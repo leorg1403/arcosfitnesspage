@@ -6,27 +6,29 @@ import {
   CLASSES,
   DAY_LABELS,
   DAY_ORDER,
-  CATEGORIES,
   type ClassCategory,
   type ClassItem,
   type DayKey,
 } from "@/lib/classes";
 import { ReservaDrawer } from "./ReservaDrawer";
+import { FilterRail } from "./FilterRail";
 import { cn } from "@/lib/cn";
+import { easeExpo } from "@/lib/motion";
 
 type Props = {
   initialCategory?: ClassCategory | "all";
   hideFilter?: boolean;
+  sectionPadY?: boolean;
 };
 
-export function ScheduleGrid({ initialCategory = "all", hideFilter }: Props) {
+export function ScheduleGrid({
+  initialCategory = "all",
+  hideFilter,
+  sectionPadY = true,
+}: Props) {
   const [category, setCategory] = useState<ClassCategory | "all">(initialCategory);
   const [activeClass, setActiveClass] = useState<ClassItem | null>(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
-
-  const filteredCategories = hideFilter
-    ? CATEGORIES.filter((c) => c.key === initialCategory)
-    : CATEGORIES;
 
   const grouped = useMemo(() => {
     const map: Record<DayKey, ClassItem[]> = {
@@ -51,101 +53,91 @@ export function ScheduleGrid({ initialCategory = "all", hideFilter }: Props) {
   return (
     <div>
       {!hideFilter && (
-        <div className="container-app">
-          <div className="flex items-center gap-2 overflow-x-auto pb-3 -mx-2 px-2 scrollbar-none">
-            {filteredCategories.map((cat) => {
-              const active = category === cat.key;
-              return (
-                <button
-                  key={cat.key}
-                  onClick={() => setCategory(cat.key as ClassCategory | "all")}
-                  className={cn(
-                    "shrink-0 px-5 py-2.5 rounded-full text-sm font-medium border transition-all duration-300",
-                    active
-                      ? "bg-ink text-paper border-ink"
-                      : "bg-paper text-ink border-line hover:border-ink"
-                  )}
-                >
-                  {cat.label}
-                </button>
-              );
-            })}
-          </div>
-        </div>
+        <FilterRail active={category} onChange={setCategory} sticky />
       )}
 
-      {/* Mobile: list por día. Desktop: grid 7 columnas */}
-      <div className="container-app mt-8">
-        <div className="hidden md:grid md:grid-cols-7 gap-3">
-          {DAY_ORDER.map((day) => (
-            <div key={day} className="space-y-3">
-              <div className="pb-3 border-b border-line">
-                <p className="font-mono text-[0.625rem] uppercase tracking-[0.2em] text-mute">
-                  {day === "lun" || day === "mar" || day === "mie" ? "" : ""}
-                </p>
-                <p className="font-display text-xl">{DAY_LABELS[day]}</p>
-              </div>
-              <div className="space-y-2 min-h-[200px]">
-                <AnimatePresence mode="sync">
-                  {grouped[day].length === 0 ? (
-                    <motion.p
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 0.4 }}
-                      exit={{ opacity: 0 }}
-                      className="font-mono text-[0.625rem] uppercase tracking-[0.18em] text-mute pt-4"
-                    >
-                      Sin clases
-                    </motion.p>
-                  ) : (
-                    grouped[day].map((cls) => (
-                      <motion.button
-                        layout
-                        key={cls.id}
-                        onClick={() => handleSelect(cls)}
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, scale: 0.96 }}
-                        transition={{ duration: 0.3 }}
-                        className="group w-full text-left p-3 rounded-md border border-line hover:border-ink hover:shadow-md hover:-translate-y-0.5 transition-all duration-300 bg-paper"
+      <div className={cn(sectionPadY && "py-16 md:py-24")}>
+        {/* Desktop · grid 7 columnas */}
+        <div className="hidden md:block container-wide">
+          <div className="grid grid-cols-7 gap-px bg-line-soft">
+            {DAY_ORDER.map((day) => (
+              <div
+                key={day}
+                className="bg-paper px-4 py-6 min-h-[420px]"
+              >
+                <div className="mb-6">
+                  <p className="font-mono text-[0.6rem] uppercase tracking-[0.22em] text-concrete mb-1">
+                    {day === "sab" || day === "dom" ? "Fin de semana" : "Día"}
+                  </p>
+                  <p className="font-display text-xl tracking-tight font-semibold">
+                    {DAY_LABELS[day]}
+                  </p>
+                </div>
+                <div className="space-y-5">
+                  <AnimatePresence mode="sync">
+                    {grouped[day].length === 0 ? (
+                      <motion.p
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 0.4 }}
+                        exit={{ opacity: 0 }}
+                        className="font-mono text-[0.625rem] uppercase tracking-[0.22em] text-concrete"
                       >
-                        <p className="font-mono text-[0.6875rem] tracking-wider text-mute group-hover:text-ink">
-                          {cls.time}
-                        </p>
-                        <p className="font-medium text-sm mt-1 leading-tight">
-                          {cls.name}
-                        </p>
-                        <p className="text-xs text-mute mt-0.5 truncate">
-                          {cls.instructor}
-                        </p>
-                      </motion.button>
-                    ))
-                  )}
-                </AnimatePresence>
+                        Sin clases
+                      </motion.p>
+                    ) : (
+                      grouped[day].map((cls) => (
+                        <motion.button
+                          layout
+                          key={cls.id}
+                          onClick={() => handleSelect(cls)}
+                          initial={{ opacity: 0, y: 8 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={{ opacity: 0, y: -4 }}
+                          transition={{ duration: 0.4, ease: easeExpo }}
+                          className="group block text-left w-full"
+                        >
+                          <p className="font-mono text-[0.6875rem] tracking-[0.18em] text-concrete group-hover:text-gold transition-colors">
+                            {cls.time}
+                          </p>
+                          <p className="font-display text-base font-semibold tracking-tight mt-0.5 group-hover:text-gold transition-colors">
+                            {cls.name}
+                          </p>
+                          <p className="font-mono text-[0.65rem] uppercase tracking-[0.18em] text-concrete mt-0.5">
+                            {cls.instructor}
+                          </p>
+                          <span className="block mt-2 h-px w-0 bg-gold transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:w-8" />
+                        </motion.button>
+                      ))
+                    )}
+                  </AnimatePresence>
+                </div>
               </div>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
 
-        {/* Mobile: acordeón vertical */}
-        <div className="md:hidden space-y-8">
+        {/* Mobile · acordeón vertical */}
+        <div className="md:hidden container-app space-y-10">
           {DAY_ORDER.map((day) => (
             <div key={day}>
-              <div className="flex items-baseline justify-between pb-3 border-b border-line">
-                <p className="font-display text-2xl">{DAY_LABELS[day]}</p>
-                <p className="font-mono text-[0.625rem] uppercase tracking-[0.18em] text-mute">
-                  {grouped[day].length} clases
+              <div className="flex items-baseline justify-between pb-4 border-b border-line-soft">
+                <p className="font-display text-2xl font-semibold tracking-tight">
+                  {DAY_LABELS[day]}
+                </p>
+                <p className="font-mono text-[0.625rem] uppercase tracking-[0.22em] text-concrete">
+                  {grouped[day].length}
                 </p>
               </div>
-              <div className="mt-4 grid gap-2">
+              <div className="mt-5 space-y-4">
                 <AnimatePresence mode="sync">
                   {grouped[day].length === 0 ? (
                     <motion.p
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 0.4 }}
                       exit={{ opacity: 0 }}
-                      className="font-mono text-xs text-mute py-2"
+                      className="font-mono text-xs text-concrete py-2"
                     >
-                      Sin clases este día.
+                      —
                     </motion.p>
                   ) : (
                     grouped[day].map((cls) => (
@@ -153,24 +145,23 @@ export function ScheduleGrid({ initialCategory = "all", hideFilter }: Props) {
                         layout
                         key={cls.id}
                         onClick={() => handleSelect(cls)}
-                        initial={{ opacity: 0, y: 10 }}
+                        initial={{ opacity: 0, y: 6 }}
                         animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, scale: 0.96 }}
+                        exit={{ opacity: 0 }}
                         transition={{ duration: 0.3 }}
-                        className="w-full text-left flex items-center gap-4 p-4 rounded-md border border-line hover:border-ink hover:bg-bone transition-all"
+                        className="w-full text-left flex items-baseline gap-4 py-3 border-b border-line-soft/60 hover:border-gold/60 transition-colors"
                       >
-                        <span className="font-mono text-sm w-14 shrink-0 text-mute">
+                        <span className="font-mono text-sm text-concrete shrink-0 w-14">
                           {cls.time}
                         </span>
                         <div className="flex-1 min-w-0">
-                          <p className="font-medium leading-tight">{cls.name}</p>
-                          <p className="text-xs text-mute mt-0.5">
-                            {cls.instructor} · {cls.duration} min
+                          <p className="font-display text-lg font-semibold tracking-tight">
+                            {cls.name}
+                          </p>
+                          <p className="font-mono text-[0.65rem] uppercase tracking-[0.2em] text-concrete mt-1">
+                            {cls.instructor} · {cls.duration}min
                           </p>
                         </div>
-                        <span className="font-mono text-[0.625rem] uppercase tracking-[0.18em] text-volt-deep bg-volt/30 px-2 py-1 rounded-full shrink-0">
-                          Reservar
-                        </span>
                       </motion.button>
                     ))
                   )}

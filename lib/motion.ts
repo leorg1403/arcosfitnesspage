@@ -1,50 +1,80 @@
 import type { Variants, Transition } from "framer-motion";
 
-export const easePremium: Transition["ease"] = [0.22, 1, 0.36, 1];
+export const easeExpo: Transition["ease"] = [0.16, 1, 0.3, 1];
+export const easePower: Transition["ease"] = [0.6, 0.05, 0.1, 1];
+export const easeInstant: Transition["ease"] = [0.2, 0, 0, 1];
 
+/** Image clip-path curtain reveal (left to right) */
+export const clipRevealRight: Variants = {
+  hidden: { clipPath: "inset(0 100% 0 0)" },
+  visible: {
+    clipPath: "inset(0 0% 0 0)",
+    transition: { duration: 1.4, ease: easeExpo },
+  },
+};
+
+/** Image clip-path curtain reveal (bottom to top) — for hero photos */
+export const clipRevealUp: Variants = {
+  hidden: { clipPath: "inset(100% 0 0 0)" },
+  visible: {
+    clipPath: "inset(0% 0 0 0)",
+    transition: { duration: 1.6, ease: easeExpo },
+  },
+};
+
+/** Subtle fade up — for body text and small elements */
 export const fadeUp: Variants = {
-  hidden: { opacity: 0, y: 32 },
+  hidden: { opacity: 0, y: 24 },
   visible: {
     opacity: 1,
     y: 0,
-    transition: { duration: 0.7, ease: easePremium },
+    transition: { duration: 0.9, ease: easeExpo },
   },
 };
 
+/** Fade in (no motion) — for very subtle reveals */
 export const fadeIn: Variants = {
   hidden: { opacity: 0 },
-  visible: { opacity: 1, transition: { duration: 0.6, ease: easePremium } },
+  visible: { opacity: 1, transition: { duration: 0.9, ease: easeExpo } },
 };
 
-export const stagger = (delay = 0.08): Variants => ({
+/** Word-level mask reveal for headlines (apply to each word inside a mask container) */
+export const wordRise: Variants = {
+  hidden: { y: "110%" },
+  visible: {
+    y: "0%",
+    transition: { duration: 1, ease: easeExpo },
+  },
+};
+
+/** Stagger orchestrators */
+export const heroStagger: Variants = {
   hidden: {},
   visible: {
-    transition: { staggerChildren: delay, delayChildren: 0.1 },
-  },
-});
-
-export const slideRight: Variants = {
-  hidden: { x: 60, opacity: 0 },
-  visible: {
-    x: 0,
-    opacity: 1,
-    transition: { duration: 0.8, ease: easePremium },
+    transition: { staggerChildren: 0.12, delayChildren: 0.15 },
   },
 };
 
-export const scaleReveal: Variants = {
+export const wordStagger: Variants = {
+  hidden: {},
+  visible: {
+    transition: { staggerChildren: 0.07 },
+  },
+};
+
+export const lineDraw: Variants = {
+  hidden: { scaleX: 0, transformOrigin: "left" },
+  visible: {
+    scaleX: 1,
+    transition: { duration: 1.2, ease: easeExpo },
+  },
+};
+
+export const subtleScale: Variants = {
   hidden: { scale: 1.08, opacity: 0 },
   visible: {
     scale: 1,
     opacity: 1,
-    transition: { duration: 0.9, ease: easePremium },
-  },
-};
-
-export const lineReveal: Variants = {
-  hidden: { scaleX: 0, transformOrigin: "left" },
-  visible: {
-    scaleX: 1,
-    transition: { duration: 0.8, ease: easePremium, delay: 0.2 },
+    transition: { duration: 1.4, ease: easeExpo },
   },
 };

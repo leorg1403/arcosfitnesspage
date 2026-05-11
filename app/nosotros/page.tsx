@@ -1,42 +1,48 @@
 import type { Metadata } from "next";
-import { PageHero } from "@/components/sections/PageHero";
+import { FullBleedHero } from "@/components/sections/FullBleedHero";
 import { StorySection } from "@/components/sections/StorySection";
 import { FacilityShowcase } from "@/components/sections/FacilityShowcase";
-import { CommonAmenities } from "@/components/sections/CommonAmenities";
-import { Values } from "@/components/sections/Values";
-import { InstructorsGrid } from "@/components/sections/InstructorsGrid";
+import { ValuesEditorial } from "@/components/sections/ValuesEditorial";
+import { InstructorsRow } from "@/components/sections/InstructorsRow";
 import { LocationSection } from "@/components/sections/LocationSection";
-import { CTASection } from "@/components/sections/CTASection";
-import { ABOUT } from "@/lib/content";
+import { FullBleedCTA } from "@/components/sections/FullBleedCTA";
+import { NOSOTROS, HEROES } from "@/lib/content";
 
 export const metadata: Metadata = {
   title: "Nosotros",
   description:
-    "Arcos Fitness Club es más que un gimnasio: es una comunidad en Cuajimalpa, CDMX. Conoce nuestra historia, equipo, instalaciones y valores.",
+    "Arcos Fitness Club: un club privado en Cuajimalpa, CDMX. Conoce nuestra historia, equipo, instalaciones y valores.",
 };
 
 export default function NosotrosPage() {
   return (
     <>
-      <PageHero
-        number="00"
-        eyebrow={ABOUT.hero.eyebrow}
-        title={
-          <>
-            Más que
-            <br />
-            <span className="italic">un gym.</span>
-          </>
-        }
-        subtitle={ABOUT.hero.subhead}
+      <FullBleedHero
+        image={HEROES.nosotros}
+        alt="Arcos Fitness Club"
+        eyebrow={NOSOTROS.hero.eyebrow}
+        headline={NOSOTROS.hero.headline}
+        italicWord={NOSOTROS.hero.italicWord}
+        height="full"
       />
+
       <StorySection />
+
       <FacilityShowcase />
-      <CommonAmenities />
-      <Values />
-      <InstructorsGrid />
+
+      <ValuesEditorial />
+
+      <InstructorsRow />
+
       <LocationSection />
-      <CTASection />
+
+      <FullBleedCTA
+        image={HEROES.ctaNosotros}
+        eyebrow={NOSOTROS.cierre.eyebrow}
+        headline={NOSOTROS.cierre.headline}
+        italicWord={NOSOTROS.cierre.italicWord}
+        cta={NOSOTROS.cierre.cta}
+      />
     </>
   );
 }

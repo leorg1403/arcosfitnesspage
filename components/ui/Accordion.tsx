@@ -2,43 +2,53 @@
 
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Plus } from "lucide-react";
 import { cn } from "@/lib/cn";
+import { easeExpo } from "@/lib/motion";
 
 type Item = { q: string; a: string };
 
 export function Accordion({
   items,
   className,
+  tone = "ink",
 }: {
   items: Item[];
   className?: string;
+  tone?: "ink" | "paper";
 }) {
   const [open, setOpen] = useState<number | null>(0);
 
+  const lineColor = tone === "paper" ? "border-paper/15" : "border-ink/10";
+  const textColor = tone === "paper" ? "text-paper" : "text-ink";
+  const muteColor = tone === "paper" ? "text-paper/60" : "text-concrete";
+
   return (
-    <div className={cn("divide-y divide-line border-y border-line", className)}>
+    <div className={cn("border-t", lineColor, className)}>
       {items.map((it, i) => {
         const isOpen = open === i;
         return (
-          <div key={i}>
+          <div key={i} className={cn("border-b", lineColor)}>
             <button
               onClick={() => setOpen(isOpen ? null : i)}
-              className="group flex w-full items-center justify-between gap-6 py-6 md:py-7 text-left transition-colors hover:bg-bone -mx-4 px-4"
+              className={cn(
+                "group flex w-full items-start justify-between gap-8 py-7 text-left transition-colors",
+                textColor,
+                "hover:text-gold"
+              )}
               aria-expanded={isOpen}
             >
-              <span className="font-display text-xl md:text-2xl tracking-tight">
+              <span className="font-display text-xl md:text-2xl tracking-tight font-medium">
                 {it.q}
               </span>
               <span
                 className={cn(
-                  "shrink-0 inline-flex size-9 items-center justify-center rounded-full border border-ink/15 transition-all duration-500",
-                  isOpen
-                    ? "bg-ink text-paper rotate-45"
-                    : "text-ink group-hover:border-ink"
+                  "relative shrink-0 w-5 h-5 mt-2 transition-transform duration-500",
+                  isOpen && "rotate-45"
                 )}
+                aria-hidden
               >
-                <Plus className="size-4" strokeWidth={1.75} />
+                <span className={cn("absolute inset-y-0 left-1/2 -translate-x-1/2 w-px bg-current")} />
+                <span className={cn("absolute inset-x-0 top-1/2 -translate-y-1/2 h-px bg-current")} />
               </span>
             </button>
             <AnimatePresence initial={false}>
@@ -47,10 +57,15 @@ export function Accordion({
                   initial={{ height: 0, opacity: 0 }}
                   animate={{ height: "auto", opacity: 1 }}
                   exit={{ height: 0, opacity: 0 }}
-                  transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
+                  transition={{ duration: 0.55, ease: easeExpo }}
                   className="overflow-hidden"
                 >
-                  <p className="pb-6 md:pb-7 pr-16 text-base leading-relaxed text-mute max-w-3xl">
+                  <p
+                    className={cn(
+                      "pb-8 pr-12 text-base leading-relaxed max-w-3xl",
+                      muteColor
+                    )}
+                  >
                     {it.a}
                   </p>
                 </motion.div>

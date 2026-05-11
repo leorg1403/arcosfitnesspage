@@ -1,19 +1,19 @@
 /**
- * Copys centralizados. Edita aquí para cambiar el tono en todo el sitio.
+ * Copys centralizados v2 — tono editorial corto, sin marketing.
  */
 
 export const SITE = {
   name: "Arcos Fitness Club",
   shortName: "Arcos",
-  tagline: "Entrena. Recupera. Pertenece.",
+  tagline: "Strength. Recovery. Belonging.",
   address: "Paseo de los Tamarindos 98, Cuajimalpa, CDMX",
   phone: "55 9135 0325",
   email: "info@arcosfitness.com",
   hours: [
-    { day: "Lunes a Jueves", time: "6:00 – 22:00" },
-    { day: "Viernes", time: "6:00 – 21:00" },
-    { day: "Sábado", time: "8:00 – 17:00" },
-    { day: "Domingo", time: "9:00 – 15:00" },
+    { day: "Lun a Jue", time: "6:00 — 22:00" },
+    { day: "Viernes", time: "6:00 — 21:00" },
+    { day: "Sábado", time: "8:00 — 17:00" },
+    { day: "Domingo", time: "9:00 — 15:00" },
   ],
   social: {
     instagram: "https://instagram.com/arcosfitness",
@@ -25,129 +25,217 @@ export const SITE = {
 
 export const NAV = [
   { label: "Inicio", href: "/" },
-  { label: "Clases & Reservas", href: "/clases-reservas" },
+  { label: "Clases", href: "/clases-reservas" },
   { label: "Hyrox", href: "/hyrox" },
   { label: "Membresías", href: "/membresias" },
+];
+
+export const NAV_FOOTER = [
+  ...NAV,
   { label: "Nosotros", href: "/nosotros" },
 ];
 
-export const HOME_HERO = {
-  eyebrow: "Cuajimalpa · CDMX",
-  display: "Entrena. Recupera.\nPertenece.",
-  subhead:
-    "Un club privado de fitness donde cada detalle —desde el equipo hasta el café— está pensado para que vuelvas mañana.",
-  primaryCTA: { label: "Reservar mi visita", action: "wa-visit" },
-  secondaryCTA: { label: "Ver clases", href: "/clases-reservas" },
+/** Hero photos curados — dark, architectural, premium */
+export const HEROES = {
+  home: "https://images.unsplash.com/photo-1623874514711-0f321325f318?auto=format&fit=crop&w=2400&q=85",
+  clases: "https://images.unsplash.com/photo-1518611012118-696072aa579a?auto=format&fit=crop&w=2400&q=85",
+  hyrox: "https://images.unsplash.com/photo-1574680096145-d05b474e2155?auto=format&fit=crop&w=2400&q=85",
+  membresias: "https://images.unsplash.com/photo-1540497077202-7c8a3999166f?auto=format&fit=crop&w=2400&q=85",
+  nosotros: "https://images.unsplash.com/photo-1571902943202-507ec2618e8f?auto=format&fit=crop&w=2400&q=85",
+  ctaHome: "https://images.unsplash.com/photo-1599058917765-a780eda07a3e?auto=format&fit=crop&w=2400&q=85",
+  ctaClases: "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?auto=format&fit=crop&w=2400&q=85",
+  ctaHyrox: "https://images.unsplash.com/photo-1599058917212-d750089bc07e?auto=format&fit=crop&w=2400&q=85",
+  ctaMembresias: "https://images.unsplash.com/photo-1583500178690-f7fd39c93728?auto=format&fit=crop&w=2400&q=85",
+  ctaNosotros: "https://images.unsplash.com/photo-1605296867424-35fc25c9212a?auto=format&fit=crop&w=2400&q=85",
 };
 
-export const VALUE_PROPS = [
-  { title: "Comunidad", body: "Donde el equipo conoce tu nombre y tu rutina.", icon: "Users" },
-  { title: "Equipo Pro", body: "Coaches certificados, entrenamiento personalizado.", icon: "Dumbbell" },
-  { title: "Hyrox Box", body: "El único centro Hyrox certificado de la zona.", icon: "Zap" },
-  { title: "Spa & Recovery", body: "Sauna, vapor y zona de recuperación.", icon: "Droplets" },
-];
-
-export const TESTIMONIOS = [
-  {
-    quote:
-      "Cambié de gimnasio tres veces antes de Arcos. Aquí me quedo. La gente, el equipo, el lugar — todo encaja.",
-    author: "Ricardo M.",
-    role: "Miembro desde 2023",
-    image: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=400&q=80",
-  },
-  {
-    quote:
-      "Las clases de Hyrox cambiaron mi forma de entrenar. Y el spa hace que ir el viernes sea un ritual.",
-    author: "Mariana L.",
-    role: "Miembro desde 2024",
-    image: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&w=400&q=80",
-  },
-  {
-    quote:
-      "Vine por una visita y me inscribí el mismo día. La atención del dueño es directa, sin rodeos.",
-    author: "Andrés T.",
-    role: "Miembro desde 2024",
-    image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=400&q=80",
-  },
-];
-
+/** Facilities scroll — fotos verticales premium */
 export const FACILITIES = [
   {
     title: "Sala de Pesas",
-    image: "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?auto=format&fit=crop&w=1600&q=80",
-    description: "Equipo Hammer Strength, mancuernas hasta 50kg, racks olímpicos.",
-  },
-  {
-    title: "Estudio Cycle",
-    image: "https://images.unsplash.com/photo-1517963879433-6ad2b056d712?auto=format&fit=crop&w=1600&q=80",
-    description: "20 bicicletas Stages SC3 con sistema de iluminación.",
+    image: "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?auto=format&fit=crop&w=1600&q=85",
   },
   {
     title: "Hyrox Box",
-    image: "https://images.unsplash.com/photo-1599058917212-d750089bc07e?auto=format&fit=crop&w=1600&q=80",
-    description: "Único centro certificado Hyrox de la zona.",
+    image: "https://images.unsplash.com/photo-1599058917212-d750089bc07e?auto=format&fit=crop&w=1600&q=85",
   },
   {
-    title: "Estudio Yoga & Pilates",
-    image: "https://images.unsplash.com/photo-1545205597-3d9d02c29597?auto=format&fit=crop&w=1600&q=80",
-    description: "Pisos calefactados, luz natural, máquinas reformer.",
+    title: "Estudio Yoga",
+    image: "https://images.unsplash.com/photo-1545205597-3d9d02c29597?auto=format&fit=crop&w=1600&q=85",
   },
   {
-    title: "Spa & Sauna",
-    image: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?auto=format&fit=crop&w=1600&q=80",
-    description: "Sauna seco, vapor, zona de hielo y descanso.",
-  },
-  {
-    title: "Café & Juice Bar",
-    image: "https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?auto=format&fit=crop&w=1600&q=80",
-    description: "Café de especialidad, smoothies, comida saludable.",
+    title: "Spa & Recovery",
+    image: "https://images.unsplash.com/photo-1540497077202-7c8a3999166f?auto=format&fit=crop&w=1600&q=85",
   },
 ];
 
-export const HYROX = {
+export const HOME = {
   hero: {
-    eyebrow: "Programa oficial",
-    display: "HYROX",
-    subhead:
-      "El deporte de fitness más exigente del mundo. 8 estaciones funcionales. 8 km de carrera. Una sola meta.",
+    eyebrow: "01 / Arcos Fitness Club",
+    headline: ["Strength.", "Recovery.", "Belonging."],
+    italicWord: "Belonging.",
+    cta: { label: "Reservar visita", action: "wa-visit" },
   },
-  what: {
-    title: "8 estaciones. 1 km entre cada una.",
-    body:
-      "Hyrox combina running con ejercicios funcionales en un formato estandarizado a nivel mundial. Empezamos con 1 km de carrera, seguido de una estación, y así por 8 rondas. La meta no es solo terminar — es competir contra ti, contra el reloj, y contra atletas en todo el mundo.",
+  statement: {
+    eyebrow: "05 / Filosofía",
+    body: "Un club privado en Cuajimalpa. Para quienes vuelven no por obligación, sino porque acá se sienten en casa.",
+    link: { label: "Conocer Arcos", href: "/nosotros" },
   },
-  program: [
-    { weeks: "Semanas 1–4", title: "Base aeróbica", body: "Construcción de resistencia y técnica de running." },
-    { weeks: "Semanas 5–8", title: "Fuerza específica", body: "Sled push, farmer carry, wall balls. Patrones reales de competencia." },
-    { weeks: "Semanas 9–12", title: "Race simulation", body: "Simulacros completos cronometrados. Listos para race day." },
-  ],
-  faqs: [
-    { q: "¿Necesito experiencia previa?", a: "No. Tenemos clases para todos los niveles, desde 'Hyrox Open' hasta 'Hyrox Race Day'. El coach te ubica el primer día." },
-    { q: "¿Qué incluye el programa?", a: "Acceso a todas las clases Hyrox, un plan de 12 semanas, evaluaciones quincenales y descuento en eventos oficiales Hyrox." },
-    { q: "¿Necesito plan Pro o Élite?", a: "El acceso Hyrox está incluido en planes Pro y Élite. Si tienes Básico, podemos hablar de upgrade." },
-  ],
+  hyrox: {
+    number: "04",
+    headline: ["HYROX.", "Una sola meta."],
+    italicWord: "meta.",
+    body: "Único centro Hyrox certificado en la zona.",
+    link: { label: "Conocer programa", href: "/hyrox" },
+  },
+  membresia: {
+    eyebrow: "04 / Membresías",
+    headline: ["Tres formas", "de pertenecer."],
+    italicWord: "pertenecer.",
+    body: "Básico · Pro · Élite. Sin contratos.",
+    link: { label: "Ver planes", href: "/membresias" },
+  },
+  testimonial: {
+    quote:
+      "Cambié de gimnasio tres veces antes de Arcos. Aquí me quedo.",
+    author: "Ricardo M.",
+    role: "Miembro desde 2023",
+  },
+  cierre: {
+    eyebrow: "Visita",
+    headline: ["Conoce", "el club."],
+    italicWord: "club.",
+    cta: { label: "Reservar por WhatsApp", action: "wa-visit" },
+  },
 };
 
-export const ABOUT = {
+export const CLASES = {
   hero: {
-    eyebrow: "Desde 2018",
-    display: "Más que un gym.",
-    subhead: "Un espacio donde tu nombre se conoce y tu progreso se celebra.",
+    eyebrow: "02 / Agenda",
+    headline: ["Reserva", "tu próxima clase."],
+    italicWord: "clase.",
+  },
+  cierre: {
+    eyebrow: "Visita",
+    headline: ["Empieza", "esta semana."],
+    italicWord: "semana.",
+    cta: { label: "Hablar con un coach", action: "wa-generic" },
+  },
+};
+
+export const HYROX = {
+  hero: {
+    eyebrow: "03 / Programa Oficial",
+    display: "HYROX",
+  },
+  manifesto: [
+    "El deporte de fitness",
+    "más exigente del mundo.",
+    "Ocho estaciones.",
+    "Ocho kilómetros de carrera.",
+    "Una sola meta.",
+  ],
+  program: [
+    {
+      number: "01",
+      weeks: "Semanas 1 — 4",
+      title: "Base aeróbica",
+      body: "Construcción de resistencia y técnica de running. Sin cargas pesadas, foco en cadencia y respiración.",
+    },
+    {
+      number: "02",
+      weeks: "Semanas 5 — 8",
+      title: "Fuerza específica",
+      body: "Sled push, farmer carry, wall balls. Patrones reales de competencia con carga progresiva.",
+    },
+    {
+      number: "03",
+      weeks: "Semanas 9 — 12",
+      title: "Race simulation",
+      body: "Simulacros completos cronometrados. Llegas a race day listo para correr tu mejor tiempo.",
+    },
+  ],
+  cierre: {
+    eyebrow: "Empezar",
+    headline: ["Tu primer", "Hyrox."],
+    italicWord: "Hyrox.",
+    cta: { label: "Hablar con un coach Hyrox", action: "wa-hyrox" },
+  },
+};
+
+export const MEMBRESIAS = {
+  hero: {
+    eyebrow: "04 / Membresías",
+    headline: ["Tres formas", "de pertenecer."],
+    italicWord: "pertenecer.",
+  },
+  faqs: [
+    {
+      q: "¿Hay contrato de permanencia?",
+      a: "No. Todos los planes son mes a mes. Cancela cuando quieras avisando con 30 días de anticipación.",
+    },
+    {
+      q: "¿Puedo congelar mi membresía si viajo?",
+      a: "Sí. Hasta 30 días al año en bloques mínimos de 7 días, sin costo extra.",
+    },
+    {
+      q: "¿Tienen día de prueba?",
+      a: "Sí. Agenda tu visita guiada por WhatsApp y te invitamos a una clase y un día completo de gimnasio sin costo.",
+    },
+    {
+      q: "¿Cómo pago la mensualidad?",
+      a: "Cargo automático a tarjeta de débito o crédito. También aceptamos transferencia y efectivo en recepción.",
+    },
+    {
+      q: "¿Puedo cambiar de plan después?",
+      a: "Sí, en cualquier momento. El cambio aplica desde el siguiente ciclo de cobro.",
+    },
+  ],
+  cierre: {
+    eyebrow: "Empezar",
+    headline: ["¿Aún", "decidiendo?"],
+    italicWord: "decidiendo?",
+    cta: { label: "Hablar con el dueño", action: "wa-generic" },
+  },
+};
+
+export const NOSOTROS = {
+  hero: {
+    eyebrow: "05 / Nosotros · Desde 2018",
+    headline: ["Más que", "un gym."],
+    italicWord: "gym.",
   },
   story: {
     eyebrow: "Nuestra historia",
-    title: "Empezamos por algo simple: un mejor lugar para entrenar.",
-    body: "Arcos nació en 2018 cuando el dueño, después de probar todos los gimnasios premium de la ciudad, decidió que faltaba algo: cercanía. Un lugar donde el equipo te saluda por nombre, donde el café del juice bar lo prepara alguien que sabe el tuyo, y donde cada clase se siente personal. Hoy somos más de 800 miembros y seguimos siendo, sobre todo, una comunidad.",
+    body:
+      "Arcos nació en 2018 cuando el dueño, después de probar todos los gimnasios premium de la ciudad, decidió que faltaba algo: cercanía. Un lugar donde el equipo te saluda por nombre, donde el café del juice bar lo prepara alguien que sabe el tuyo, y donde cada clase se siente personal. Hoy somos más de 800 miembros y seguimos siendo, sobre todo, una comunidad.",
+    stats: [
+      { value: 800, suffix: "+", label: "Miembros" },
+      { value: 8, suffix: " años", label: "Operando" },
+      { value: 2400, suffix: " m²", label: "Espacio" },
+    ],
   },
   values: [
-    { title: "Comunidad", body: "Cada miembro es parte del club. Sin números, sin filas anónimas." },
-    { title: "Excelencia", body: "Equipo top, coaches certificados, instalaciones impecables. Sin atajos." },
-    { title: "Bienestar integral", body: "Entrenar es parte. Recuperar, dormir, comer y conectar también." },
+    {
+      number: "01",
+      title: "Comunidad",
+      body: "Cada miembro es parte del club. Sin números, sin filas anónimas. El equipo conoce tu nombre.",
+    },
+    {
+      number: "02",
+      title: "Excelencia",
+      body: "Equipo top, coaches certificados, instalaciones impecables. Sin atajos en lo que importa.",
+    },
+    {
+      number: "03",
+      title: "Bienestar integral",
+      body: "Entrenar es una parte. Recuperar, dormir, comer y conectar también. Cuidamos todas.",
+    },
   ],
-};
-
-export const FINAL_CTA = {
-  eyebrow: "Empieza hoy",
-  title: "¿Listo para conocer Arcos?",
-  body: "Agenda tu visita guiada por WhatsApp. Sin compromisos, sin presión.",
+  cierre: {
+    eyebrow: "Visita",
+    headline: ["Te esperamos", "en Cuajimalpa."],
+    italicWord: "Cuajimalpa.",
+    cta: { label: "Agendar visita por WhatsApp", action: "wa-visit" },
+  },
 };

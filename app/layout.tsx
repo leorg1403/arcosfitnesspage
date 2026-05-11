@@ -4,6 +4,8 @@ import "./globals.css";
 import { SiteHeader } from "@/components/layout/SiteHeader";
 import { SiteFooter } from "@/components/layout/SiteFooter";
 import { WhatsAppFAB } from "@/components/layout/WhatsAppFAB";
+import { ScrollProgressBar } from "@/components/layout/ScrollProgressBar";
+import { PageTransition } from "@/components/layout/PageTransition";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -11,11 +13,11 @@ const inter = Inter({
   display: "swap",
 });
 
-const display = Instrument_Serif({
+const serif = Instrument_Serif({
   subsets: ["latin"],
   weight: "400",
   style: ["normal", "italic"],
-  variable: "--font-display",
+  variable: "--font-instrument-serif",
   display: "swap",
 });
 
@@ -28,24 +30,24 @@ const mono = JetBrains_Mono({
 export const metadata: Metadata = {
   metadataBase: new URL("https://www.arcosfitness.com"),
   title: {
-    default: "Arcos Fitness Club — Entrena. Recupera. Pertenece.",
+    default: "Arcos Fitness Club — Strength. Recovery. Belonging.",
     template: "%s · Arcos Fitness Club",
   },
   description:
-    "Gimnasio premium en Cuajimalpa, CDMX. Hyrox, clases en grupo, entrenamiento personalizado, spa y comunidad. Reserva tu visita por WhatsApp.",
+    "Club privado de fitness en Cuajimalpa, CDMX. Hyrox, clases en grupo, entrenamiento personalizado, spa y comunidad. Reserva tu visita por WhatsApp.",
   keywords: [
     "gimnasio Cuajimalpa",
     "Hyrox CDMX",
     "gimnasio premium",
     "clases funcionales",
-    "Arcos Fitness",
+    "Arcos Fitness Club",
   ],
   openGraph: {
     type: "website",
     locale: "es_MX",
     siteName: "Arcos Fitness Club",
-    title: "Arcos Fitness Club — Entrena. Recupera. Pertenece.",
-    description: "Gimnasio premium en Cuajimalpa. Reserva tu visita por WhatsApp.",
+    title: "Arcos Fitness Club",
+    description: "Un club privado en Cuajimalpa. Reserva tu visita por WhatsApp.",
   },
   twitter: { card: "summary_large_image" },
   icons: { icon: "/favicon.ico" },
@@ -57,11 +59,14 @@ export default function RootLayout({
   return (
     <html
       lang="es-MX"
-      className={`${inter.variable} ${display.variable} ${mono.variable}`}
+      className={`${inter.variable} ${serif.variable} ${mono.variable}`}
     >
       <body className="bg-paper text-ink">
+        <ScrollProgressBar />
         <SiteHeader />
-        <main className="min-h-[calc(100dvh-5rem)]">{children}</main>
+        <main>
+          <PageTransition>{children}</PageTransition>
+        </main>
         <SiteFooter />
         <WhatsAppFAB />
       </body>

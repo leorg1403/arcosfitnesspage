@@ -4,12 +4,12 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import { Menu, X, MessageCircle } from "lucide-react";
 import { NAV } from "@/lib/content";
 import { buildWhatsAppLink, WA_MESSAGES } from "@/lib/whatsapp";
 import { Logo } from "./Logo";
-import { Button } from "@/components/ui/Button";
+import { WhatsappIcon } from "./SocialIcons";
 import { cn } from "@/lib/cn";
+import { easeExpo } from "@/lib/motion";
 
 export function SiteHeader() {
   const pathname = usePathname();
@@ -17,7 +17,7 @@ export function SiteHeader() {
   const [open, setOpen] = useState(false);
 
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 12);
+    const onScroll = () => setScrolled(window.scrollY > 60);
     onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
@@ -34,18 +34,22 @@ export function SiteHeader() {
     };
   }, [open]);
 
+  // Todas las páginas tienen hero full-bleed: el header siempre va sobre fondo oscuro
+  // (transparente sobre hero oscuro, o bg-ink/85 al scrollear). Texto siempre paper.
+  const lightMode = true;
+
   return (
     <>
       <header
         className={cn(
-          "fixed inset-x-0 top-0 z-40 transition-all duration-500",
+          "fixed inset-x-0 top-0 z-40 transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)]",
           scrolled
-            ? "bg-paper/80 backdrop-blur-xl border-b border-line-soft"
+            ? "bg-ink/85 backdrop-blur-xl border-b border-charcoal"
             : "bg-transparent border-b border-transparent"
         )}
       >
-        <div className="container-app flex h-20 items-center justify-between">
-          <Logo />
+        <div className="container-wide flex h-20 items-center justify-between">
+          <Logo light={lightMode} />
 
           <nav className="hidden lg:flex items-center gap-1">
             {NAV.map((item) => {
@@ -57,14 +61,21 @@ export function SiteHeader() {
                 <Link
                   key={item.href}
                   href={item.href}
-                  className="relative px-4 py-2 text-sm font-medium text-ink/80 hover:text-ink transition-colors"
+                  className={cn(
+                    "group relative px-5 py-2 text-[0.8rem] font-medium tracking-wide uppercase transition-colors duration-500",
+                    lightMode ? "text-paper/80 hover:text-paper" : "text-ink/70 hover:text-ink",
+                    active && (lightMode ? "text-paper" : "text-ink")
+                  )}
                 >
+                  <span className="font-mono text-[0.625rem] tracking-[0.2em] mr-2 opacity-50">
+                    0{NAV.indexOf(item) + 1}
+                  </span>
                   {item.label}
                   {active && (
                     <motion.span
-                      layoutId="nav-active"
-                      className="absolute inset-x-3 -bottom-0.5 h-[2px] bg-volt"
-                      transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                      layoutId="nav-underline"
+                      transition={{ type: "spring", stiffness: 200, damping: 30 }}
+                      className="absolute left-5 right-5 -bottom-0.5 h-px bg-gold"
                     />
                   )}
                 </Link>
@@ -72,55 +83,64 @@ export function SiteHeader() {
             })}
           </nav>
 
-          <div className="flex items-center gap-2">
-            <Button
+          <div className="flex items-center gap-4">
+            <a
               href={buildWhatsAppLink(WA_MESSAGES.generic)}
-              external
-              variant="dark"
-              size="sm"
-              className="hidden sm:inline-flex"
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="WhatsApp"
+              className={cn(
+                "hidden sm:inline-flex items-center gap-2 text-[0.8rem] uppercase tracking-wide font-medium transition-colors duration-500",
+                lightMode ? "text-paper/80 hover:text-gold" : "text-ink/70 hover:text-gold"
+              )}
             >
-              <MessageCircle className="size-4" strokeWidth={1.75} />
+              <WhatsappIcon className="size-4 text-gold" />
               WhatsApp
-            </Button>
+            </a>
             <button
               type="button"
-              className="lg:hidden inline-flex h-11 w-11 items-center justify-center rounded-full hover:bg-ink/5"
+              className={cn(
+                "lg:hidden inline-flex h-11 w-11 items-center justify-center -mr-2",
+                lightMode ? "text-paper" : "text-ink"
+              )}
               onClick={() => setOpen(true)}
               aria-label="Abrir menú"
             >
-              <Menu className="size-5" strokeWidth={1.75} />
+              <span className="flex flex-col items-end gap-1.5">
+                <span className="block h-px w-5 bg-current" />
+                <span className="block h-px w-3.5 bg-current" />
+              </span>
             </button>
           </div>
         </div>
       </header>
 
-      {/* Spacer */}
-      <div className="h-20" aria-hidden />
-
-      {/* Mobile sheet */}
+      {/* Mobile fullscreen menu */}
       <AnimatePresence>
         {open && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 0.3 }}
+            transition={{ duration: 0.4 }}
             className="fixed inset-0 z-50 bg-ink text-paper"
           >
             <div className="container-app flex h-20 items-center justify-between">
               <Logo light />
               <button
                 type="button"
-                className="inline-flex h-11 w-11 items-center justify-center rounded-full hover:bg-paper/10"
+                className="inline-flex h-11 w-11 items-center justify-center -mr-2"
                 onClick={() => setOpen(false)}
                 aria-label="Cerrar menú"
               >
-                <X className="size-5" strokeWidth={1.75} />
+                <span className="relative h-5 w-5">
+                  <span className="absolute top-1/2 left-0 w-full h-px bg-paper rotate-45" />
+                  <span className="absolute top-1/2 left-0 w-full h-px bg-paper -rotate-45" />
+                </span>
               </button>
             </div>
             <nav className="container-app pt-12">
-              <ul className="flex flex-col gap-1">
+              <ul className="flex flex-col">
                 {NAV.map((item, i) => {
                   const active =
                     item.href === "/"
@@ -129,19 +149,26 @@ export function SiteHeader() {
                   return (
                     <motion.li
                       key={item.href}
-                      initial={{ opacity: 0, x: -24 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: 0.1 + i * 0.05, ease: [0.22, 1, 0.36, 1] }}
+                      initial={{ opacity: 0, y: 24 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{
+                        delay: 0.15 + i * 0.08,
+                        duration: 0.8,
+                        ease: easeExpo,
+                      }}
+                      className="border-b border-paper/10"
                     >
                       <Link
                         href={item.href}
                         className={cn(
-                          "group flex items-baseline justify-between gap-4 border-b border-paper/10 py-6 font-display text-4xl sm:text-5xl tracking-tight transition-colors",
-                          active ? "text-volt" : "text-paper hover:text-volt"
+                          "group flex items-baseline justify-between gap-4 py-7 transition-colors duration-500",
+                          active ? "text-gold" : "text-paper hover:text-gold"
                         )}
                       >
-                        <span>{item.label}</span>
-                        <span className="font-mono text-xs text-paper/40 group-hover:text-volt">
+                        <span className="font-display text-4xl sm:text-5xl tracking-[-0.03em] font-medium">
+                          {item.label}
+                        </span>
+                        <span className="font-mono text-xs text-paper/40 group-hover:text-gold">
                           0{i + 1}
                         </span>
                       </Link>
@@ -150,21 +177,20 @@ export function SiteHeader() {
                 })}
               </ul>
               <motion.div
-                initial={{ opacity: 0, y: 16 }}
+                initial={{ opacity: 0, y: 24 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.4 }}
-                className="mt-12"
+                transition={{ delay: 0.55, duration: 0.8, ease: easeExpo }}
+                className="mt-16"
               >
-                <Button
+                <a
                   href={buildWhatsAppLink(WA_MESSAGES.generic)}
-                  external
-                  variant="primary"
-                  size="lg"
-                  className="w-full"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-3 text-gold font-mono text-sm uppercase tracking-[0.2em]"
                 >
-                  <MessageCircle className="size-4" strokeWidth={1.75} />
-                  Hablar por WhatsApp
-                </Button>
+                  <WhatsappIcon className="size-4" />
+                  Hablar con el dueño →
+                </a>
               </motion.div>
             </nav>
           </motion.div>
