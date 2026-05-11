@@ -185,3 +185,71 @@
 .scrollbar-none::-webkit-scrollbar {
   display: none;
 }
+
+/* ─── Reveal animations · v4 cross-browser ──────────
+   CSS-only mount animations. Run on element insertion,
+   no JS observer, no React state. Bullet-proof in
+   Chrome / Safari / Firefox. animation-fill-mode: both
+   guarantees the element ends visible no matter what. */
+@keyframes revealFadeUp {
+  from { opacity: 0; transform: translate3d(0, 24px, 0); }
+  to   { opacity: 1; transform: translate3d(0, 0, 0); }
+}
+@keyframes revealFadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+@keyframes revealSlideUp {
+  from { transform: translate3d(0, 100%, 0); }
+  to   { transform: translate3d(0, 0, 0); }
+}
+@keyframes revealSlideDown {
+  from { transform: translate3d(0, -100%, 0); }
+  to   { transform: translate3d(0, 0, 0); }
+}
+@keyframes revealSlideLeft {
+  from { transform: translate3d(100%, 0, 0); }
+  to   { transform: translate3d(0, 0, 0); }
+}
+@keyframes revealSlideRight {
+  from { opacity: 0; transform: translate3d(60px, 0, 0); }
+  to   { opacity: 1; transform: translate3d(0, 0, 0); }
+}
+@keyframes revealScaleX {
+  from { transform: scaleX(0); }
+  to   { transform: scaleX(1); }
+}
+@keyframes revealScaleY {
+  from { transform: scaleY(0); }
+  to   { transform: scaleY(1); }
+}
+@keyframes revealWordRise {
+  from { transform: translate3d(0, 110%, 0); }
+  to   { transform: translate3d(0, 0, 0); }
+}
+
+@layer utilities {
+  .reveal-fade-up    { animation: revealFadeUp 0.9s cubic-bezier(0.16, 1, 0.3, 1) both; }
+  .reveal-fade-in    { animation: revealFadeIn 0.9s cubic-bezier(0.16, 1, 0.3, 1) both; }
+  .reveal-slide-up   { animation: revealSlideUp 1.4s cubic-bezier(0.16, 1, 0.3, 1) both; }
+  .reveal-slide-down { animation: revealSlideDown 1.4s cubic-bezier(0.16, 1, 0.3, 1) both; }
+  .reveal-slide-left { animation: revealSlideLeft 1.4s cubic-bezier(0.16, 1, 0.3, 1) both; }
+  .reveal-slide-right{ animation: revealSlideRight 1.2s cubic-bezier(0.16, 1, 0.3, 1) both; }
+  .reveal-scale-x    { animation: revealScaleX 1.2s cubic-bezier(0.16, 1, 0.3, 1) both; transform-origin: left center; }
+  .reveal-scale-y    { animation: revealScaleY 1.2s cubic-bezier(0.16, 1, 0.3, 1) both; transform-origin: top center; }
+  .reveal-word-rise  { animation: revealWordRise 1s cubic-bezier(0.16, 1, 0.3, 1) both; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .reveal-fade-up,
+  .reveal-fade-in,
+  .reveal-slide-up,
+  .reveal-slide-down,
+  .reveal-slide-left,
+  .reveal-slide-right,
+  .reveal-scale-x,
+  .reveal-scale-y,
+  .reveal-word-rise {
+    animation: none !important;
+  }
+}

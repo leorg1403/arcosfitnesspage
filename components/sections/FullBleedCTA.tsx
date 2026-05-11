@@ -7,7 +7,7 @@ import { Eyebrow } from "@/components/primitives/Eyebrow";
 import { Button } from "@/components/ui/Button";
 import { buildWhatsAppLink, WA_MESSAGES } from "@/lib/whatsapp";
 import { heroStagger, fadeUp } from "@/lib/motion";
-import { useReveal } from "@/lib/useReveal";
+import { useInViewSafe } from "@/lib/useInViewSafe";
 
 type Action = "wa-visit" | "wa-generic" | "wa-hyrox" | string;
 
@@ -27,8 +27,11 @@ type Props = {
   cta: { label: string; action: Action };
 };
 
+/**
+ * v5: scroll-triggered con useInViewSafe.
+ */
 export function FullBleedCTA({ image, eyebrow, headline, italicWord, cta }: Props) {
-  const { ref, inView } = useReveal<HTMLDivElement>({ amount: 0.15 });
+  const [ref, shown] = useInViewSafe<HTMLDivElement>();
 
   return (
     <section className="relative h-[85svh] min-h-[560px] bg-ink text-paper overflow-hidden">
@@ -45,7 +48,7 @@ export function FullBleedCTA({ image, eyebrow, headline, italicWord, cta }: Prop
         ref={ref}
         variants={heroStagger}
         initial="hidden"
-        animate={inView ? "visible" : "hidden"}
+        animate={shown ? "visible" : "hidden"}
         className="container-wide absolute inset-x-0 bottom-0 pb-16 md:pb-24"
       >
         <div className="max-w-3xl">

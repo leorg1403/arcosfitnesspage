@@ -1,9 +1,7 @@
 "use client";
 
-import { motion, type Variants } from "framer-motion";
 import { cn } from "@/lib/cn";
-import { wordRise, wordStagger } from "@/lib/motion";
-import { useReveal } from "@/lib/useReveal";
+import { useInViewSafe } from "@/lib/useInViewSafe";
 
 type Props = {
   /** Líneas del headline. Cada string es una línea. */
@@ -16,10 +14,10 @@ type Props = {
   tone?: "ink" | "paper" | "gold";
   /** Alineación */
   align?: "left" | "right" | "center";
-  /** Delay inicial antes del stagger */
+  /** Delay base antes del primer stagger (en ms) */
   delay?: number;
-  /** Si está dentro de un orquestador padre (heroStagger), no inicia su propia animación */
-  inGroup?: boolean;
+  /** Stagger entre palabras (ms). Default 80ms */
+  stagger?: number;
   className?: string;
 };
 
@@ -35,13 +33,10 @@ const toneMap = {
   gold: "text-gold",
 };
 
-const wrapperVariants: Variants = {
-  hidden: {},
-  visible: {
-    transition: { staggerChildren: 0.08, delayChildren: 0.05 },
-  },
-};
-
+/**
+ * Headline con word-mask reveal scroll-triggered. v5: useInViewSafe + CSS transition.
+ * Cada palabra hace slide-up con stagger cuando el headline entra al viewport.
+ */
 export function SplitHeadline({
   lines,
   italicWord,
@@ -49,14 +44,14 @@ export function SplitHeadline({
   tone = "ink",
   align = "left",
   delay = 0,
-  inGroup = false,
+  stagger = 80,
   className,
 }: Props) {
-  const { ref, inView } = useReveal<HTMLHeadingElement>({ amount: 0.1 });
-  const animateState = inGroup ? undefined : inView ? "visible" : "hidden";
+  const [ref, shown] = useInViewSafe<HTMLHeadingElement>();
+  let wordIndex = 0;
 
   return (
-    <motion.h2
+    <h2
       ref={ref}
       className={cn(
         "font-display",
@@ -66,40 +61,48 @@ export function SplitHeadline({
         align === "right" && "text-right",
         className
       )}
-      initial="hidden"
-      animate={animateState}
-      variants={inGroup ? wordStagger : wrapperVariants}
-      transition={{ delay }}
     >
       {lines.map((line, lineIdx) => {
         const words = line.split(" ");
         return (
           <span key={lineIdx} className="block overflow-hidden pb-[0.05em]">
-            <span className="flex flex-wrap gap-x-[0.25em]">
-              {words.map((word, wordIdx) => {
+            <span
+              className={cn(
+                "flex flex-wrap gap-x-[0.25em]",
+                align === "center" && "justify-center",
+                align === "right" && "justify-end"
+              )}
+            >
+              {words.map((word, idx) => {
                 const isItalic = italicWord && word === italicWord;
+                const wordDelay = `${delay + wordIndex * stagger}ms`;
+                wordIndex += 1;
                 return (
-                  <motion.span
-                    key={`${lineIdx}-${wordIdx}`}
-                    variants={wordRise}
+                  <span
+                    key={`${lineIdx}-${idx}`}
                     className={cn(
-                      "inline-block will-change-transform",
+                      "inline-block",
                       isItalic && "font-serif-italic text-gold"
                     )}
-                    style={
-                      isItalic
-                        ? { fontFamily: "var(--font-serif), serif", fontWeight: 400, fontStyle: "italic" }
-                        : undefined
-                    }
+                    style={{
+                      transform: shown ? "translate3d(0, 0, 0)" : "translate3d(0, 110%, 0)",
+                      transition: `transform 1s cubic-bezier(0.16, 1, 0.3, 1) ${wordDelay}`,
+                      willChange: "transform",
+                      ...(isItalic && {
+                        fontFamily: "var(--font-serif), serif",
+                        fontWeight: 400,
+                        fontStyle: "italic",
+                      }),
+                    }}
                   >
                     {word}
-                  </motion.span>
+                  </span>
                 );
               })}
             </span>
           </span>
         );
       })}
-    </motion.h2>
+    </h2>
   );
 }

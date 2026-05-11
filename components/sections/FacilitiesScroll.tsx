@@ -4,16 +4,19 @@ import Image from "next/image";
 import { FACILITIES } from "@/lib/content";
 import { Eyebrow } from "@/components/primitives/Eyebrow";
 import { Reveal } from "@/components/primitives/Reveal";
-import { useReveal } from "@/lib/useReveal";
-import { fadeUp } from "@/lib/motion";
+import { useInViewSafe } from "@/lib/useInViewSafe";
 
+/**
+ * v5: scroll-triggered con useInViewSafe (triple-redundant detection).
+ * El carrusel desktop hace slide-in cuando entra al viewport.
+ */
 export function FacilitiesScroll() {
-  const { ref, inView } = useReveal<HTMLDivElement>({ amount: 0.05 });
+  const [ref, shown] = useInViewSafe<HTMLDivElement>();
 
   return (
     <section className="bg-ink text-paper py-24 md:py-32 overflow-hidden">
       <div className="container-wide mb-12 md:mb-16">
-        <Reveal variants={fadeUp}>
+        <Reveal>
           <Eyebrow tone="gold" withLine>
             02 / Espacios
           </Eyebrow>
@@ -23,24 +26,21 @@ export function FacilitiesScroll() {
       {/* Mobile: stack vertical */}
       <div className="md:hidden space-y-4 px-[var(--spacing-gutter)]">
         {FACILITIES.map((f, i) => (
-          <Reveal
-            key={f.title}
-            variants={fadeUp}
-            delay={i * 0.05}
-          >
+          <Reveal key={f.title} delay={i * 0.05}>
             <FacilityCard {...f} index={i} />
           </Reveal>
         ))}
       </div>
 
-      {/* Desktop: horizontal scroll */}
+      {/* Desktop: horizontal scroll con slide-in */}
       <div
         ref={ref}
         className="hidden md:block overflow-x-auto scrollbar-none"
         style={{
-          transform: inView ? "translate3d(0, 0, 0)" : "translate3d(60px, 0, 0)",
-          opacity: inView ? 1 : 0,
-          transition: "transform 1.2s cubic-bezier(0.16, 1, 0.3, 1), opacity 1.2s cubic-bezier(0.16, 1, 0.3, 1)",
+          transform: shown ? "translate3d(0, 0, 0)" : "translate3d(60px, 0, 0)",
+          opacity: shown ? 1 : 0,
+          transition:
+            "transform 1.2s cubic-bezier(0.16, 1, 0.3, 1), opacity 1.2s cubic-bezier(0.16, 1, 0.3, 1)",
           willChange: "transform, opacity",
         }}
       >

@@ -1,8 +1,13 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useReveal } from "@/lib/useReveal";
+import { useInViewSafe } from "@/lib/useInViewSafe";
 
+/**
+ * Contador animado scroll-triggered. v5: useInViewSafe + RAF.
+ * El contador empieza cuando el elemento entra al viewport.
+ * Si por alguna razón el detector no dispara, el failsafe (4s) lo resuelve.
+ */
 export function AnimatedCounter({
   to,
   duration = 1.6,
@@ -16,11 +21,11 @@ export function AnimatedCounter({
   prefix?: string;
   className?: string;
 }) {
-  const { ref, inView } = useReveal<HTMLSpanElement>({ amount: 0.3 });
+  const [ref, shown] = useInViewSafe<HTMLSpanElement>();
   const [value, setValue] = useState(0);
 
   useEffect(() => {
-    if (!inView) return;
+    if (!shown) return;
     const start = performance.now();
     let raf = 0;
     const tick = (now: number) => {
@@ -32,7 +37,7 @@ export function AnimatedCounter({
     };
     raf = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(raf);
-  }, [inView, to, duration]);
+  }, [shown, to, duration]);
 
   return (
     <span ref={ref} className={className}>

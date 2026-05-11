@@ -1,7 +1,7 @@
 "use client";
 
 import { cn } from "@/lib/cn";
-import { useReveal } from "@/lib/useReveal";
+import { useInViewSafe } from "@/lib/useInViewSafe";
 
 type Props = {
   orientation?: "horizontal" | "vertical";
@@ -11,6 +11,9 @@ type Props = {
   duration?: number;
 };
 
+/**
+ * Hairline animado scroll-triggered. v5: useInViewSafe + CSS transform.
+ */
 export function HairlineDivider({
   orientation = "horizontal",
   tone = "gold",
@@ -18,12 +21,12 @@ export function HairlineDivider({
   delay = 0,
   duration = 1.2,
 }: Props) {
-  const { ref, inView } = useReveal<HTMLDivElement>({ amount: 0.3 });
+  const [ref, shown] = useInViewSafe<HTMLDivElement>();
 
   const toneClass =
     tone === "gold" ? "bg-gold" : tone === "ink" ? "bg-ink" : "bg-concrete";
 
-  const transform = inView
+  const transform = shown
     ? "scale(1, 1)"
     : orientation === "horizontal"
     ? "scaleX(0)"
