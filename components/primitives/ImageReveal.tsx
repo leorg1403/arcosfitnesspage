@@ -1,7 +1,6 @@
 "use client";
 
-import { motion, useInView } from "framer-motion";
-import { useRef } from "react";
+import { motion } from "framer-motion";
 import { cn } from "@/lib/cn";
 import { easeExpo } from "@/lib/motion";
 
@@ -34,23 +33,17 @@ export function ImageReveal({
   direction = "up",
   duration = 1.4,
   delay = 0,
-  amount = 0.2,
+  amount = 0.15,
   className,
   loop = false,
 }: Props) {
-  const ref = useRef<HTMLDivElement>(null);
-  const inView = useInView(ref, { once: !loop, amount });
-
   return (
     <motion.div
-      ref={ref}
       className={cn("overflow-hidden", className)}
       initial={{ clipPath: directionInit[direction] }}
-      animate={
-        inView
-          ? { clipPath: "inset(0% 0 0 0)", transition: { duration, delay, ease: easeExpo } }
-          : { clipPath: directionInit[direction] }
-      }
+      whileInView={{ clipPath: "inset(0% 0 0 0)" }}
+      viewport={{ once: !loop, amount, margin: "0px 0px -10% 0px" }}
+      transition={{ duration, delay, ease: easeExpo }}
     >
       {children}
     </motion.div>
