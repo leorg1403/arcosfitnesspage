@@ -1,13 +1,15 @@
 "use client";
 
 import Image from "next/image";
-import { motion } from "framer-motion";
 import { FACILITIES } from "@/lib/content";
 import { Eyebrow } from "@/components/primitives/Eyebrow";
 import { Reveal } from "@/components/primitives/Reveal";
+import { useReveal } from "@/lib/useReveal";
 import { fadeUp } from "@/lib/motion";
 
 export function FacilitiesScroll() {
+  const { ref, inView } = useReveal<HTMLDivElement>({ amount: 0.05 });
+
   return (
     <section className="bg-ink text-paper py-24 md:py-32 overflow-hidden">
       <div className="container-wide mb-12 md:mb-16">
@@ -32,12 +34,15 @@ export function FacilitiesScroll() {
       </div>
 
       {/* Desktop: horizontal scroll */}
-      <motion.div
-        initial={{ x: 60, opacity: 0 }}
-        whileInView={{ x: 0, opacity: 1 }}
-        viewport={{ once: true, amount: 0.1 }}
-        transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
+      <div
+        ref={ref}
         className="hidden md:block overflow-x-auto scrollbar-none"
+        style={{
+          transform: inView ? "translate3d(0, 0, 0)" : "translate3d(60px, 0, 0)",
+          opacity: inView ? 1 : 0,
+          transition: "transform 1.2s cubic-bezier(0.16, 1, 0.3, 1), opacity 1.2s cubic-bezier(0.16, 1, 0.3, 1)",
+          willChange: "transform, opacity",
+        }}
       >
         <div className="flex gap-6 px-[var(--spacing-gutter)] pb-4">
           {FACILITIES.map((f, i) => (
@@ -45,7 +50,7 @@ export function FacilitiesScroll() {
           ))}
           <div className="shrink-0 w-px h-px" aria-hidden />
         </div>
-      </motion.div>
+      </div>
     </section>
   );
 }

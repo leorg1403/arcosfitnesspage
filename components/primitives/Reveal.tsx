@@ -1,7 +1,7 @@
 "use client";
 
-import { motion, useInView, type Variants } from "framer-motion";
-import { useRef } from "react";
+import { motion, type Variants } from "framer-motion";
+import { useReveal } from "@/lib/useReveal";
 import { fadeUp } from "@/lib/motion";
 
 type Props = {
@@ -21,10 +21,9 @@ export function Reveal({
   className,
   as = "div",
   once = true,
-  amount = 0.2,
+  amount = 0.1,
 }: Props) {
-  const ref = useRef<HTMLDivElement>(null);
-  const inView = useInView(ref, { once, amount });
+  const { ref, inView } = useReveal<HTMLDivElement>({ amount, once });
 
   const MotionTag = motion[as] as typeof motion.div;
 

@@ -1,9 +1,7 @@
 "use client";
 
-import { motion, useInView } from "framer-motion";
-import { useRef } from "react";
 import { cn } from "@/lib/cn";
-import { easeExpo } from "@/lib/motion";
+import { useReveal } from "@/lib/useReveal";
 
 type Props = {
   orientation?: "horizontal" | "vertical";
@@ -20,32 +18,33 @@ export function HairlineDivider({
   delay = 0,
   duration = 1.2,
 }: Props) {
-  const ref = useRef<HTMLDivElement>(null);
-  const inView = useInView(ref, { once: true, amount: 0.5 });
+  const { ref, inView } = useReveal<HTMLDivElement>({ amount: 0.3 });
 
   const toneClass =
     tone === "gold" ? "bg-gold" : tone === "ink" ? "bg-ink" : "bg-concrete";
 
+  const transform = inView
+    ? "scale(1, 1)"
+    : orientation === "horizontal"
+    ? "scaleX(0)"
+    : "scaleY(0)";
+
+  const origin = orientation === "horizontal" ? "left" : "top";
+
   return (
-    <motion.div
+    <div
       ref={ref}
-      initial={{
-        scaleX: orientation === "horizontal" ? 0 : 1,
-        scaleY: orientation === "vertical" ? 0 : 1,
-      }}
-      animate={
-        inView
-          ? { scaleX: 1, scaleY: 1, transition: { duration, ease: easeExpo, delay } }
-          : undefined
-      }
-      style={{
-        transformOrigin: orientation === "horizontal" ? "left" : "top",
-      }}
       className={cn(
         orientation === "horizontal" ? "h-px w-full" : "w-px h-full",
         toneClass,
         className
       )}
+      style={{
+        transform,
+        transformOrigin: origin,
+        transition: `transform ${duration}s cubic-bezier(0.16, 1, 0.3, 1) ${delay}s`,
+        willChange: "transform",
+      }}
     />
   );
 }

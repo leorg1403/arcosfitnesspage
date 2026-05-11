@@ -7,6 +7,7 @@ import { Eyebrow } from "@/components/primitives/Eyebrow";
 import { Button } from "@/components/ui/Button";
 import { buildWhatsAppLink, WA_MESSAGES } from "@/lib/whatsapp";
 import { heroStagger, fadeUp } from "@/lib/motion";
+import { useReveal } from "@/lib/useReveal";
 
 type Action = "wa-visit" | "wa-generic" | "wa-hyrox" | string;
 
@@ -27,6 +28,8 @@ type Props = {
 };
 
 export function FullBleedCTA({ image, eyebrow, headline, italicWord, cta }: Props) {
+  const { ref, inView } = useReveal<HTMLDivElement>({ amount: 0.15 });
+
   return (
     <section className="relative h-[85svh] min-h-[560px] bg-ink text-paper overflow-hidden">
       <ParallaxImage
@@ -39,10 +42,10 @@ export function FullBleedCTA({ image, eyebrow, headline, italicWord, cta }: Prop
       <div className="absolute inset-0 bg-gradient-to-t from-ink via-ink/40 to-ink/30 pointer-events-none" />
 
       <motion.div
+        ref={ref}
         variants={heroStagger}
         initial="hidden"
-        whileInView="visible"
-        viewport={{ once: true, amount: 0.3 }}
+        animate={inView ? "visible" : "hidden"}
         className="container-wide absolute inset-x-0 bottom-0 pb-16 md:pb-24"
       >
         <div className="max-w-3xl">

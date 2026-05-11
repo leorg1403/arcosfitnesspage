@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
-import { useInView } from "framer-motion";
+import { useEffect, useState } from "react";
+import { useReveal } from "@/lib/useReveal";
 
 export function AnimatedCounter({
   to,
@@ -16,8 +16,7 @@ export function AnimatedCounter({
   prefix?: string;
   className?: string;
 }) {
-  const ref = useRef<HTMLSpanElement>(null);
-  const inView = useInView(ref, { once: true, amount: 0.5 });
+  const { ref, inView } = useReveal<HTMLSpanElement>({ amount: 0.3 });
   const [value, setValue] = useState(0);
 
   useEffect(() => {

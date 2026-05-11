@@ -1,9 +1,9 @@
 "use client";
 
-import { motion, useInView, type Variants } from "framer-motion";
-import { useRef } from "react";
+import { motion, type Variants } from "framer-motion";
 import { cn } from "@/lib/cn";
 import { wordRise, wordStagger } from "@/lib/motion";
+import { useReveal } from "@/lib/useReveal";
 
 type Props = {
   /** Líneas del headline. Cada string es una línea. */
@@ -52,8 +52,7 @@ export function SplitHeadline({
   inGroup = false,
   className,
 }: Props) {
-  const ref = useRef<HTMLHeadingElement>(null);
-  const inView = useInView(ref, { once: true, amount: 0.3 });
+  const { ref, inView } = useReveal<HTMLHeadingElement>({ amount: 0.1 });
   const animateState = inGroup ? undefined : inView ? "visible" : "hidden";
 
   return (

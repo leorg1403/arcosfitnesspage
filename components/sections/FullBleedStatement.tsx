@@ -6,6 +6,7 @@ import { Eyebrow } from "@/components/primitives/Eyebrow";
 import { Button } from "@/components/ui/Button";
 import { cn } from "@/lib/cn";
 import { heroStagger, fadeUp } from "@/lib/motion";
+import { useReveal } from "@/lib/useReveal";
 
 type Props = {
   image: string;
@@ -44,6 +45,7 @@ export function FullBleedStatement({
   variant = "manifesto",
 }: Props) {
   const lines = Array.isArray(body) ? body : [body];
+  const { ref, inView } = useReveal<HTMLDivElement>({ amount: 0.15 });
 
   return (
     <section
@@ -74,10 +76,10 @@ export function FullBleedStatement({
       />
 
       <motion.div
+        ref={ref}
         variants={heroStagger}
         initial="hidden"
-        whileInView="visible"
-        viewport={{ once: true, amount: 0.25 }}
+        animate={inView ? "visible" : "hidden"}
         className={cn(
           "container-wide relative pb-20 md:pb-28 pt-32 md:pt-40 w-full",
           align === "center" && "text-center"
