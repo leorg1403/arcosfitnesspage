@@ -88,8 +88,8 @@ export function ScheduleGrid({
       <div className={cn(sectionPadY && "pt-12 pb-10 md:pt-14 md:pb-12")}>
         {/* Hint editorial — affordance de "click para reservar" */}
         <div className="container-wide mb-6 md:mb-8">
-          <p className="font-mono text-[0.65rem] uppercase tracking-[0.22em] text-concrete">
-            <span className="text-gold">—</span>&nbsp;&nbsp;Selecciona una clase para reservar
+          <p className="font-mono text-[0.65rem] uppercase tracking-[0.22em] text-gold">
+            —&nbsp;&nbsp;Selecciona una clase para reservar
           </p>
         </div>
 

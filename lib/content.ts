@@ -72,8 +72,8 @@ export const FACILITIES = [
 export const HOME = {
   hero: {
     eyebrow: "01 / Arcos Fitness Club",
-    headline: ["Strength.", "Recovery.", "Belonging."],
-    italicWord: "Belonging.",
+    headline: ["Aquí, todos", "te conocen."],
+    italicWord: "conocen.",
     cta: { label: "Reservar visita", action: "wa-visit" },
   },
   statement: {

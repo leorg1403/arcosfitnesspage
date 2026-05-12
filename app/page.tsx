@@ -33,7 +33,7 @@ export default function HomePage() {
       <SinglePhotoSection
         image="https://images.unsplash.com/photo-1599058917212-d750089bc07e?auto=format&fit=crop&w=2000&q=85"
         alt="Hyrox box · Arcos Fitness"
-        number={HOME.hyrox.number}
+        eyebrow="04 / Hyrox"
         headline={HOME.hyrox.headline}
         italicWord={HOME.hyrox.italicWord}
         body={HOME.hyrox.body}

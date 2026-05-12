@@ -41,9 +41,9 @@ export function MainPlansHome({
               </Eyebrow>
               {isHome ? (
                 <h2 className="mt-6 font-display text-headline tracking-[-0.03em] leading-[0.95] font-bold">
-                  Dos formas
+                  Tu llave
                   <br />
-                  de <span className="font-serif-italic text-gold">pertenecer</span>.
+                  al <span className="font-serif-italic text-gold">club</span>.
                 </h2>
               ) : (
                 <h2 className="mt-6 font-display text-headline tracking-[-0.03em] leading-[0.95] font-bold">
@@ -78,9 +78,19 @@ export function MainPlansHome({
 
         {showAllLink && (
           <Reveal variants={fadeUp} delay={0.25} className="mt-14">
-            <Button href="/membresias" variant="link" size="md">
-              Ver todas las membresías
-            </Button>
+            <div className="flex flex-col items-center gap-6">
+              <div className="text-center max-w-2xl">
+                <p className="font-mono text-xs md:text-sm uppercase tracking-[0.18em] text-concrete">
+                  ¿Buscas algo a tu medida?
+                </p>
+                <p className="mt-4 font-display text-2xl md:text-3xl font-semibold tracking-tight text-ink">
+                  Hay un plan para <span className="font-serif-italic text-gold">cada vida</span>.
+                </p>
+              </div>
+              <Button href="/membresias" variant="hairline" size="lg">
+                Ver todas las membresías
+              </Button>
+            </div>
           </Reveal>
         )}
 
