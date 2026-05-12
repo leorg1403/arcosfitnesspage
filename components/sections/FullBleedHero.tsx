@@ -138,13 +138,6 @@ export function FullBleedHero({
         </div>
       </motion.div>
 
-      {/* Scroll hint */}
-      <div className="absolute bottom-8 right-8 hidden md:flex flex-col items-end gap-3 animate-scroll-hint">
-        <span className="font-mono text-[0.625rem] uppercase tracking-[0.22em] text-paper/60">
-          Scroll
-        </span>
-        <span className="block h-10 w-px bg-gold/60" />
-      </div>
     </section>
   );
 }

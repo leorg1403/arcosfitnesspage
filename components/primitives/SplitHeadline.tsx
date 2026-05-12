@@ -6,8 +6,8 @@ import { useInViewSafe } from "@/lib/useInViewSafe";
 type Props = {
   /** Líneas del headline. Cada string es una línea. */
   lines: string[];
-  /** Palabra exacta que se renderiza en italic-serif acento (búsqueda case-sensitive). */
-  italicWord?: string;
+  /** Palabra(s) exacta(s) que se renderizan en italic-serif acento (búsqueda case-sensitive). */
+  italicWord?: string | string[];
   /** Tamaño y peso del display */
   size?: "display" | "headline" | "h2";
   /** Color base del texto */
@@ -48,6 +48,7 @@ export function SplitHeadline({
   className,
 }: Props) {
   const [ref, shown] = useInViewSafe<HTMLHeadingElement>();
+  const italicWords = Array.isArray(italicWord) ? italicWord : italicWord ? [italicWord] : [];
   let wordIndex = 0;
 
   return (
@@ -74,7 +75,7 @@ export function SplitHeadline({
               )}
             >
               {words.map((word, idx) => {
-                const isItalic = italicWord && word === italicWord;
+                const isItalic = italicWords.includes(word);
                 const wordDelay = `${delay + wordIndex * stagger}ms`;
                 wordIndex += 1;
                 return (
