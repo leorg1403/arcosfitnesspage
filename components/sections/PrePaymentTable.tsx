@@ -1,11 +1,21 @@
+"use client";
+
+import { useState } from "react";
 import { Eyebrow } from "@/components/primitives/Eyebrow";
 import { Reveal } from "@/components/primitives/Reveal";
-import { Button } from "@/components/ui/Button";
 import { PRE_PAYMENTS, type PrePayment } from "@/lib/memberships";
-import { buildWhatsAppLink, WA_MESSAGES } from "@/lib/whatsapp";
+import { CheckoutDialog, type CheckoutItem } from "./CheckoutDialog";
 import { fadeUp } from "@/lib/motion";
 
 export function PrePaymentTable() {
+  const [item, setItem] = useState<CheckoutItem | null>(null);
+  const [open, setOpen] = useState(false);
+
+  const openCheckout = (p: PrePayment) => {
+    setItem({ kind: "prepayment", data: p });
+    setOpen(true);
+  };
+
   return (
     <section className="bg-paper py-16 md:py-20">
       <div className="container-wide">
@@ -30,11 +40,19 @@ export function PrePaymentTable() {
         <Reveal variants={fadeUp}>
           <div className="grid md:grid-cols-4 border-y border-line-soft">
             {PRE_PAYMENTS.map((pay, i) => (
-              <PrePaymentCard key={pay.id} pay={pay} index={i} total={PRE_PAYMENTS.length} />
+              <PrePaymentCard
+                key={pay.id}
+                pay={pay}
+                index={i}
+                total={PRE_PAYMENTS.length}
+                onBuy={() => openCheckout(pay)}
+              />
             ))}
           </div>
         </Reveal>
       </div>
+
+      <CheckoutDialog item={item} open={open} onOpenChange={setOpen} />
     </section>
   );
 }
@@ -43,10 +61,12 @@ function PrePaymentCard({
   pay,
   index,
   total,
+  onBuy,
 }: {
   pay: PrePayment;
   index: number;
   total: number;
+  onBuy: () => void;
 }) {
   const savings = pay.originalPrice - pay.price;
   const isLast = index === total - 1;
@@ -73,7 +93,6 @@ function PrePaymentCard({
         </p>
       </div>
 
-      {/* Savings highlight — destacado para reforzar el valor */}
       <div className="mt-5 pt-4 border-t border-gold/30">
         <p className="font-mono text-[0.6rem] uppercase tracking-[0.22em] text-concrete mb-1">
           Ahorras
@@ -87,14 +106,12 @@ function PrePaymentCard({
       </div>
 
       <div className="mt-auto pt-6">
-        <Button
-          href={buildWhatsAppLink(WA_MESSAGES.membership(`anticipado ${pay.label}`))}
-          external
-          variant="link"
-          size="sm"
+        <button
+          onClick={onBuy}
+          className="h-11 px-6 inline-flex items-center justify-center bg-ink text-paper font-medium tracking-tight text-sm hover:bg-graphite active:scale-[0.99] transition-all duration-300"
         >
-          WhatsApp
-        </Button>
+          Comprar ahora
+        </button>
       </div>
     </div>
   );

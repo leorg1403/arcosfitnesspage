@@ -1,12 +1,21 @@
+"use client";
+
+import { useState } from "react";
 import { Eyebrow } from "@/components/primitives/Eyebrow";
 import { Reveal } from "@/components/primitives/Reveal";
-import { Button } from "@/components/ui/Button";
 import { SEGMENT_PLANS, type Plan } from "@/lib/memberships";
-import { buildWhatsAppLink, WA_MESSAGES } from "@/lib/whatsapp";
-import { cn } from "@/lib/cn";
+import { CheckoutDialog, type CheckoutItem } from "./CheckoutDialog";
 import { fadeUp } from "@/lib/motion";
 
 export function SegmentPlans() {
+  const [item, setItem] = useState<CheckoutItem | null>(null);
+  const [open, setOpen] = useState(false);
+
+  const openCheckout = (plan: Plan) => {
+    setItem({ kind: "plan", data: plan });
+    setOpen(true);
+  };
+
   return (
     <section id="mas-opciones" className="bg-bone pt-10 pb-16 md:pt-12 md:pb-20 scroll-mt-24">
       <div className="container-wide">
@@ -22,16 +31,18 @@ export function SegmentPlans() {
         <Reveal variants={fadeUp} delay={0.1}>
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-px bg-line-soft border-y border-line-soft">
             {SEGMENT_PLANS.map((plan) => (
-              <SegmentCard key={plan.id} plan={plan} />
+              <SegmentCard key={plan.id} plan={plan} onBuy={() => openCheckout(plan)} />
             ))}
           </div>
         </Reveal>
       </div>
+
+      <CheckoutDialog item={item} open={open} onOpenChange={setOpen} />
     </section>
   );
 }
 
-function SegmentCard({ plan }: { plan: Plan }) {
+function SegmentCard({ plan, onBuy }: { plan: Plan; onBuy: () => void }) {
   const isDropIn = plan.periodicity === "unico";
   return (
     <div className="bg-bone p-7 md:p-8 flex flex-col">
@@ -65,14 +76,12 @@ function SegmentCard({ plan }: { plan: Plan }) {
         ))}
       </ul>
 
-      <Button
-        href={buildWhatsAppLink(WA_MESSAGES.membership(plan.name))}
-        external
-        variant="link"
-        size="sm"
+      <button
+        onClick={onBuy}
+        className="h-11 px-6 inline-flex items-center justify-center bg-ink text-paper font-medium tracking-tight text-sm hover:bg-graphite active:scale-[0.99] transition-all duration-300"
       >
-        Hablar por WhatsApp
-      </Button>
+        Comprar {plan.name}
+      </button>
     </div>
   );
 }

@@ -23,7 +23,7 @@ export function SiteFooter() {
               como volver a casa.
             </p>
             <p className="font-mono text-[0.625rem] uppercase tracking-[0.22em] text-gold leading-relaxed">
-              Hyrox · Funcional · Yoga · Pilates · Spinning · Box · Spa &amp; Recovery
+              Funcional · Hyrox · Boxeo · Spa &amp; Recovery
             </p>
           </div>
 

@@ -8,7 +8,7 @@ import { CLASES, HEROES } from "@/lib/content";
 export const metadata: Metadata = {
   title: "Clases & Reservas",
   description:
-    "Agenda semanal completa. Reserva tu lugar en clases de Yoga, Funcional, Hyrox, Spinning, Box y Pilates por WhatsApp.",
+    "Agenda semanal completa. Reserva tu lugar en clases de Entrenamiento Funcional, Hyrox y Boxeo.",
 };
 
 export default function ClasesReservasPage() {

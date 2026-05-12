@@ -169,10 +169,19 @@
 }
 
 /* ─── Focus visible elegante ────────────────────── */
+/* Por defecto: outline dorado sutil para botones/links/divs interactivos */
 *:focus-visible {
   outline: 1px solid var(--color-gold);
   outline-offset: 4px;
   border-radius: 2px;
+}
+
+/* Para inputs/textarea/select: el border-bottom ya cambia a dorado al focus,
+   no necesitan outline adicional (que se ve como cuadro flotante feo). */
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible {
+  outline: none;
 }
 
 /* ─── Image grain texture (optional) ────────────── */

@@ -1,10 +1,12 @@
+"use client";
+
+import { useState } from "react";
 import { ChevronDown } from "lucide-react";
 import { Eyebrow } from "@/components/primitives/Eyebrow";
 import { Reveal } from "@/components/primitives/Reveal";
 import { Button } from "@/components/ui/Button";
-import { WhatsappIcon } from "@/components/layout/SocialIcons";
 import { MAIN_PLANS, MAIN_COMPARISON, type Plan } from "@/lib/memberships";
-import { buildWhatsAppLink, WA_MESSAGES } from "@/lib/whatsapp";
+import { CheckoutDialog, type CheckoutItem } from "./CheckoutDialog";
 import { cn } from "@/lib/cn";
 import { fadeUp } from "@/lib/motion";
 
@@ -26,9 +28,15 @@ export function MainPlansHome({
 }: Props) {
   const bg = tone === "bone" ? "bg-bone" : "bg-paper";
 
-  // En home (showAllLink=true) → cierre con "Dos formas de pertenecer" + link a /membresias
-  // En /membresias (showAllLink=false) → encuadre abierto que invita a seguir scrolleando
   const isHome = showAllLink;
+
+  const [checkoutItem, setCheckoutItem] = useState<CheckoutItem | null>(null);
+  const [open, setOpen] = useState(false);
+
+  const openCheckout = (plan: Plan) => {
+    setCheckoutItem({ kind: "plan", data: plan });
+    setOpen(true);
+  };
 
   return (
     <section className={cn("pt-16 pb-8 md:pt-20 md:pb-10", bg)}>
@@ -71,6 +79,7 @@ export function MainPlansHome({
                 plan={plan}
                 index={i}
                 showDivider={i === 0}
+                onBuy={() => openCheckout(plan)}
               />
             ))}
           </div>
@@ -115,6 +124,8 @@ export function MainPlansHome({
           </Reveal>
         )}
       </div>
+
+      <CheckoutDialog item={checkoutItem} open={open} onOpenChange={setOpen} />
     </section>
   );
 }
@@ -123,10 +134,12 @@ function PlanCard({
   plan,
   index,
   showDivider,
+  onBuy,
 }: {
   plan: Plan;
   index: number;
   showDivider: boolean;
+  onBuy: () => void;
 }) {
   const isGold = plan.highlight;
   return (
@@ -175,7 +188,7 @@ function PlanCard({
 
       <ul className="space-y-2.5 mb-8">
         {plan.features.map((feat, idx) => {
-          const isUnique = isGold && idx === 0; // primer feature en Gold es el diferenciador
+          const isUnique = isGold && idx === 0;
           return (
             <li
               key={feat}
@@ -197,15 +210,17 @@ function PlanCard({
         })}
       </ul>
 
-      <Button
-        href={buildWhatsAppLink(WA_MESSAGES.membership(plan.name))}
-        external
-        variant={isGold ? "linkGold" : "link"}
-        size="md"
+      <button
+        onClick={onBuy}
+        className={cn(
+          "h-12 px-7 inline-flex items-center justify-center font-medium tracking-tight transition-all duration-300 active:scale-[0.99]",
+          isGold
+            ? "bg-gold text-ink hover:bg-gold-soft"
+            : "bg-ink text-paper hover:bg-graphite"
+        )}
       >
-        <WhatsappIcon className="size-3.5 shrink-0" />
-        Hablar por WhatsApp
-      </Button>
+        Comprar {plan.name}
+      </button>
     </div>
   );
 }
