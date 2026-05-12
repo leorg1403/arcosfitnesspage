@@ -3,6 +3,7 @@ import { FullBleedHero } from "@/components/sections/FullBleedHero";
 import { StorySection } from "@/components/sections/StorySection";
 import { FacilityShowcase } from "@/components/sections/FacilityShowcase";
 import { ValuesEditorial } from "@/components/sections/ValuesEditorial";
+import { LegendsSection } from "@/components/sections/LegendsSection";
 import { InstructorsRow } from "@/components/sections/InstructorsRow";
 import { LocationSection } from "@/components/sections/LocationSection";
 import { FullBleedCTA } from "@/components/sections/FullBleedCTA";
@@ -31,6 +32,8 @@ export default function NosotrosPage() {
       <FacilityShowcase />
 
       <ValuesEditorial />
+
+      <LegendsSection />
 
       <InstructorsRow />
 

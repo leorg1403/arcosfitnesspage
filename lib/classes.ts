@@ -37,8 +37,8 @@ export type ClassItem = {
 };
 
 const IMG = {
-  funcional: "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?auto=format&fit=crop&w=1600&q=80",
-  hyrox: "https://images.unsplash.com/photo-1599058917212-d750089bc07e?auto=format&fit=crop&w=1600&q=80",
+  funcional: "/images/facilities/paraiso-fierros.jpg",
+  hyrox: "/images/hero/home.jpg",
   boxeo: "https://images.unsplash.com/photo-1549719386-74dfcbf7dbed?auto=format&fit=crop&w=1600&q=80",
 } as const;
 

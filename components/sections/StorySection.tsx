@@ -47,8 +47,8 @@ export function StorySection() {
             className="relative aspect-[4/5] lg:col-span-5 order-1 lg:order-2"
           >
             <Image
-              src="https://images.unsplash.com/photo-1581009146145-b5ef050c2e1e?auto=format&fit=crop&w=1600&q=85"
-              alt="Sala de pesas Arcos Fitness"
+              src="/images/nosotros/story.jpg"
+              alt="Pasillos de Arcos Fitness Club"
               fill
               sizes="(min-width: 1024px) 40vw, 100vw"
               className="object-cover grayscale-[40%]"

@@ -37,9 +37,9 @@ export const NAV_FOOTER = [
 
 /** Hero photos curados — dark, architectural, premium */
 export const HEROES = {
-  home: "https://images.unsplash.com/photo-1623874514711-0f321325f318?auto=format&fit=crop&w=2400&q=85",
-  clases: "https://images.unsplash.com/photo-1518611012118-696072aa579a?auto=format&fit=crop&w=2400&q=85",
-  hyrox: "https://images.unsplash.com/photo-1574680096145-d05b474e2155?auto=format&fit=crop&w=2400&q=85",
+  home: "/images/hero/home.jpg",
+  clases: "/images/hero/clases.jpg",
+  hyrox: "/images/hero/hyrox.jpg",
   membresias: "https://images.unsplash.com/photo-1540497077202-7c8a3999166f?auto=format&fit=crop&w=2400&q=85",
   nosotros: "https://images.unsplash.com/photo-1571902943202-507ec2618e8f?auto=format&fit=crop&w=2400&q=85",
   ctaHome: "https://images.unsplash.com/photo-1599058917765-a780eda07a3e?auto=format&fit=crop&w=2400&q=85",
@@ -53,19 +53,19 @@ export const HEROES = {
 export const FACILITIES = [
   {
     title: "Sala de Pesas",
-    image: "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?auto=format&fit=crop&w=1600&q=85",
+    image: "/images/facilities/sala-pesas.jpg",
   },
   {
     title: "Hyrox Box",
-    image: "https://images.unsplash.com/photo-1599058917212-d750089bc07e?auto=format&fit=crop&w=1600&q=85",
+    image: "/images/hero/hyrox.jpg",
   },
   {
-    title: "Estudio Yoga",
-    image: "https://images.unsplash.com/photo-1545205597-3d9d02c29597?auto=format&fit=crop&w=1600&q=85",
+    title: "Paraíso de Fierros",
+    image: "/images/facilities/paraiso-fierros.jpg",
   },
   {
-    title: "Spa & Recovery",
-    image: "https://images.unsplash.com/photo-1540497077202-7c8a3999166f?auto=format&fit=crop&w=1600&q=85",
+    title: "Lounge & Bar",
+    image: "/images/facilities/lounge.jpg",
   },
 ];
 
