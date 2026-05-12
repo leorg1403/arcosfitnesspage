@@ -8,13 +8,13 @@ import { fadeUp } from "@/lib/motion";
 
 export function SegmentPlans() {
   return (
-    <section className="bg-bone section-y">
+    <section className="bg-bone py-16 md:py-20">
       <div className="container-wide">
-        <Reveal variants={fadeUp} className="mb-12 md:mb-16">
+        <Reveal variants={fadeUp} className="mb-10 md:mb-14">
           <Eyebrow tone="gold" withLine>
             02 / Más opciones
           </Eyebrow>
-          <h2 className="mt-6 font-display text-headline tracking-[-0.03em] leading-[0.95] font-bold max-w-3xl">
+          <h2 className="mt-5 font-display text-headline tracking-[-0.03em] leading-[0.95] font-bold max-w-3xl">
             Para cada <span className="font-serif-italic text-gold">ritmo</span>.
           </h2>
         </Reveal>
@@ -34,15 +34,15 @@ export function SegmentPlans() {
 function SegmentCard({ plan }: { plan: Plan }) {
   const isDropIn = plan.periodicity === "unico";
   return (
-    <div className="bg-bone p-8 md:p-10 flex flex-col">
+    <div className="bg-bone p-7 md:p-8 flex flex-col">
       <h3 className="font-display text-2xl md:text-3xl font-bold tracking-[-0.02em]">
         {plan.name}
       </h3>
-      <p className="mt-2 text-sm text-concrete min-h-[3rem]">
+      <p className="mt-2 text-sm text-concrete min-h-[2.5rem]">
         {plan.tagline}
       </p>
 
-      <div className="mt-8 mb-8">
+      <div className="mt-5 mb-6">
         <p className="font-display text-3xl md:text-4xl font-light tracking-tight">
           ${plan.price.toLocaleString("es-MX")}
         </p>
@@ -56,7 +56,7 @@ function SegmentCard({ plan }: { plan: Plan }) {
         )}
       </div>
 
-      <ul className="space-y-2 mb-8 flex-1">
+      <ul className="space-y-2 mb-6 flex-1">
         {plan.features.map((feat) => (
           <li key={feat} className="flex gap-2 text-xs text-ink/75 leading-relaxed">
             <span className="text-gold mt-0.5">●</span>

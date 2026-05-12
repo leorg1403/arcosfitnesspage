@@ -35,17 +35,17 @@ export default function MembresiasPage() {
 
       <PrePaymentTable />
 
-      <section className="bg-bone section-y">
+      <section className="bg-bone py-16 md:py-20">
         <div className="container-wide">
-          <div className="grid lg:grid-cols-12 gap-12">
+          <div className="grid lg:grid-cols-12 gap-10">
             <Reveal variants={fadeUp} className="lg:col-span-4">
               <Eyebrow tone="gold" withLine>
                 04 / Preguntas
               </Eyebrow>
-              <h2 className="mt-8 font-display text-headline tracking-[-0.03em] leading-[0.95] font-bold">
+              <h2 className="mt-5 font-display text-headline tracking-[-0.03em] leading-[0.95] font-bold">
                 Sin sorpresas.
               </h2>
-              <p className="mt-6 text-base leading-relaxed text-concrete max-w-sm">
+              <p className="mt-4 text-base leading-relaxed text-concrete max-w-sm">
                 Si falta algo, escríbenos directo y te resolvemos al momento.
               </p>
             </Reveal>

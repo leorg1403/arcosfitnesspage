@@ -1,3 +1,4 @@
+import { ChevronDown } from "lucide-react";
 import { Eyebrow } from "@/components/primitives/Eyebrow";
 import { Reveal } from "@/components/primitives/Reveal";
 import { Button } from "@/components/ui/Button";
@@ -12,7 +13,7 @@ type Props = {
   showHeader?: boolean;
   /** Número del eyebrow */
   number?: string;
-  /** Mostrar link "Ver todas las membresías" al final */
+  /** Mostrar link "Ver todas las membresías" al final (home) */
   showAllLink?: boolean;
   tone?: "paper" | "bone";
 };
@@ -25,24 +26,38 @@ export function MainPlansHome({
 }: Props) {
   const bg = tone === "bone" ? "bg-bone" : "bg-paper";
 
+  // En home (showAllLink=true) → cierre con "Dos formas de pertenecer" + link a /membresias
+  // En /membresias (showAllLink=false) → encuadre abierto que invita a seguir scrolleando
+  const isHome = showAllLink;
+
   return (
-    <section className={cn("section-y", bg)}>
+    <section className={cn("py-16 md:py-20", bg)}>
       <div className="container-wide">
         {showHeader && (
-          <div className="mb-16 md:mb-20 grid lg:grid-cols-12 gap-y-8 items-end">
+          <div className="mb-10 md:mb-14 grid lg:grid-cols-12 gap-y-6 items-end">
             <Reveal variants={fadeUp} className="lg:col-span-7">
               <Eyebrow tone="gold" withLine>
-                {number} / Membresías
+                {number} / {isHome ? "Membresías" : "Las principales"}
               </Eyebrow>
-              <h2 className="mt-6 font-display text-headline tracking-[-0.03em] leading-[0.95] font-bold">
-                Dos formas
-                <br />
-                de <span className="font-serif-italic text-gold">pertenecer</span>.
-              </h2>
+              {isHome ? (
+                <h2 className="mt-6 font-display text-headline tracking-[-0.03em] leading-[0.95] font-bold">
+                  Dos formas
+                  <br />
+                  de <span className="font-serif-italic text-gold">pertenecer</span>.
+                </h2>
+              ) : (
+                <h2 className="mt-6 font-display text-headline tracking-[-0.03em] leading-[0.95] font-bold">
+                  Empieza por
+                  <br />
+                  las <span className="font-serif-italic text-gold">esenciales</span>.
+                </h2>
+              )}
             </Reveal>
             <Reveal variants={fadeUp} delay={0.15} className="lg:col-span-4 lg:col-start-9 lg:pb-2">
               <p className="text-base text-concrete leading-relaxed max-w-sm">
-                {MAIN_COMPARISON.difference.body}
+                {isHome
+                  ? MAIN_COMPARISON.difference.body
+                  : "Las dos opciones más elegidas. Si tu vida pide otro ritmo, abajo hay opciones por horario y planes anticipados."}
               </p>
             </Reveal>
           </div>
@@ -68,6 +83,22 @@ export function MainPlansHome({
             </Button>
           </Reveal>
         )}
+
+        {/* Hint de continuidad en /membresias: invita a seguir scrolleando */}
+        {!showAllLink && (
+          <Reveal variants={fadeUp} delay={0.25} className="mt-12 md:mt-14">
+            <div className="flex flex-col items-center gap-3 text-center">
+              <p className="font-mono text-[0.65rem] uppercase tracking-[0.22em] text-concrete">
+                <span className="text-gold">—</span>&nbsp;&nbsp;Más opciones según tu ritmo
+              </p>
+              <ChevronDown
+                className="size-5 text-gold animate-scroll-hint"
+                strokeWidth={1.5}
+                aria-hidden
+              />
+            </div>
+          </Reveal>
+        )}
       </div>
     </section>
   );
@@ -86,13 +117,13 @@ function PlanCard({
   return (
     <div
       className={cn(
-        "relative p-8 md:p-10 lg:p-12",
+        "relative p-7 md:p-9 lg:p-10",
         showDivider && "md:border-r border-gold/30",
         "border-b md:border-b-0 border-line-soft last:border-b-0"
       )}
     >
       {/* Top label */}
-      <div className="flex items-baseline justify-between mb-4">
+      <div className="flex items-baseline justify-between mb-3">
         <span className="font-mono text-[0.625rem] uppercase tracking-[0.22em] text-concrete">
           0{index + 1} / 02
         </span>
@@ -111,9 +142,9 @@ function PlanCard({
       >
         {plan.name}
       </h3>
-      <p className="mt-3 text-sm text-concrete">{plan.tagline}</p>
+      <p className="mt-2 text-sm text-concrete">{plan.tagline}</p>
 
-      <div className="my-10 flex items-baseline gap-3 flex-wrap">
+      <div className="mt-6 mb-7 flex items-baseline gap-3 flex-wrap">
         <span className="font-display text-5xl md:text-6xl font-light tracking-tight">
           ${plan.price.toLocaleString("es-MX")}
         </span>
@@ -127,7 +158,7 @@ function PlanCard({
         )}
       </div>
 
-      <ul className="space-y-3 mb-12">
+      <ul className="space-y-2.5 mb-8">
         {plan.features.map((feat, idx) => {
           const isUnique = isGold && idx === 0; // primer feature en Gold es el diferenciador
           return (

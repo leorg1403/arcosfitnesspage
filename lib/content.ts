@@ -45,7 +45,7 @@ export const HEROES = {
   ctaHome: "https://images.unsplash.com/photo-1599058917765-a780eda07a3e?auto=format&fit=crop&w=2400&q=85",
   ctaClases: "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?auto=format&fit=crop&w=2400&q=85",
   ctaHyrox: "https://images.unsplash.com/photo-1599058917212-d750089bc07e?auto=format&fit=crop&w=2400&q=85",
-  ctaMembresias: "https://images.unsplash.com/photo-1583500178690-f7fd39c93728?auto=format&fit=crop&w=2400&q=85",
+  ctaMembresias: "https://images.unsplash.com/photo-1534258936925-c58bed479fcb?auto=format&fit=crop&w=2400&q=85",
   ctaNosotros: "https://images.unsplash.com/photo-1605296867424-35fc25c9212a?auto=format&fit=crop&w=2400&q=85",
 };
 
@@ -166,8 +166,8 @@ export const HYROX = {
 export const MEMBRESIAS = {
   hero: {
     eyebrow: "04 / Membresías",
-    headline: ["Tres formas", "de pertenecer."],
-    italicWord: "pertenecer.",
+    headline: ["Tu ritmo,", "tu plan."],
+    italicWord: "plan.",
   },
   faqs: [
     {
