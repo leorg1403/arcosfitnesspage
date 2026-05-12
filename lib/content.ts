@@ -6,7 +6,7 @@ export const SITE = {
   name: "Arcos Fitness Club",
   shortName: "Arcos",
   tagline: "Strength. Recovery. Belonging.",
-  address: "Paseo de los Tamarindos 98, Cuajimalpa, CDMX",
+  address: "Paseo de los Tamarindos 98, Bosques de las Lomas, CDMX",
   phone: "55 9135 0325",
   email: "info@arcosfitness.com",
   hours: [
@@ -16,10 +16,10 @@ export const SITE = {
     { day: "Domingo", time: "9:00 — 15:00" },
   ],
   social: {
-    instagram: "https://instagram.com/arcosfitness",
-    facebook: "https://facebook.com/arcosfitness",
-    tiktok: "https://tiktok.com/@arcosfitness",
-    youtube: "https://youtube.com/@arcosfitness",
+    instagram: "https://instagram.com/arcosfitnessclub",
+    facebook: "https://facebook.com/arcosfitnessclub",
+    tiktok: "https://tiktok.com/@arcos_fitness_club",
+    youtube: "https://youtube.com/@arcosfitnessclub",
   },
 };
 
@@ -78,7 +78,7 @@ export const HOME = {
   },
   statement: {
     eyebrow: "05 / Filosofía",
-    body: "Un club privado en Cuajimalpa. Para quienes vuelven no por obligación, sino porque acá se sienten en casa.",
+    body: "Un club privado en Bosques de las Lomas. Para quienes vuelven no por obligación, sino porque acá se sienten en casa.",
     link: { label: "Conocer Arcos", href: "/nosotros" },
   },
   hyrox: {
@@ -201,18 +201,18 @@ export const MEMBRESIAS = {
 
 export const NOSOTROS = {
   hero: {
-    eyebrow: "05 / Nosotros · Desde 2018",
-    headline: ["Más que", "un gym."],
-    italicWord: "gym.",
+    eyebrow: "05 / Nosotros",
+    headline: ["Un paraíso", "de fierros."],
+    italicWord: "fierros.",
   },
   story: {
-    eyebrow: "Nuestra historia",
+    eyebrow: "Cómo nació",
     body:
-      "Arcos nació en 2018 cuando el dueño, después de probar todos los gimnasios premium de la ciudad, decidió que faltaba algo: cercanía. Un lugar donde el equipo te saluda por nombre, donde el café del juice bar lo prepara alguien que sabe el tuyo, y donde cada clase se siente personal. Hoy somos más de 800 miembros y seguimos siendo, sobre todo, una comunidad.",
-    stats: [
-      { value: 800, suffix: "+", label: "Miembros" },
-      { value: 8, suffix: " años", label: "Operando" },
-      { value: 2400, suffix: " m²", label: "Espacio" },
+      "Arcos nació en plena pandemia. Cuando el gimnasio al que asistía el fundador cerró sus puertas, el entrenamiento en casa lo obligó a regresar a las raíces del fitness — y a ver lo que faltaba en la mayoría de los establecimientos: el paquete completo. Los conceptos sólidos de gym databan de hace cinco décadas. Así surgió Arcos: un espacio que se sintiera como un gimnasio de verdad. No un club social. No una moda. Un paraíso de fierros, con la experiencia y la tecnología del presente.",
+    pillars: [
+      { eyebrow: "Filosofía", title: "Paraíso de fierros." },
+      { eyebrow: "Promesa", title: "El paquete completo." },
+      { eyebrow: "Resultado", title: "Cuerpos de antaño, hoy." },
     ],
   },
   values: [
@@ -234,8 +234,8 @@ export const NOSOTROS = {
   ],
   cierre: {
     eyebrow: "Visita",
-    headline: ["Te esperamos", "en Cuajimalpa."],
-    italicWord: "Cuajimalpa.",
+    headline: ["Te esperamos", "en Arcos."],
+    italicWord: "Arcos.",
     cta: { label: "Agendar visita por WhatsApp", action: "wa-visit" },
   },
 };

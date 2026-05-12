@@ -12,7 +12,7 @@ export default function HomePage() {
       {/* 01 · Hero (ink + foto) */}
       <FullBleedHero
         image={HEROES.home}
-        alt="Arcos Fitness Club — Cuajimalpa"
+        alt="Arcos Fitness Club — Bosques de las Lomas"
         eyebrow={HOME.hero.eyebrow}
         headline={HOME.hero.headline}
         italicWord={HOME.hero.italicWord}

@@ -11,7 +11,7 @@ import { NOSOTROS, HEROES } from "@/lib/content";
 export const metadata: Metadata = {
   title: "Nosotros",
   description:
-    "Arcos Fitness Club: un club privado en Cuajimalpa, CDMX. Conoce nuestra historia, equipo, instalaciones y valores.",
+    "Arcos Fitness Club: un club privado en Bosques de las Lomas, CDMX. Conoce nuestra historia, equipo, instalaciones y valores.",
 };
 
 export default function NosotrosPage() {
@@ -42,6 +42,7 @@ export default function NosotrosPage() {
         headline={NOSOTROS.cierre.headline}
         italicWord={NOSOTROS.cierre.italicWord}
         cta={NOSOTROS.cierre.cta}
+        size="headline"
       />
     </>
   );

@@ -9,7 +9,7 @@ import { HYROX, HEROES } from "@/lib/content";
 export const metadata: Metadata = {
   title: "Hyrox — Programa oficial",
   description:
-    "Único Hyrox Box certificado en Cuajimalpa. Programa de 12 semanas, simulacros cronometrados, coaches especializados.",
+    "Único Hyrox Box certificado en Bosques de las Lomas. Programa de 12 semanas, simulacros cronometrados, coaches especializados.",
 };
 
 export default function HyroxPage() {

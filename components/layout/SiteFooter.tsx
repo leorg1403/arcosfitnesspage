@@ -1,7 +1,7 @@
-import Link from "next/link";
 import { SITE, NAV_FOOTER } from "@/lib/content";
 import { buildWhatsAppLink, WA_MESSAGES } from "@/lib/whatsapp";
 import { Logo } from "./Logo";
+import { FooterNavLink } from "./FooterNavLink";
 import {
   InstagramIcon,
   FacebookIcon,
@@ -18,8 +18,12 @@ export function SiteFooter() {
           {/* Brand */}
           <div className="lg:col-span-4 space-y-6">
             <Logo light />
-            <p className="text-sm text-paper/60 leading-relaxed max-w-xs">
-              Un club privado en Cuajimalpa, CDMX. Donde tu nombre se conoce.
+            <p className="text-sm text-paper/60 leading-relaxed max-w-sm">
+              Un club privado en Bosques de las Lomas, CDMX. Donde entrenar se siente
+              como volver a casa.
+            </p>
+            <p className="font-mono text-[0.625rem] uppercase tracking-[0.22em] text-gold leading-relaxed">
+              Hyrox · Funcional · Yoga · Pilates · Spinning · Box · Spa &amp; Recovery
             </p>
           </div>
 
@@ -48,6 +52,21 @@ export function SiteFooter() {
                 <WhatsappIcon className="size-3.5" />
                 WhatsApp
               </a>
+              {/* Redes sociales — visibles arriba del fold del footer */}
+              <div className="pt-3 flex items-center gap-4">
+                <SocialIcon href={SITE.social.instagram} label="Instagram">
+                  <InstagramIcon className="size-4" />
+                </SocialIcon>
+                <SocialIcon href={SITE.social.facebook} label="Facebook">
+                  <FacebookIcon className="size-4" />
+                </SocialIcon>
+                <SocialIcon href={SITE.social.tiktok} label="TikTok">
+                  <TiktokIcon className="size-4" />
+                </SocialIcon>
+                <SocialIcon href={SITE.social.youtube} label="YouTube">
+                  <YoutubeIcon className="size-4" />
+                </SocialIcon>
+              </div>
             </FooterCol>
 
             <FooterCol title="Horarios">
@@ -61,13 +80,13 @@ export function SiteFooter() {
 
             <FooterCol title="Navegar" className="col-span-2 md:col-span-1">
               {NAV_FOOTER.map((item) => (
-                <Link
+                <FooterNavLink
                   key={item.href}
                   href={item.href}
                   className="block hover:text-gold transition-colors duration-300"
                 >
                   {item.label}
-                </Link>
+                </FooterNavLink>
               ))}
             </FooterCol>
           </div>
@@ -76,24 +95,10 @@ export function SiteFooter() {
         {/* Hairline gold */}
         <div className="mt-20 mb-8 h-px bg-gold/30" />
 
-        <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+        <div className="flex items-center justify-between gap-6">
           <p className="font-mono text-[0.625rem] text-paper/40 uppercase tracking-[0.22em]">
             © {new Date().getFullYear()} Arcos Fitness Club · Hecho en CDMX
           </p>
-          <div className="flex items-center gap-5">
-            <SocialIcon href={SITE.social.instagram} label="Instagram">
-              <InstagramIcon className="size-4" />
-            </SocialIcon>
-            <SocialIcon href={SITE.social.facebook} label="Facebook">
-              <FacebookIcon className="size-4" />
-            </SocialIcon>
-            <SocialIcon href={SITE.social.tiktok} label="TikTok">
-              <TiktokIcon className="size-4" />
-            </SocialIcon>
-            <SocialIcon href={SITE.social.youtube} label="YouTube">
-              <YoutubeIcon className="size-4" />
-            </SocialIcon>
-          </div>
         </div>
       </div>
     </footer>
@@ -134,7 +139,7 @@ function SocialIcon({
       aria-label={label}
       target="_blank"
       rel="noopener noreferrer"
-      className="text-paper/60 hover:text-gold transition-colors duration-300"
+      className="text-gold hover:text-gold-soft transition-colors duration-300"
     >
       {children}
     </a>

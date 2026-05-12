@@ -23,14 +23,23 @@ type Props = {
   image: string;
   eyebrow: string;
   headline: string[];
-  italicWord?: string;
+  italicWord?: string | string[];
   cta: { label: string; action: Action };
+  /** Tamaño del headline. Default "display" (gigante). Usar "headline" si hay palabras largas */
+  size?: "display" | "headline";
 };
 
 /**
  * v5: scroll-triggered con useInViewSafe.
  */
-export function FullBleedCTA({ image, eyebrow, headline, italicWord, cta }: Props) {
+export function FullBleedCTA({
+  image,
+  eyebrow,
+  headline,
+  italicWord,
+  cta,
+  size = "display",
+}: Props) {
   const [ref, shown] = useInViewSafe<HTMLDivElement>();
 
   return (
@@ -62,7 +71,7 @@ export function FullBleedCTA({ image, eyebrow, headline, italicWord, cta }: Prop
             <SplitHeadline
               lines={headline}
               italicWord={italicWord}
-              size="display"
+              size={size}
               tone="paper"
             />
           </div>

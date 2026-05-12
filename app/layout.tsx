@@ -34,9 +34,9 @@ export const metadata: Metadata = {
     template: "%s · Arcos Fitness Club",
   },
   description:
-    "Club privado de fitness en Cuajimalpa, CDMX. Hyrox, clases en grupo, entrenamiento personalizado, spa y comunidad. Reserva tu visita por WhatsApp.",
+    "Club privado de fitness en Bosques de las Lomas, CDMX. Hyrox, clases en grupo, entrenamiento personalizado, spa y comunidad. Reserva tu visita por WhatsApp.",
   keywords: [
-    "gimnasio Cuajimalpa",
+    "gimnasio Bosques de las Lomas",
     "Hyrox CDMX",
     "gimnasio premium",
     "clases funcionales",
@@ -47,7 +47,7 @@ export const metadata: Metadata = {
     locale: "es_MX",
     siteName: "Arcos Fitness Club",
     title: "Arcos Fitness Club",
-    description: "Un club privado en Cuajimalpa. Reserva tu visita por WhatsApp.",
+    description: "Un club privado en Bosques de las Lomas. Reserva tu visita por WhatsApp.",
   },
   twitter: { card: "summary_large_image" },
   icons: { icon: "/favicon.ico" },

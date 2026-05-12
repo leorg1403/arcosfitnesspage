@@ -14,7 +14,7 @@ type Props = {
   eyebrow: string;
   /** Líneas del headline */
   headline: string[];
-  italicWord?: string;
+  italicWord?: string | string[];
   cta?: {
     label: string;
     href?: string;

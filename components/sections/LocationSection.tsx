@@ -12,14 +12,14 @@ export function LocationSection() {
   )}`;
 
   return (
-    <section className="bg-paper section-y">
+    <section className="bg-bone section-y">
       <div className="container-wide">
         <Reveal variants={fadeUp} className="mb-12">
           <Eyebrow tone="gold" withLine>
             05 / Ubicación
           </Eyebrow>
           <h2 className="mt-8 font-display text-headline tracking-[-0.03em] leading-[0.95] font-bold max-w-3xl">
-            Cuajimalpa, <span className="font-serif-italic text-gold">CDMX</span>.
+            Bosques de las <span className="font-serif-italic text-gold">Lomas</span>.
           </h2>
         </Reveal>
 
@@ -28,7 +28,7 @@ export function LocationSection() {
             <div className="relative aspect-[16/10] bg-bone">
               <iframe
                 title="Ubicación Arcos Fitness Club"
-                src="https://www.google.com/maps?q=Paseo+de+los+Tamarindos+98+Cuajimalpa+CDMX&output=embed"
+                src="https://www.google.com/maps?q=Paseo+de+los+Tamarindos+98+Bosques+de+las+Lomas+CDMX&output=embed"
                 className="absolute inset-0 h-full w-full grayscale-[60%] hover:grayscale-0 transition-[filter] duration-1000"
                 loading="lazy"
                 referrerPolicy="no-referrer-when-downgrade"
