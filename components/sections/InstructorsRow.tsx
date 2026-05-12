@@ -6,9 +6,9 @@ import { fadeUp } from "@/lib/motion";
 
 export function InstructorsRow() {
   return (
-    <section className="bg-paper section-y">
+    <section className="bg-paper py-16 md:py-24">
       <div className="container-wide">
-        <Reveal variants={fadeUp} className="mb-12">
+        <Reveal variants={fadeUp} className="mb-10">
           <Eyebrow tone="gold" withLine>
             Equipo
           </Eyebrow>

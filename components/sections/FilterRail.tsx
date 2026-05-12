@@ -18,7 +18,7 @@ export function FilterRail({ active, onChange, sticky = true }: Props) {
       )}
     >
       <div className="container-wide">
-        <div className="flex items-center gap-1 overflow-x-auto scrollbar-none py-4 -mx-2 px-2">
+        <div className="flex items-center gap-2 md:gap-3 overflow-x-auto scrollbar-none py-6 md:py-7 -mx-2 px-2">
           {CATEGORIES.map((cat) => {
             const isActive = active === cat.key;
             return (
@@ -26,7 +26,7 @@ export function FilterRail({ active, onChange, sticky = true }: Props) {
                 key={cat.key}
                 onClick={() => onChange(cat.key as ClassCategory | "all")}
                 className={cn(
-                  "group shrink-0 px-4 py-2 font-mono text-[0.6875rem] uppercase tracking-[0.22em] transition-colors duration-300",
+                  "group shrink-0 px-5 md:px-6 py-2.5 font-mono text-sm md:text-[0.95rem] uppercase tracking-[0.18em] font-medium transition-colors duration-300",
                   isActive
                     ? "text-ink"
                     : "text-concrete hover:text-ink"
@@ -36,7 +36,7 @@ export function FilterRail({ active, onChange, sticky = true }: Props) {
                   <span>{cat.label}</span>
                   <span
                     className={cn(
-                      "block h-px w-full bg-gold transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] origin-left",
+                      "block h-[1.5px] w-full bg-gold mt-1 transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] origin-left",
                       isActive ? "scale-x-100" : "scale-x-0 group-hover:scale-x-100"
                     )}
                   />
