@@ -1,7 +1,7 @@
 import { Eyebrow } from "@/components/primitives/Eyebrow";
 import { Reveal } from "@/components/primitives/Reveal";
 import { Button } from "@/components/ui/Button";
-import { PRE_PAYMENTS } from "@/lib/memberships";
+import { PRE_PAYMENTS, type PrePayment } from "@/lib/memberships";
 import { buildWhatsAppLink, WA_MESSAGES } from "@/lib/whatsapp";
 import { fadeUp } from "@/lib/motion";
 
@@ -30,46 +30,72 @@ export function PrePaymentTable() {
         <Reveal variants={fadeUp}>
           <div className="grid md:grid-cols-4 border-y border-line-soft">
             {PRE_PAYMENTS.map((pay, i) => (
-              <div
-                key={pay.id}
-                className={
-                  "p-7 md:p-8 flex flex-col" +
-                  (i < PRE_PAYMENTS.length - 1 ? " md:border-r border-line-soft" : "") +
-                  (i < PRE_PAYMENTS.length - 1 ? " border-b md:border-b-0" : "")
-                }
-              >
-                <p className="font-mono text-[0.625rem] uppercase tracking-[0.22em] text-gold mb-3">
-                  {pay.discount}
-                </p>
-                <h3 className="font-display text-2xl md:text-3xl font-bold tracking-tight">
-                  {pay.label}
-                </h3>
-                <div className="mt-5 mb-5">
-                  <p className="font-display text-3xl md:text-4xl font-light tracking-tight">
-                    ${pay.price.toLocaleString("es-MX")}
-                  </p>
-                  <p className="font-mono text-[0.625rem] uppercase tracking-[0.22em] text-concrete mt-1">
-                    MXN · pago único
-                  </p>
-                  <p className="mt-2 font-mono text-[0.625rem] uppercase tracking-[0.22em] text-concrete line-through">
-                    ${pay.originalPrice.toLocaleString("es-MX")} sin descuento
-                  </p>
-                </div>
-                <div className="mt-auto pt-4">
-                  <Button
-                    href={buildWhatsAppLink(WA_MESSAGES.membership(`anticipado ${pay.label}`))}
-                    external
-                    variant="link"
-                    size="sm"
-                  >
-                    WhatsApp
-                  </Button>
-                </div>
-              </div>
+              <PrePaymentCard key={pay.id} pay={pay} index={i} total={PRE_PAYMENTS.length} />
             ))}
           </div>
         </Reveal>
       </div>
     </section>
+  );
+}
+
+function PrePaymentCard({
+  pay,
+  index,
+  total,
+}: {
+  pay: PrePayment;
+  index: number;
+  total: number;
+}) {
+  const savings = pay.originalPrice - pay.price;
+  const isLast = index === total - 1;
+  return (
+    <div
+      className={
+        "p-7 md:p-8 flex flex-col" +
+        (!isLast ? " md:border-r border-line-soft border-b md:border-b-0" : "")
+      }
+    >
+      <p className="font-mono text-[0.625rem] uppercase tracking-[0.22em] text-gold mb-3">
+        {pay.discount}
+      </p>
+      <h3 className="font-display text-2xl md:text-3xl font-bold tracking-tight">
+        {pay.label}
+      </h3>
+
+      <div className="mt-5">
+        <p className="font-display text-3xl md:text-4xl font-light tracking-tight">
+          ${pay.price.toLocaleString("es-MX")}
+        </p>
+        <p className="font-mono text-[0.625rem] uppercase tracking-[0.22em] text-concrete mt-1">
+          MXN · pago único
+        </p>
+      </div>
+
+      {/* Savings highlight — destacado para reforzar el valor */}
+      <div className="mt-5 pt-4 border-t border-gold/30">
+        <p className="font-mono text-[0.6rem] uppercase tracking-[0.22em] text-concrete mb-1">
+          Ahorras
+        </p>
+        <p className="font-display text-2xl md:text-3xl font-bold tracking-tight text-gold">
+          ${savings.toLocaleString("es-MX")}
+        </p>
+        <p className="mt-2 font-mono text-[0.625rem] uppercase tracking-[0.22em] text-concrete/70 line-through">
+          Antes ${pay.originalPrice.toLocaleString("es-MX")}
+        </p>
+      </div>
+
+      <div className="mt-auto pt-6">
+        <Button
+          href={buildWhatsAppLink(WA_MESSAGES.membership(`anticipado ${pay.label}`))}
+          external
+          variant="link"
+          size="sm"
+        >
+          WhatsApp
+        </Button>
+      </div>
+    </div>
   );
 }

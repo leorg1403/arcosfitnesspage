@@ -150,13 +150,22 @@
   animation: goldPulse 7s var(--ease-expo) infinite;
 }
 
-/* ─── Subtle scroll hint ────────────────────────── */
+/* ─── Subtle scroll hint (chevron sólo) ─────────── */
 @keyframes scrollHint {
-  0%, 100% { transform: translateY(0); opacity: 0.4; }
+  0%, 100% { transform: translateY(0); opacity: 0.7; }
   50%      { transform: translateY(8px); opacity: 1; }
 }
 .animate-scroll-hint {
   animation: scrollHint 2.4s var(--ease-expo) infinite;
+}
+
+/* ─── Bounce suave para el botón de hint ────────── */
+@keyframes bounceSoft {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(6px); }
+}
+.animate-bounce-soft {
+  animation: bounceSoft 2s var(--ease-expo) infinite;
 }
 
 /* ─── Focus visible elegante ────────────────────── */

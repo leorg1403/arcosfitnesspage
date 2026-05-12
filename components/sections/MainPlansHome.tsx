@@ -31,7 +31,7 @@ export function MainPlansHome({
   const isHome = showAllLink;
 
   return (
-    <section className={cn("py-16 md:py-20", bg)}>
+    <section className={cn("pt-16 pb-8 md:pt-20 md:pb-10", bg)}>
       <div className="container-wide">
         {showHeader && (
           <div className="mb-10 md:mb-14 grid lg:grid-cols-12 gap-y-6 items-end">
@@ -86,16 +86,21 @@ export function MainPlansHome({
 
         {/* Hint de continuidad en /membresias: invita a seguir scrolleando */}
         {!showAllLink && (
-          <Reveal variants={fadeUp} delay={0.25} className="mt-12 md:mt-14">
-            <div className="flex flex-col items-center gap-3 text-center">
-              <p className="font-mono text-[0.65rem] uppercase tracking-[0.22em] text-concrete">
-                <span className="text-gold">—</span>&nbsp;&nbsp;Más opciones según tu ritmo
-              </p>
-              <ChevronDown
-                className="size-5 text-gold animate-scroll-hint"
-                strokeWidth={1.5}
-                aria-hidden
-              />
+          <Reveal variants={fadeUp} delay={0.25} className="mt-10">
+            <div className="flex justify-center">
+              <a
+                href="#mas-opciones"
+                className="group flex flex-col items-center gap-4"
+              >
+                <span className="font-display text-xl md:text-2xl font-semibold tracking-tight text-ink group-hover:text-gold transition-colors duration-500 text-center">
+                  Hay <span className="font-serif-italic text-gold">más planes</span> según tu ritmo
+                </span>
+                <ChevronDown
+                  className="size-9 text-gold animate-bounce-soft group-hover:animate-none group-hover:translate-y-1 transition-transform duration-500"
+                  strokeWidth={2.25}
+                  aria-hidden
+                />
+              </a>
             </div>
           </Reveal>
         )}

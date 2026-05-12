@@ -8,7 +8,7 @@ import { fadeUp } from "@/lib/motion";
 
 export function SegmentPlans() {
   return (
-    <section className="bg-bone py-16 md:py-20">
+    <section id="mas-opciones" className="bg-bone pt-10 pb-16 md:pt-12 md:pb-20 scroll-mt-24">
       <div className="container-wide">
         <Reveal variants={fadeUp} className="mb-10 md:mb-14">
           <Eyebrow tone="gold" withLine>
