@@ -20,6 +20,31 @@ You can start editing the page by modifying `app/page.tsx`. The page auto-update
 
 This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
 
+## Correo (Resend) — `info@arcosfitness.com`
+
+El remitente oficial del cliente es **info@arcosfitness.com**. En Resend no “creas” el buzón ahí: conectas el **dominio** del correo y luego envías con esa dirección como `From`.
+
+### Dominio que debes verificar en Resend
+
+- En Resend → **Domains** → **Add domain**: **`arcosfitness.com`** (la parte después de `@` en `info@arcosfitness.com`).
+- Cuando el dominio quede **Verified**, en `.env` / hosting puedes usar por ejemplo:
+  - `FROM_EMAIL=Arcos Fitness <info@arcosfitness.com>`
+  - `OWNER_EMAIL=info@arcosfitness.com` (u otra bandeja interna; ver `lib/email.ts`).
+
+### DNS sin tener la web hosteada
+
+Verificar el dominio en Resend **no depende** de dónde esté la página (Vercel, etc.). Los registros DKIM/SPF que pide Resend van en el **DNS del dominio** (donde estén apuntando las NS de `arcosfitness.com`: Cloudflare, GoDaddy, el registrador, etc.). Puedes hacerlo **antes** de publicar el sitio.
+
+### Pruebas sin dominio propio verificado
+
+Sí, con limitaciones típicas de Resend:
+
+1. Pon `RESEND_API_KEY` en `.env.local` (clave real, no placeholder).
+2. Deja el remitente por defecto del proyecto (`Arcos Fitness <onboarding@resend.dev>` en `lib/email.ts` si no defines `FROM_EMAIL`) **o** el que indique la documentación actual de Resend para entorno de prueba.
+3. Resend suele permitir envíos de prueba solo hacia **correos autorizados** (por ejemplo el email de tu cuenta o direcciones que añadas como verificadas en el dashboard). Revisa en el panel de Resend la sección de límites / “sandbox” del plan gratuito.
+
+Cuando `arcosfitness.com` esté verificado, cambia `FROM_EMAIL` a `info@arcosfitness.com` y sube las mismas variables al hosting.
+
 ## Learn More
 
 To learn more about Next.js, take a look at the following resources:

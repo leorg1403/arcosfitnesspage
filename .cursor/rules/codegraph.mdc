@@ -1,0 +1,14 @@
+---
+description: Usar Codegraph para explorar el código antes de editar
+alwaysApply: false
+---
+
+# Codegraph en este repo
+
+Consulta el índice MCP **antes** de buscar símbolos a mano:
+
+- `codegraph_context` — contexto de un área o tarea
+- `codegraph_search` — buscar símbolos por nombre
+- `codegraph_impact` — blast radius de un cambio
+
+Si el índice falla: `codegraph sync` en la raíz del proyecto.

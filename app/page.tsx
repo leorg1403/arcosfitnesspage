@@ -31,7 +31,7 @@ export default function HomePage() {
 
       {/* 04 · Hyrox (ink + foto B&N) */}
       <SinglePhotoSection
-        image="https://images.unsplash.com/photo-1599058917212-d750089bc07e?auto=format&fit=crop&w=2000&q=85"
+        image={HEROES.hyrox}
         alt="Hyrox box · Arcos Fitness"
         eyebrow="04 / Hyrox"
         headline={HOME.hyrox.headline}

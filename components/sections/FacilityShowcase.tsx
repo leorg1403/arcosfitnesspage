@@ -51,6 +51,11 @@ export function FacilityShowcase() {
               <h3 className="font-display text-2xl md:text-4xl text-paper font-semibold tracking-tight">
                 {f.title}
               </h3>
+              {"subtitle" in f && f.subtitle && (
+                <p className="mt-1 font-display text-lg md:text-2xl text-paper/80 font-medium tracking-tight">
+                  {f.subtitle}
+                </p>
+              )}
             </div>
           </ImageReveal>
         ))}

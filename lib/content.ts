@@ -25,9 +25,9 @@ export const SITE = {
 
 export const NAV = [
   { label: "Inicio", href: "/" },
-  { label: "Clases", href: "/clases-reservas" },
-  { label: "Hyrox", href: "/hyrox" },
   { label: "Membresías", href: "/membresias" },
+  { label: "Hyrox", href: "/hyrox" },
+  { label: "Clases", href: "/clases-reservas" },
 ];
 
 export const NAV_FOOTER = [
@@ -37,9 +37,9 @@ export const NAV_FOOTER = [
 
 /** Hero photos curados — dark, architectural, premium */
 export const HEROES = {
-  home: "/images/hero/home.jpg",
+  home: "/images/hero/hyrox.jpg",
   clases: "/images/hero/clases.jpg",
-  hyrox: "/images/hero/hyrox.jpg",
+  hyrox: "/images/hero/home.jpg",
   membresias: "https://images.unsplash.com/photo-1540497077202-7c8a3999166f?auto=format&fit=crop&w=2400&q=85",
   nosotros: "https://images.unsplash.com/photo-1571902943202-507ec2618e8f?auto=format&fit=crop&w=2400&q=85",
   ctaHome: "https://images.unsplash.com/photo-1599058917765-a780eda07a3e?auto=format&fit=crop&w=2400&q=85",
@@ -52,28 +52,29 @@ export const HEROES = {
 /** Facilities scroll — fotos verticales premium */
 export const FACILITIES = [
   {
-    title: "Sala de Pesas",
+    title: "Peso libre",
     image: "/images/facilities/sala-pesas.jpg",
   },
   {
-    title: "Hyrox Box",
+    title: "Hyrox",
+    subtitle: "Cardio/Funcional",
     image: "/images/hero/hyrox.jpg",
   },
   {
-    title: "Paraíso de Fierros",
+    title: "Peso Integrado",
     image: "/images/facilities/paraiso-fierros.jpg",
   },
   {
-    title: "Lounge & Bar",
-    image: "/images/facilities/lounge.jpg",
+    title: "Protein Lab",
+    image: "/images/facilities/protein-lab.jpg",
   },
 ];
 
 export const HOME = {
   hero: {
     eyebrow: "01 / Arcos Fitness Club",
-    headline: ["Aquí, todos", "te conocen."],
-    italicWord: ["te", "conocen."],
+    headline: ["Fitness", "redefinido"],
+    italicWord: "redefinido",
     cta: { label: "Reservar visita", action: "wa-visit" },
   },
   statement: {

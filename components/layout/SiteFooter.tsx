@@ -23,7 +23,7 @@ export function SiteFooter() {
               como volver a casa.
             </p>
             <p className="font-mono text-[0.625rem] uppercase tracking-[0.22em] text-gold leading-relaxed">
-              Funcional · Hyrox · Boxeo · Spa &amp; Recovery
+              Gym · Funcional · Hyrox · Protein Lab
             </p>
           </div>
 
@@ -97,7 +97,7 @@ export function SiteFooter() {
 
         <div className="flex items-center justify-between gap-6">
           <p className="font-mono text-[0.625rem] text-paper/40 uppercase tracking-[0.22em]">
-            © {new Date().getFullYear()} Arcos Fitness Club · Hecho en CDMX
+            © {new Date().getFullYear()} Arcos Fitness Club · Todos los derechos reservados®
           </p>
         </div>
       </div>

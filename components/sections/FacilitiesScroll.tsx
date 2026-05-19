@@ -57,18 +57,22 @@ export function FacilitiesScroll() {
 
 function FacilityCard({
   title,
+  subtitle,
   image,
   index,
 }: {
   title: string;
+  subtitle?: string;
   image: string;
   index: number;
 }) {
+  const alt = subtitle ? `${title} — ${subtitle}` : title;
+
   return (
     <div className="group relative shrink-0 w-full md:w-[36vw] lg:w-[28vw] aspect-[3/4] md:aspect-[3/4.5] bg-ink overflow-hidden">
       <Image
         src={image}
-        alt={title}
+        alt={alt}
         fill
         sizes="(min-width: 1024px) 28vw, 100vw"
         className="object-cover transition-transform duration-[1500ms] ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-105"
@@ -82,6 +86,11 @@ function FacilityCard({
           <h3 className="font-display text-xl md:text-2xl text-paper font-semibold tracking-tight">
             {title}
           </h3>
+          {subtitle && (
+            <p className="mt-0.5 font-display text-base md:text-lg text-paper/80 font-medium tracking-tight">
+              {subtitle}
+            </p>
+          )}
         </div>
       </div>
     </div>

@@ -1,0 +1,27 @@
+---
+description: Convenciones del sitio Arcos Fitness Club (Next.js)
+alwaysApply: true
+---
+
+# Arcos Fitness Club
+
+Sitio marketing + reservas en **Next.js** (ver `AGENTS.md` para APIs actuales del framework).
+
+## Estructura clave
+
+- **Copys y navegación**: `lib/content.ts` (`NAV`, `HOME`, `HEROES`, etc.)
+- **Clases y agenda**: `lib/classes.ts`
+- **Membresías / Stripe**: `lib/memberships.ts`, `app/api/checkout/`
+- **Layout global**: `components/layout/SiteHeader.tsx`, `SiteFooter.tsx`
+- **Secciones**: `components/sections/`
+
+## Convenciones
+
+- Textos de UI en español; tono editorial, sin marketing exagerado.
+- Orden del navbar: Inicio → Membresías → Hyrox → Clases.
+- WhatsApp: mensajes preformados en `lib/whatsapp.ts`.
+- Imágenes hero en `public/images/hero/` y facilities en `public/images/facilities/`.
+
+## Codegraph
+
+El proyecto usa Codegraph (`.codegraph/`). Tras cambios grandes, ejecutar `codegraph sync` si el índice MCP está desactualizado.
