@@ -147,12 +147,14 @@ export function ReservaForm({ cls }: Props) {
 
         <a
           href={buildWhatsAppLink(
-            WA_MESSAGES.classBooking({
-              name: cls.name,
-              day: DAY_LABELS[cls.day].toLowerCase(),
-              time: cls.time,
-              instructor: cls.instructor,
-            })
+            cls.category === "open-gym"
+              ? WA_MESSAGES.openGym(DAY_LABELS[cls.day].toLowerCase())
+              : WA_MESSAGES.classBooking({
+                  name: cls.name,
+                  day: DAY_LABELS[cls.day].toLowerCase(),
+                  time: cls.time,
+                  instructor: cls.instructor,
+                })
           )}
           target="_blank"
           rel="noopener noreferrer"

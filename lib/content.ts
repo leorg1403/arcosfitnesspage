@@ -2,6 +2,19 @@
  * Copys centralizados v2 — tono editorial corto, sin marketing.
  */
 
+import type { DayKey } from "@/lib/classes";
+
+/** Rango de horario del gym por día — usado en Open Gym */
+export const GYM_HOURS_BY_DAY: Record<DayKey, string> = {
+  lun: "6:00 — 22:00",
+  mar: "6:00 — 22:00",
+  mie: "6:00 — 22:00",
+  jue: "6:00 — 22:00",
+  vie: "6:00 — 21:00",
+  sab: "8:00 — 17:00",
+  dom: "9:00 — 15:00",
+};
+
 export const SITE = {
   name: "Arcos Fitness Club",
   shortName: "Arcos",
@@ -32,7 +45,6 @@ export const NAV = [
 
 export const NAV_FOOTER = [
   ...NAV,
-  { label: "Nosotros", href: "/nosotros" },
 ];
 
 /** Hero photos curados — dark, architectural, premium */
@@ -41,12 +53,10 @@ export const HEROES = {
   clases: "/images/hero/clases.jpg",
   hyrox: "/images/hero/home.jpg",
   membresias: "/images/hero/membresias.jpg",
-  nosotros: "https://images.unsplash.com/photo-1571902943202-507ec2618e8f?auto=format&fit=crop&w=2400&q=85",
   ctaHome: "https://images.unsplash.com/photo-1599058917765-a780eda07a3e?auto=format&fit=crop&w=2400&q=85",
   ctaClases: "/images/hero/clases.png",
   ctaHyrox: "https://images.unsplash.com/photo-1599058917212-d750089bc07e?auto=format&fit=crop&w=2400&q=85",
   ctaMembresias: "https://images.unsplash.com/photo-1534258936925-c58bed479fcb?auto=format&fit=crop&w=2400&q=85",
-  ctaNosotros: "https://images.unsplash.com/photo-1605296867424-35fc25c9212a?auto=format&fit=crop&w=2400&q=85",
 };
 
 /** Facilities scroll — fotos verticales premium */
@@ -84,7 +94,6 @@ export const HOME = {
   statement: {
     eyebrow: "01 / Filosofía",
     body: "Un club privado en Bosques de las Lomas. Para quienes vuelven no por obligación, sino porque acá se sienten en casa.",
-    link: { label: "Conocer Arcos", href: "/nosotros" },
   },
   hyrox: {
     number: "03",
@@ -204,43 +213,3 @@ export const MEMBRESIAS = {
   },
 };
 
-export const NOSOTROS = {
-  hero: {
-    eyebrow: "05 / Nosotros",
-    headline: ["Un paraíso", "de fierros."],
-    italicWord: "fierros.",
-  },
-  story: {
-    eyebrow: "Cómo nació",
-    body:
-      "Arcos nació en plena pandemia. Cuando el gimnasio al que asistía el fundador cerró sus puertas, el entrenamiento en casa lo obligó a regresar a las raíces del fitness — y a ver lo que faltaba en la mayoría de los establecimientos: el paquete completo. Los conceptos sólidos de gym databan de hace cinco décadas. Así surgió Arcos: un espacio que se sintiera como un gimnasio de verdad. No un club social. No una moda. Un paraíso de fierros, con la experiencia y la tecnología del presente.",
-    pillars: [
-      { eyebrow: "Filosofía", title: "Paraíso de fierros." },
-      { eyebrow: "Promesa", title: "El paquete completo." },
-      { eyebrow: "Resultado", title: "Cuerpos de antaño, hoy." },
-    ],
-  },
-  values: [
-    {
-      number: "01",
-      title: "Comunidad",
-      body: "Cada miembro es parte del club. Sin números, sin filas anónimas. El equipo conoce tu nombre.",
-    },
-    {
-      number: "02",
-      title: "Excelencia",
-      body: "Equipo top, coaches certificados, instalaciones impecables. Sin atajos en lo que importa.",
-    },
-    {
-      number: "03",
-      title: "Bienestar integral",
-      body: "Entrenar es una parte. Recuperar, dormir, comer y conectar también. Cuidamos todas.",
-    },
-  ],
-  cierre: {
-    eyebrow: "Visita",
-    headline: ["Te esperamos", "en Arcos."],
-    italicWord: "Arcos.",
-    cta: { label: "Agendar visita por WhatsApp", action: "wa-visit" },
-  },
-};
