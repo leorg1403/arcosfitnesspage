@@ -37,13 +37,13 @@ export const NAV_FOOTER = [
 
 /** Hero photos curados — dark, architectural, premium */
 export const HEROES = {
-  home: "/images/hero/hyrox.jpg",
+  home: "/images/hero/heroLOGO.jpeg",
   clases: "/images/hero/clases.jpg",
   hyrox: "/images/hero/home.jpg",
-  membresias: "https://images.unsplash.com/photo-1540497077202-7c8a3999166f?auto=format&fit=crop&w=2400&q=85",
+  membresias: "/images/hero/membresias.jpg",
   nosotros: "https://images.unsplash.com/photo-1571902943202-507ec2618e8f?auto=format&fit=crop&w=2400&q=85",
   ctaHome: "https://images.unsplash.com/photo-1599058917765-a780eda07a3e?auto=format&fit=crop&w=2400&q=85",
-  ctaClases: "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?auto=format&fit=crop&w=2400&q=85",
+  ctaClases: "/images/hero/clases.png",
   ctaHyrox: "https://images.unsplash.com/photo-1599058917212-d750089bc07e?auto=format&fit=crop&w=2400&q=85",
   ctaMembresias: "https://images.unsplash.com/photo-1534258936925-c58bed479fcb?auto=format&fit=crop&w=2400&q=85",
   ctaNosotros: "https://images.unsplash.com/photo-1605296867424-35fc25c9212a?auto=format&fit=crop&w=2400&q=85",
@@ -53,7 +53,7 @@ export const HEROES = {
 export const FACILITIES = [
   {
     title: "Peso libre",
-    image: "/images/facilities/sala-pesas.jpg",
+    image: "/images/facilities/peso-libre.png",
   },
   {
     title: "Hyrox",
@@ -62,35 +62,39 @@ export const FACILITIES = [
   },
   {
     title: "Peso Integrado",
-    image: "/images/facilities/paraiso-fierros.jpg",
+    image: "/images/facilities/peso-integrado.png",
   },
   {
     title: "Protein Lab",
     image: "/images/facilities/protein-lab.jpg",
   },
+  {
+    title: "Vestidores",
+    image: "/images/facilities/vestidores.png",
+  },
 ];
 
 export const HOME = {
   hero: {
-    eyebrow: "01 / Arcos Fitness Club",
+    eyebrow: "01 / Inicio",
     headline: ["Fitness", "redefinido"],
     italicWord: "redefinido",
     cta: { label: "Reservar visita", action: "wa-visit" },
   },
   statement: {
-    eyebrow: "05 / Filosofía",
+    eyebrow: "01 / Filosofía",
     body: "Un club privado en Bosques de las Lomas. Para quienes vuelven no por obligación, sino porque acá se sienten en casa.",
     link: { label: "Conocer Arcos", href: "/nosotros" },
   },
   hyrox: {
-    number: "04",
+    number: "03",
     headline: ["HYROX.", "Una sola meta."],
     italicWord: "meta.",
     body: "Único centro Hyrox certificado en la zona.",
     link: { label: "Conocer programa", href: "/hyrox" },
   },
   membresia: {
-    eyebrow: "04 / Membresías",
+    eyebrow: "02 / Membresías",
     headline: ["Tres formas", "de pertenecer."],
     italicWord: "pertenecer.",
     body: "Básico · Pro · Élite. Sin contratos.",
@@ -112,21 +116,21 @@ export const HOME = {
 
 export const CLASES = {
   hero: {
-    eyebrow: "02 / Agenda",
-    headline: ["Reserva", "tu próxima clase."],
-    italicWord: "clase.",
+    eyebrow: "04 / Clases",
+    headline: ["Reserva", "tu próxima sesión."],
+    italicWord: "sesión.",
   },
   cierre: {
     eyebrow: "Visita",
     headline: ["Empieza", "esta semana."],
     italicWord: "semana.",
-    cta: { label: "Hablar con un coach", action: "wa-generic" },
+    cta: { label: "Hablar con un especialista", action: "wa-generic" },
   },
 };
 
 export const HYROX = {
   hero: {
-    eyebrow: "03 / Programa Oficial",
+    eyebrow: "03 / Hyrox",
     display: "HYROX",
   },
   manifesto: [
@@ -166,9 +170,9 @@ export const HYROX = {
 
 export const MEMBRESIAS = {
   hero: {
-    eyebrow: "04 / Membresías",
-    headline: ["Tu ritmo,", "tu plan."],
-    italicWord: "plan.",
+    eyebrow: "02 / Membresías",
+    headline: ["Elige", "tu nivel."],
+    italicWord: "nivel.",
   },
   faqs: [
     {

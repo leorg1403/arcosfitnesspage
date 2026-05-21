@@ -17,7 +17,7 @@ export function SiteFooter() {
         <div className="grid gap-16 lg:grid-cols-12">
           {/* Brand */}
           <div className="lg:col-span-4 space-y-6">
-            <Logo light />
+            <Logo />
             <p className="text-sm text-paper/60 leading-relaxed max-w-sm">
               Un club privado en Bosques de las Lomas, CDMX. Donde entrenar se siente
               como volver a casa.

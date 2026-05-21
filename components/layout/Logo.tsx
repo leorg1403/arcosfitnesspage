@@ -1,34 +1,21 @@
+import Image from "next/image";
 import Link from "next/link";
 import { cn } from "@/lib/cn";
 
-export function Logo({
-  className,
-  light,
-}: {
-  className?: string;
-  light?: boolean;
-}) {
+export function Logo({ className }: { className?: string }) {
   return (
     <Link
       href="/"
       aria-label="Arcos Fitness Club — Inicio"
-      className={cn(
-        "group inline-flex items-baseline gap-1.5 transition-colors duration-500",
-        light ? "text-paper" : "text-ink",
-        className
-      )}
+      className={cn("group inline-flex items-center", className)}
     >
-      <span className="font-display text-xl tracking-[-0.02em] font-bold uppercase">
-        Arcos
-      </span>
-      <span
-        className={cn(
-          "font-mono text-[0.6rem] uppercase tracking-[0.18em] translate-y-[-0.35em] transition-colors duration-500",
-          light ? "text-paper/60 group-hover:text-gold" : "text-concrete group-hover:text-gold"
-        )}
-      >
-        Fitness Club
-      </span>
+      <Image
+        src="/images/logo-arcos.png"
+        alt="Arcos Fitness Club"
+        width={72}
+        height={72}
+        priority
+      />
     </Link>
   );
 }
