@@ -27,13 +27,13 @@ export default function HomePage() {
       <FacilitiesScroll />
 
       {/* 03 · Membresías (bone — contraste sutil con paper de Espacios) */}
-      <MainPlansHome number="03" showAllLink tone="bone" />
+      <MainPlansHome showAllLink tone="bone" />
 
       {/* 04 · Hyrox (ink + foto B&N) */}
       <SinglePhotoSection
         image={HEROES.hyrox}
         alt="Hyrox box · Arcos Fitness"
-        eyebrow="04 / Hyrox"
+        eyebrow="Hyrox"
         headline={HOME.hyrox.headline}
         italicWord={HOME.hyrox.italicWord}
         body={HOME.hyrox.body}
