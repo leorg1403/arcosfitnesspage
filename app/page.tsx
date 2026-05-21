@@ -49,7 +49,6 @@ export default function HomePage() {
         alt="Recepción Arcos Fitness Club"
         eyebrow={HOME.statement.eyebrow}
         body={HOME.statement.body}
-        link={HOME.statement.link}
         height="medium"
         align="left"
         monochrome

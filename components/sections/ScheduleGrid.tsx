@@ -13,10 +13,10 @@ import {
   type ClassItem,
   type DayKey,
 } from "@/lib/classes";
+import { GYM_HOURS_BY_DAY } from "@/lib/content";
 import { ReservaDrawer } from "./ReservaDrawer";
 import { FilterRail } from "./FilterRail";
 import { cn } from "@/lib/cn";
-import { easeExpo } from "@/lib/motion";
 
 type Props = {
   initialCategory?: ClassCategory | "all";
@@ -89,7 +89,7 @@ export function ScheduleGrid({
         {/* Hint editorial — affordance de "click para reservar" */}
         <div className="container-wide mb-6 md:mb-8">
           <p className="font-mono text-[0.65rem] uppercase tracking-[0.22em] text-gold">
-            —&nbsp;&nbsp;Selecciona una clase para reservar
+            —&nbsp;&nbsp;Selecciona una clase o sesión para reservar
           </p>
         </div>
 
@@ -154,18 +154,18 @@ export function ScheduleGrid({
                             exit={{ opacity: 0, y: -4, scale: 0.98 }}
                             transition={LAYOUT_TRANSITION}
                             className="group relative block text-left w-full -mx-2 px-2 py-1.5 rounded-sm cursor-pointer hover:bg-bone/60 transition-colors duration-300"
-                            aria-label={`Ver detalle y reservar ${cls.name} de ${cls.instructor}`}
+                            aria-label={`Ver detalle y reservar ${cls.name}${cls.category !== "open-gym" ? ` de ${cls.instructor}` : ""}`}
                           >
                             <div className="flex items-start justify-between gap-2">
                               <div className="flex-1 min-w-0">
                                 <p className="font-mono text-[0.6875rem] tracking-[0.18em] text-concrete group-hover:text-gold transition-colors">
-                                  {cls.time}
+                                  {cls.category === "open-gym" ? GYM_HOURS_BY_DAY[cls.day] : cls.time}
                                 </p>
                                 <p className="font-display text-base font-semibold tracking-tight mt-0.5 group-hover:text-gold transition-colors">
                                   {cls.name}
                                 </p>
                                 <p className="font-mono text-[0.65rem] uppercase tracking-[0.18em] text-concrete mt-0.5">
-                                  {cls.instructor}
+                                  {cls.category === "open-gym" ? "Acceso libre" : cls.instructor}
                                 </p>
                               </div>
                               <ArrowUpRight
@@ -234,15 +234,15 @@ export function ScheduleGrid({
                           className="group w-full text-left flex items-center gap-4 py-3 border-b border-line-soft/60 hover:border-gold/60 active:bg-bone/60 transition-colors"
                           aria-label={`Ver detalle y reservar ${cls.name}`}
                         >
-                        <span className="font-mono text-sm text-concrete shrink-0 w-14">
-                          {cls.time}
+                        <span className={cn("font-mono text-sm text-concrete shrink-0", cls.category === "open-gym" ? "w-[6.5rem]" : "w-14")}>
+                          {cls.category === "open-gym" ? GYM_HOURS_BY_DAY[cls.day] : cls.time}
                         </span>
                         <div className="flex-1 min-w-0">
                           <p className="font-display text-lg font-semibold tracking-tight">
                             {cls.name}
                           </p>
                           <p className="font-mono text-[0.65rem] uppercase tracking-[0.2em] text-concrete mt-1">
-                            {cls.instructor} · {cls.duration}min
+                            {cls.category === "open-gym" ? "Acceso libre" : `${cls.instructor} · ${cls.duration}min`}
                           </p>
                         </div>
                         <ArrowUpRight

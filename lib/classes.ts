@@ -1,4 +1,4 @@
-export type ClassCategory = "funcional" | "hyrox" | "boxeo";
+export type ClassCategory = "funcional" | "hyrox" | "boxeo" | "open-gym";
 
 export type DayKey = "lun" | "mar" | "mie" | "jue" | "vie" | "sab" | "dom";
 
@@ -19,6 +19,7 @@ export const CATEGORIES: { key: ClassCategory | "all"; label: string }[] = [
   { key: "funcional", label: "Funcional" },
   { key: "hyrox", label: "Hyrox" },
   { key: "boxeo", label: "Boxeo" },
+  { key: "open-gym", label: "Open Gym" },
 ];
 
 export type ClassItem = {
@@ -40,6 +41,7 @@ const IMG = {
   funcional: "/images/facilities/paraiso-fierros.jpg",
   hyrox: "/images/hero/home.jpg",
   boxeo: "https://images.unsplash.com/photo-1549719386-74dfcbf7dbed?auto=format&fit=crop&w=1600&q=80",
+  "open-gym": "/images/facilities/sala-pesas.jpg",
 } as const;
 
 /* ─── Instructores · placeholders hasta que el cliente confirme nombres ─── */
@@ -55,6 +57,8 @@ const DESC = {
     "Simulacro de las 8 estaciones Hyrox con running entre cada una. Para competidores y entusiastas.",
   boxeo:
     "Técnica de boxeo, footwork, costaleo y acondicionamiento físico.",
+  "open-gym":
+    "Acceso libre a todas las instalaciones del club durante el horario de operación.",
 } as const;
 
 export const CLASSES: ClassItem[] = [
@@ -92,6 +96,15 @@ export const CLASSES: ClassItem[] = [
   // ─── BOXEO ───
   { id: "box-jue-1", name: "Boxeo", category: "boxeo", day: "jue", time: "09:00", duration: 60, instructor: COACH_BOX, room: "Ring", level: "Todos los niveles", capacity: 10, description: DESC.boxeo, image: IMG.boxeo },
   { id: "box-sab-1", name: "Boxeo", category: "boxeo", day: "sab", time: "08:30", duration: 60, instructor: COACH_BOX, room: "Ring", level: "Todos los niveles", capacity: 10, description: DESC.boxeo, image: IMG.boxeo },
+
+  // ─── OPEN GYM · Lun a Dom · horario completo del gym ───
+  { id: "og-lun", name: "Open Gym", category: "open-gym", day: "lun", time: "06:00", duration: 960, instructor: "—", room: "Todas las áreas", level: "Todos los niveles", capacity: 50, description: DESC["open-gym"], image: IMG["open-gym"] },
+  { id: "og-mar", name: "Open Gym", category: "open-gym", day: "mar", time: "06:00", duration: 960, instructor: "—", room: "Todas las áreas", level: "Todos los niveles", capacity: 50, description: DESC["open-gym"], image: IMG["open-gym"] },
+  { id: "og-mie", name: "Open Gym", category: "open-gym", day: "mie", time: "06:00", duration: 960, instructor: "—", room: "Todas las áreas", level: "Todos los niveles", capacity: 50, description: DESC["open-gym"], image: IMG["open-gym"] },
+  { id: "og-jue", name: "Open Gym", category: "open-gym", day: "jue", time: "06:00", duration: 960, instructor: "—", room: "Todas las áreas", level: "Todos los niveles", capacity: 50, description: DESC["open-gym"], image: IMG["open-gym"] },
+  { id: "og-vie", name: "Open Gym", category: "open-gym", day: "vie", time: "06:00", duration: 900, instructor: "—", room: "Todas las áreas", level: "Todos los niveles", capacity: 50, description: DESC["open-gym"], image: IMG["open-gym"] },
+  { id: "og-sab", name: "Open Gym", category: "open-gym", day: "sab", time: "08:00", duration: 540, instructor: "—", room: "Todas las áreas", level: "Todos los niveles", capacity: 50, description: DESC["open-gym"], image: IMG["open-gym"] },
+  { id: "og-dom", name: "Open Gym", category: "open-gym", day: "dom", time: "09:00", duration: 360, instructor: "—", room: "Todas las áreas", level: "Todos los niveles", capacity: 50, description: DESC["open-gym"], image: IMG["open-gym"] },
 ];
 
 export function getClassesByDay(day: DayKey, category?: ClassCategory) {

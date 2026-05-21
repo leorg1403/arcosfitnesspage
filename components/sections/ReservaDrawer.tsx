@@ -4,6 +4,7 @@ import { useEffect } from "react";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import { type ClassItem, DAY_LABELS } from "@/lib/classes";
+import { GYM_HOURS_BY_DAY } from "@/lib/content";
 import { ReservaForm } from "./ReservaForm";
 import { easeExpo } from "@/lib/motion";
 
@@ -68,19 +69,27 @@ export function ReservaDrawer({ cls, open, onOpenChange }: Props) {
                 <div className="absolute inset-0 bg-gradient-to-t from-ink via-ink/40 to-ink/30" />
                 <div className="relative px-7 md:px-9 py-7 md:py-9">
                   <p className="font-mono text-[0.625rem] uppercase tracking-[0.22em] text-gold mb-4">
-                    Detalle de clase
+                    {cls.category === "open-gym" ? "Open Gym" : "Detalle de clase"}
                   </p>
                   <h2 className="font-display text-3xl md:text-4xl font-bold tracking-[-0.02em] leading-tight text-paper">
                     {cls.name}
                   </h2>
                   <p className="mt-3 font-mono text-[0.6875rem] uppercase tracking-[0.22em] text-gold">
-                    {DAY_LABELS[cls.day]} · {cls.time}
+                    {DAY_LABELS[cls.day]} · {cls.category === "open-gym" ? GYM_HOURS_BY_DAY[cls.day] : cls.time}
                   </p>
-                  <p className="mt-3 text-sm text-paper/70">
-                    con <span className="text-paper font-medium">{cls.instructor}</span>
-                  </p>
+                  {cls.category === "open-gym" ? (
+                    <p className="mt-3 text-sm text-paper/70">
+                      Acceso libre a todas las áreas
+                    </p>
+                  ) : (
+                    <p className="mt-3 text-sm text-paper/70">
+                      con <span className="text-paper font-medium">{cls.instructor}</span>
+                    </p>
+                  )}
                   <p className="text-sm text-paper/70">
-                    {cls.duration} min · {cls.room} · {cls.level}
+                    {cls.category === "open-gym"
+                      ? `Horario completo · ${cls.room} · ${cls.level}`
+                      : `${cls.duration} min · ${cls.room} · ${cls.level}`}
                   </p>
                 </div>
               </div>

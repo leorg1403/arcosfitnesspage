@@ -9,6 +9,5 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: `${BASE}/clases-reservas`, lastModified: now, changeFrequency: "weekly", priority: 0.9 },
     { url: `${BASE}/hyrox`, lastModified: now, changeFrequency: "weekly", priority: 0.9 },
     { url: `${BASE}/membresias`, lastModified: now, changeFrequency: "monthly", priority: 0.9 },
-    { url: `${BASE}/nosotros`, lastModified: now, changeFrequency: "monthly", priority: 0.7 },
   ];
 }
