@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { FullBleedHero } from "@/components/sections/FullBleedHero";
 import { FullBleedStatement } from "@/components/sections/FullBleedStatement";
-import { HyroxProgramTimeline } from "@/components/sections/HyroxProgramTimeline";
+
 import { HyroxSchedule } from "@/components/sections/HyroxSchedule";
 import { FullBleedCTA } from "@/components/sections/FullBleedCTA";
 import { HYROX, HEROES } from "@/lib/content";
@@ -35,8 +35,6 @@ export default function HyroxPage() {
         intensity="strong"
         variant="manifesto"
       />
-
-      <HyroxProgramTimeline />
 
       <HyroxSchedule />
 

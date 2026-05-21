@@ -49,7 +49,7 @@ export function SiteHeader() {
         )}
       >
         <div className="container-wide flex h-20 items-center justify-between">
-          <Logo light={lightMode} />
+          <Logo />
 
           <nav className="hidden lg:flex items-center gap-1">
             {NAV.map((item) => {
@@ -126,7 +126,7 @@ export function SiteHeader() {
             className="fixed inset-0 z-50 bg-ink text-paper"
           >
             <div className="container-app flex h-20 items-center justify-between">
-              <Logo light />
+              <Logo />
               <button
                 type="button"
                 className="inline-flex h-11 w-11 items-center justify-center -mr-2"
