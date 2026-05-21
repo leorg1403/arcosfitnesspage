@@ -13,8 +13,6 @@ import { fadeUp } from "@/lib/motion";
 type Props = {
   /** Mostrar el header con eyebrow + headline + cta a /membresias */
   showHeader?: boolean;
-  /** Número del eyebrow */
-  number?: string;
   /** Mostrar link "Ver todas las membresías" al final (home) */
   showAllLink?: boolean;
   tone?: "paper" | "bone";
@@ -22,7 +20,6 @@ type Props = {
 
 export function MainPlansHome({
   showHeader = true,
-  number = "04",
   showAllLink = true,
   tone = "paper",
 }: Props) {
@@ -45,7 +42,7 @@ export function MainPlansHome({
           <div className="mb-10 md:mb-14 grid lg:grid-cols-12 gap-y-6 items-end">
             <Reveal variants={fadeUp} className="lg:col-span-7">
               <Eyebrow tone="gold" withLine>
-                {number} / {isHome ? "Membresías" : "Las principales"}
+                {isHome ? "Membresías" : "Las principales"}
               </Eyebrow>
               {isHome ? (
                 <h2 className="mt-6 font-display text-headline tracking-[-0.03em] leading-[0.95] font-bold">

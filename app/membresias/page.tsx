@@ -29,7 +29,7 @@ export default function MembresiasPage() {
         height="tall"
       />
 
-      <MainPlansHome number="01" showAllLink={false} tone="paper" />
+      <MainPlansHome showAllLink={false} tone="paper" />
 
       <SegmentPlans />
 
@@ -40,7 +40,7 @@ export default function MembresiasPage() {
           <div className="grid lg:grid-cols-12 gap-10">
             <Reveal variants={fadeUp} className="lg:col-span-4">
               <Eyebrow tone="gold" withLine>
-                04 / Preguntas
+                Preguntas
               </Eyebrow>
               <h2 className="mt-5 font-display text-headline tracking-[-0.03em] leading-[0.95] font-bold">
                 Sin sorpresas.

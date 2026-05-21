@@ -18,7 +18,7 @@ export function FacilitiesScroll() {
       <div className="container-wide mb-12 md:mb-16">
         <Reveal>
           <Eyebrow tone="gold" withLine>
-            02 / Espacios
+            Espacios
           </Eyebrow>
         </Reveal>
       </div>

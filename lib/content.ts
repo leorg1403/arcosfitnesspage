@@ -66,8 +66,7 @@ export const FACILITIES = [
     image: "/images/facilities/peso-libre.png",
   },
   {
-    title: "Hyrox",
-    subtitle: "Cardio/Funcional",
+    title: "Cardio / Funcional",
     image: "/images/hero/hyrox.jpg",
   },
   {
@@ -76,7 +75,7 @@ export const FACILITIES = [
   },
   {
     title: "Protein Lab",
-    image: "/images/facilities/protein-lab.jpg",
+    image: "/images/facilities/protein-lab.png",
   },
   {
     title: "Vestidores",
@@ -92,7 +91,7 @@ export const HOME = {
     cta: { label: "Reservar visita", action: "wa-visit" },
   },
   statement: {
-    eyebrow: "01 / Filosofía",
+    eyebrow: "Filosofía",
     body: "Un club privado en Bosques de las Lomas. Para quienes vuelven no por obligación, sino porque acá se sienten en casa.",
   },
   hyrox: {
