@@ -6,7 +6,6 @@ import { PrePaymentTable } from "@/components/sections/PrePaymentTable";
 import { Accordion } from "@/components/ui/Accordion";
 import { Eyebrow } from "@/components/primitives/Eyebrow";
 import { Reveal } from "@/components/primitives/Reveal";
-import { FullBleedCTA } from "@/components/sections/FullBleedCTA";
 import { MEMBRESIAS, HEROES } from "@/lib/content";
 import { MEMBERSHIP_FAQS } from "@/lib/memberships";
 import { fadeUp } from "@/lib/motion";
@@ -21,12 +20,12 @@ export default function MembresiasPage() {
   return (
     <>
       <FullBleedHero
-        image={HEROES.membresias}
+        image={HEROES.home}
         alt="Lockers Arcos Fitness"
         eyebrow={MEMBRESIAS.hero.eyebrow}
         headline={MEMBRESIAS.hero.headline}
         italicWord={MEMBRESIAS.hero.italicWord}
-        height="tall"
+        height="full"
       />
 
       <MainPlansHome showAllLink={false} tone="paper" />
@@ -40,7 +39,7 @@ export default function MembresiasPage() {
           <div className="grid lg:grid-cols-12 gap-10">
             <Reveal variants={fadeUp} className="lg:col-span-4">
               <Eyebrow tone="gold" withLine>
-                Preguntas
+                Preguntas frecuentes
               </Eyebrow>
               <h2 className="mt-5 font-display text-headline tracking-[-0.03em] leading-[0.95] font-bold">
                 Sin sorpresas.
@@ -56,13 +55,6 @@ export default function MembresiasPage() {
         </div>
       </section>
 
-      <FullBleedCTA
-        image={HEROES.ctaMembresias}
-        eyebrow={MEMBRESIAS.cierre.eyebrow}
-        headline={MEMBRESIAS.cierre.headline}
-        italicWord={MEMBRESIAS.cierre.italicWord}
-        cta={MEMBRESIAS.cierre.cta}
-      />
     </>
   );
 }

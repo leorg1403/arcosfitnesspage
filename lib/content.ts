@@ -98,8 +98,8 @@ export const HOME = {
     number: "03",
     headline: ["HYROX.", "Una sola meta."],
     italicWord: "meta.",
-    body: "Único centro Hyrox certificado en la zona.",
-    link: { label: "Conocer programa", href: "/hyrox" },
+    body: "Todo lo que necesitas para tu primer Hyrox.",
+    link: { label: "Conocer más", href: "/hyrox" },
   },
   membresia: {
     eyebrow: "02 / Membresías",
@@ -118,7 +118,7 @@ export const HOME = {
     eyebrow: "Visita",
     headline: ["Conoce", "el club."],
     italicWord: "club.",
-    cta: { label: "Reservar por WhatsApp", action: "wa-visit" },
+    cta: { label: "Reserva tu visita", action: "/clases-reservas" },
   },
 };
 
@@ -172,7 +172,7 @@ export const HYROX = {
     eyebrow: "Empezar",
     headline: ["Tu primer", "Hyrox."],
     italicWord: "Hyrox.",
-    cta: { label: "Hablar con un coach Hyrox", action: "wa-hyrox" },
+    cta: { label: "Contacta a un especialista en Hyrox", action: "wa-hyrox" },
   },
 };
 
@@ -204,11 +204,5 @@ export const MEMBRESIAS = {
       a: "Sí, en cualquier momento. El cambio aplica desde el siguiente ciclo de cobro.",
     },
   ],
-  cierre: {
-    eyebrow: "Empezar",
-    headline: ["¿Aún", "decidiendo?"],
-    italicWord: "decidiendo?",
-    cta: { label: "Hablar con el dueño", action: "wa-generic" },
-  },
 };
 

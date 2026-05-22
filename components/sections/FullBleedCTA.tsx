@@ -21,12 +21,13 @@ function resolveHref(action?: Action) {
 
 type Props = {
   image: string;
-  eyebrow: string;
+  eyebrow?: string;
   headline: string[];
   italicWord?: string | string[];
   cta: { label: string; action: Action };
   /** Tamaño del headline. Default "display" (gigante). Usar "headline" si hay palabras largas */
   size?: "display" | "headline";
+  monochrome?: boolean;
 };
 
 /**
@@ -39,6 +40,7 @@ export function FullBleedCTA({
   italicWord,
   cta,
   size = "display",
+  monochrome,
 }: Props) {
   const [ref, shown] = useInViewSafe<HTMLDivElement>();
 
@@ -47,7 +49,7 @@ export function FullBleedCTA({
       <ParallaxImage
         src={image}
         alt=""
-        className="absolute inset-0 h-full w-full"
+        className={`absolute inset-0 h-full w-full${monochrome ? " grayscale" : ""}`}
         sizes="100vw"
         strength={0.15}
       />
@@ -61,11 +63,13 @@ export function FullBleedCTA({
         className="container-wide absolute inset-x-0 bottom-0 pb-16 md:pb-24"
       >
         <div className="max-w-3xl">
-          <motion.div variants={fadeUp}>
-            <Eyebrow tone="gold" withLine>
-              {eyebrow}
-            </Eyebrow>
-          </motion.div>
+          {eyebrow && (
+            <motion.div variants={fadeUp}>
+              <Eyebrow tone="gold" withLine>
+                {eyebrow}
+              </Eyebrow>
+            </motion.div>
+          )}
 
           <div className="mt-6">
             <SplitHeadline
@@ -79,7 +83,7 @@ export function FullBleedCTA({
           <motion.div variants={fadeUp} className="mt-10">
             <Button
               href={resolveHref(cta.action)}
-              external
+              external={!cta.action.startsWith("/")}
               variant="linkLight"
               size="lg"
             >

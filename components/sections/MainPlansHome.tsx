@@ -41,9 +41,11 @@ export function MainPlansHome({
         {showHeader && (
           <div className="mb-10 md:mb-14 grid lg:grid-cols-12 gap-y-6 items-end">
             <Reveal variants={fadeUp} className="lg:col-span-7">
-              <Eyebrow tone="gold" withLine>
-                {isHome ? "Membresías" : "Las principales"}
-              </Eyebrow>
+              {isHome && (
+                <Eyebrow tone="gold" withLine>
+                  Membresías
+                </Eyebrow>
+              )}
               {isHome ? (
                 <h2 className="mt-6 font-display text-headline tracking-[-0.03em] leading-[0.95] font-bold">
                   Tu llave
@@ -51,10 +53,10 @@ export function MainPlansHome({
                   al <span className="font-serif-italic text-gold">club</span>.
                 </h2>
               ) : (
-                <h2 className="mt-6 font-display text-headline tracking-[-0.03em] leading-[0.95] font-bold">
-                  Empieza por
+                <h2 className="font-display text-headline tracking-[-0.03em] leading-[0.95] font-bold">
+                  Conoce las
                   <br />
-                  las <span className="font-serif-italic text-gold">esenciales</span>.
+                  <span className="font-serif-italic text-gold">principales</span>.
                 </h2>
               )}
             </Reveal>
@@ -69,13 +71,12 @@ export function MainPlansHome({
         )}
 
         <Reveal variants={fadeUp} delay={0.1}>
-          <div className="grid md:grid-cols-2 relative border-t border-line-soft">
+          <div className="grid md:grid-cols-2 gap-4 md:gap-6">
             {MAIN_PLANS.map((plan, i) => (
               <PlanCard
                 key={plan.id}
                 plan={plan}
                 index={i}
-                showDivider={i === 0}
                 onBuy={() => openCheckout(plan)}
               />
             ))}
@@ -87,10 +88,10 @@ export function MainPlansHome({
             <div className="flex flex-col items-center gap-6">
               <div className="text-center max-w-2xl">
                 <p className="font-mono text-xs md:text-sm uppercase tracking-[0.18em] text-concrete">
-                  ¿Buscas algo a tu medida?
+                  ¿Buscas algo diferente?
                 </p>
                 <p className="mt-4 font-display text-2xl md:text-3xl font-semibold tracking-tight text-ink">
-                  Hay un plan para <span className="font-serif-italic text-gold">cada vida</span>.
+                  Hay un plan para cada <span className="font-serif-italic text-gold">estilo de vida</span>.
                 </p>
               </div>
               <Button href="/membresias" variant="hairline" size="lg">
@@ -130,34 +131,20 @@ export function MainPlansHome({
 function PlanCard({
   plan,
   index,
-  showDivider,
   onBuy,
 }: {
   plan: Plan;
   index: number;
-  showDivider: boolean;
   onBuy: () => void;
 }) {
   const isGold = plan.highlight;
   return (
     <div
       className={cn(
-        "relative p-7 md:p-9 lg:p-10",
-        showDivider && "md:border-r border-gold/30",
-        "border-b md:border-b-0 border-line-soft last:border-b-0"
+        "relative p-7 md:p-9 lg:p-10 border-2 transition-all duration-300 hover:scale-[1.02] hover:shadow-lg hover:border-gold",
+        isGold ? "border-gold/30" : "border-line-soft"
       )}
     >
-      {/* Top label */}
-      <div className="flex items-baseline justify-between mb-3">
-        <span className="font-mono text-[0.625rem] uppercase tracking-[0.22em] text-concrete">
-          0{index + 1} / 02
-        </span>
-        {isGold && (
-          <span className="font-mono text-[0.625rem] uppercase tracking-[0.22em] text-gold">
-            — Con programa personalizado —
-          </span>
-        )}
-      </div>
 
       <h3
         className={cn(

@@ -12,6 +12,7 @@ export default function HomePage() {
       {/* 01 · Hero (ink + foto) */}
       <FullBleedHero
         image={HEROES.home}
+        video="/videos/hero-membresias.mp4"
         alt="Arcos Fitness Club — Bosques de las Lomas"
         eyebrow={HOME.hero.eyebrow}
         headline={HOME.hero.headline}
@@ -33,7 +34,6 @@ export default function HomePage() {
       <SinglePhotoSection
         image={HEROES.hyrox}
         alt="Hyrox box · Arcos Fitness"
-        eyebrow="Hyrox"
         headline={HOME.hyrox.headline}
         italicWord={HOME.hyrox.italicWord}
         body={HOME.hyrox.body}
@@ -47,7 +47,6 @@ export default function HomePage() {
       <FullBleedStatement
         image="/images/filosofia-bg.jpeg"
         alt="Recepción Arcos Fitness Club"
-        eyebrow={HOME.statement.eyebrow}
         body={HOME.statement.body}
         height="medium"
         align="left"
@@ -57,7 +56,6 @@ export default function HomePage() {
       {/* 06 · Cierre (ink + foto) */}
       <FullBleedCTA
         image={HEROES.ctaHome}
-        eyebrow={HOME.cierre.eyebrow}
         headline={HOME.cierre.headline}
         italicWord={HOME.cierre.italicWord}
         cta={HOME.cierre.cta}

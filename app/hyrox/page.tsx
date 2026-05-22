@@ -40,10 +40,10 @@ export default function HyroxPage() {
 
       <FullBleedCTA
         image={HEROES.ctaHyrox}
-        eyebrow={HYROX.cierre.eyebrow}
         headline={HYROX.cierre.headline}
         italicWord={HYROX.cierre.italicWord}
         cta={HYROX.cierre.cta}
+        monochrome
       />
     </>
   );

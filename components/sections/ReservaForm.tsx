@@ -161,7 +161,7 @@ export function ReservaForm({ cls }: Props) {
           className="flex items-center justify-center gap-2 text-paper/55 hover:text-gold text-xs font-mono uppercase tracking-[0.18em] transition-colors py-1"
         >
           <WhatsappIcon className="size-3.5" />
-          Contactar con un asesor
+          Contáctanos
         </a>
 
         <p className="font-mono text-[0.625rem] uppercase tracking-[0.22em] text-concrete text-center pt-1">

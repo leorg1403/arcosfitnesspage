@@ -20,10 +20,7 @@ export function SegmentPlans() {
     <section id="mas-opciones" className="bg-bone pt-10 pb-16 md:pt-12 md:pb-20 scroll-mt-24">
       <div className="container-wide">
         <Reveal variants={fadeUp} className="mb-10 md:mb-14">
-          <Eyebrow tone="gold" withLine>
-            02 / Más opciones
-          </Eyebrow>
-          <h2 className="mt-5 font-display text-headline tracking-[-0.03em] leading-[0.95] font-bold max-w-3xl">
+          <h2 className="font-display text-headline tracking-[-0.03em] leading-[0.95] font-bold max-w-3xl">
             Para cada <span className="font-serif-italic text-gold">ritmo</span>.
           </h2>
         </Reveal>
@@ -45,7 +42,7 @@ export function SegmentPlans() {
 function SegmentCard({ plan, onBuy }: { plan: Plan; onBuy: () => void }) {
   const isDropIn = plan.periodicity === "unico";
   return (
-    <div className="bg-bone p-7 md:p-8 flex flex-col">
+    <div className="bg-bone p-7 md:p-8 flex flex-col border border-transparent transition-all duration-300 hover:scale-[1.02] hover:shadow-lg hover:border-gold">
       <h3 className="font-display text-2xl md:text-3xl font-bold tracking-[-0.02em]">
         {plan.name}
       </h3>

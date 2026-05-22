@@ -28,6 +28,8 @@ type Props = {
   align?: "bottom-left" | "bottom-center";
   /** Variante con foto en blanco y negro */
   monochrome?: boolean;
+  /** Video de fondo (reemplaza la imagen) */
+  video?: string;
 };
 
 const heightMap = {
@@ -47,6 +49,7 @@ export function FullBleedHero({
   displaySize = "display",
   align = "bottom-left",
   monochrome = false,
+  video,
 }: Props) {
   return (
     <section
@@ -55,7 +58,7 @@ export function FullBleedHero({
         heightMap[height]
       )}
     >
-      {/* Image with parallax */}
+      {/* Background media with reveal animation */}
       <motion.div
         initial={{ clipPath: "inset(20% 0 0 0)", opacity: 0 }}
         animate={{
@@ -65,16 +68,32 @@ export function FullBleedHero({
         }}
         className="absolute inset-0"
       >
-        <ParallaxImage
-          src={image}
-          alt={alt}
-          className="h-full w-full"
-          imgClassName={cn(monochrome && "grayscale")}
-          priority
-          sizes="100vw"
-          strength={0.2}
-          withZoom
-        />
+        {video ? (
+          <video
+            autoPlay
+            muted
+            loop
+            playsInline
+            preload="metadata"
+            className={cn(
+              "absolute inset-0 h-full w-full object-cover",
+              monochrome && "grayscale"
+            )}
+          >
+            <source src={video} type="video/mp4" />
+          </video>
+        ) : (
+          <ParallaxImage
+            src={image}
+            alt={alt}
+            className="h-full w-full"
+            imgClassName={cn(monochrome && "grayscale")}
+            priority
+            sizes="100vw"
+            strength={0.2}
+            withZoom
+          />
+        )}
         {/* Gradient overlay for text legibility */}
         <div className="absolute inset-0 bg-gradient-to-b from-ink/40 via-ink/10 to-ink/85 pointer-events-none" />
         <div className="absolute inset-y-0 left-0 w-1/2 bg-gradient-to-r from-ink/40 to-transparent pointer-events-none" />

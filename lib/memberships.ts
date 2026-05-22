@@ -132,10 +132,10 @@ export type PrePayment = {
 };
 
 export const PRE_PAYMENTS: PrePayment[] = [
-  { id: "anual",        label: "Anual",       price: 26880, originalPrice: 33600, discount: "20% off" },
-  { id: "semestral",    label: "Semestral",   price: 14280, originalPrice: 16800, discount: "15% off" },
-  { id: "cuatrimestre", label: "Cuatrimestre", price:  9800, originalPrice: 11200, discount: "12.5% off" },
   { id: "trimestre",    label: "Trimestre",    price:  7560, originalPrice:  8400, discount: "10% off" },
+  { id: "cuatrimestre", label: "Cuatrimestre", price:  9800, originalPrice: 11200, discount: "12.5% off" },
+  { id: "semestral",    label: "Semestral",   price: 14280, originalPrice: 16800, discount: "15% off" },
+  { id: "anual",        label: "Anual",       price: 26880, originalPrice: 33600, discount: "20% off" },
 ];
 
 export const MEMBERSHIP_FAQS = [

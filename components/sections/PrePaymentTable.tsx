@@ -21,10 +21,7 @@ export function PrePaymentTable() {
       <div className="container-wide">
         <div className="grid lg:grid-cols-12 gap-y-6 mb-10 md:mb-14 items-end">
           <Reveal variants={fadeUp} className="lg:col-span-7">
-            <Eyebrow tone="gold" withLine>
-              03 / Pagos por adelantado
-            </Eyebrow>
-            <h2 className="mt-5 font-display text-headline tracking-[-0.03em] leading-[0.95] font-bold">
+            <h2 className="font-display text-headline tracking-[-0.03em] leading-[0.95] font-bold">
               Paga adelantado,
               <br />
               <span className="font-serif-italic text-gold">ahorra más</span>.
@@ -38,13 +35,11 @@ export function PrePaymentTable() {
         </div>
 
         <Reveal variants={fadeUp}>
-          <div className="grid md:grid-cols-4 border-y border-line-soft">
-            {PRE_PAYMENTS.map((pay, i) => (
+          <div className="grid md:grid-cols-4 gap-4 md:gap-6">
+            {PRE_PAYMENTS.map((pay) => (
               <PrePaymentCard
                 key={pay.id}
                 pay={pay}
-                index={i}
-                total={PRE_PAYMENTS.length}
                 onBuy={() => openCheckout(pay)}
               />
             ))}
@@ -59,23 +54,15 @@ export function PrePaymentTable() {
 
 function PrePaymentCard({
   pay,
-  index,
-  total,
   onBuy,
 }: {
   pay: PrePayment;
-  index: number;
-  total: number;
   onBuy: () => void;
 }) {
   const savings = pay.originalPrice - pay.price;
-  const isLast = index === total - 1;
   return (
     <div
-      className={
-        "p-7 md:p-8 flex flex-col" +
-        (!isLast ? " md:border-r border-line-soft border-b md:border-b-0" : "")
-      }
+      className="p-7 md:p-8 flex flex-col border border-line-soft transition-all duration-300 hover:scale-[1.02] hover:shadow-lg hover:border-gold"
     >
       <p className="font-mono text-[0.625rem] uppercase tracking-[0.22em] text-gold mb-3">
         {pay.discount}

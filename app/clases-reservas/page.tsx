@@ -20,7 +20,7 @@ export default function ClasesReservasPage() {
         eyebrow={CLASES.hero.eyebrow}
         headline={CLASES.hero.headline}
         italicWord={CLASES.hero.italicWord}
-        height="tall"
+        height="full"
       />
 
       <ScheduleGrid />
@@ -29,7 +29,6 @@ export default function ClasesReservasPage() {
 
       <FullBleedCTA
         image={HEROES.ctaClases}
-        eyebrow={CLASES.cierre.eyebrow}
         headline={CLASES.cierre.headline}
         italicWord={CLASES.cierre.italicWord}
         cta={CLASES.cierre.cta}
