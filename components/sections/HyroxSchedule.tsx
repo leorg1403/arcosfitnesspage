@@ -9,7 +9,7 @@ export function HyroxSchedule() {
       <div className="container-wide pt-24 md:pt-32 pb-12">
         <Reveal variants={fadeUp}>
           <Eyebrow tone="gold" withLine>
-            04 / Agenda Hyrox
+            Calendario Hyrox
           </Eyebrow>
           <h2 className="mt-8 font-display text-headline tracking-[-0.03em] leading-[0.95] font-bold max-w-3xl">
             Reserva tu sesión.

@@ -26,7 +26,7 @@ export default function HyroxPage() {
       />
 
       <FullBleedStatement
-        image="https://images.unsplash.com/photo-1517836357463-d25dfeac3438?auto=format&fit=crop&w=2400&q=85"
+        image="/images/hyrox-statement.jpeg"
         alt="Hyrox race day"
         body={HYROX.manifesto}
         height="tall"

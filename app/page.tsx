@@ -45,7 +45,7 @@ export default function HomePage() {
 
       {/* 05 · Filosofía (ink + foto full-bleed) */}
       <FullBleedStatement
-        image="https://images.unsplash.com/photo-1571902943202-507ec2618e8f?auto=format&fit=crop&w=2400&q=85"
+        image="/images/filosofia-bg.jpeg"
         alt="Recepción Arcos Fitness Club"
         eyebrow={HOME.statement.eyebrow}
         body={HOME.statement.body}

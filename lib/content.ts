@@ -53,9 +53,9 @@ export const HEROES = {
   clases: "/images/hero/clases.jpg",
   hyrox: "/images/hero/home.jpg",
   membresias: "/images/hero/membresias.jpg",
-  ctaHome: "https://images.unsplash.com/photo-1599058917765-a780eda07a3e?auto=format&fit=crop&w=2400&q=85",
+  ctaHome: "/images/visita-bg.jpeg",
   ctaClases: "/images/hero/clases.png",
-  ctaHyrox: "https://images.unsplash.com/photo-1599058917212-d750089bc07e?auto=format&fit=crop&w=2400&q=85",
+  ctaHyrox: "/images/hyrox-cta.jpeg",
   ctaMembresias: "https://images.unsplash.com/photo-1534258936925-c58bed479fcb?auto=format&fit=crop&w=2400&q=85",
 };
 
