@@ -125,7 +125,7 @@ export const TIME_SLOTS = Array.from(
 
 /* Instructores únicos · placeholders hasta confirmación */
 export const INSTRUCTORS = [
-  { name: COACH_FUNC, specialty: "Entrenamiento Funcional", image: "https://images.unsplash.com/photo-1583468982228-19f19164aee2?auto=format&fit=crop&w=800&q=80" },
-  { name: COACH_HYROX, specialty: "Hyrox & Endurance", image: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?auto=format&fit=crop&w=800&q=80" },
-  { name: COACH_BOX, specialty: "Boxeo", image: "https://images.unsplash.com/photo-1581089778245-3ce67677f718?auto=format&fit=crop&w=800&q=80" },
+  { name: "Daniel Azuara", specialty: "Atleta Híbrido de Alto Rendimiento", image: "/images/team/daniel-azuara.avif" },
+  { name: "Raúl Victoria", specialty: "Embajador Certificado de Hyrox", image: "/images/team/raul-victoria.avif" },
+  { name: "Luis Fernando Azuara", specialty: "Embajador de Hyrox", image: "/images/team/luis-fernando-azuara.avif" },
 ];
