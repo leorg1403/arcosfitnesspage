@@ -5,16 +5,26 @@ import { PLANS, PRE_PAYMENTS } from "@/lib/memberships";
 
 export const runtime = "nodejs";
 
+const CustomerSchema = z.object({
+  name: z.string().min(2).max(80),
+  email: z.string().email(),
+  phone: z.string().max(40),
+});
+
+const ClassMetaSchema = z.object({
+  className: z.string().min(1),
+  classDay: z.string().min(1),
+  classTime: z.string().min(1),
+  classInstructor: z.string().min(1),
+  price: z.number().int().positive(),
+});
+
 const CheckoutSchema = z.object({
-  // Para planes mensuales: "all-access", "all-access-gold", "ejecutiva", etc.
-  // Para anticipados: "anual", "semestral", "cuatrimestre", "trimestre"
   itemId: z.string().min(1),
-  itemKind: z.enum(["plan", "prepayment"]),
-  customer: z.object({
-    name: z.string().min(2).max(80),
-    email: z.string().email(),
-    phone: z.string().max(40),
-  }),
+  itemKind: z.enum(["plan", "prepayment", "class"]),
+  customer: CustomerSchema,
+  // Solo para itemKind === "class"
+  classMeta: ClassMetaSchema.optional(),
 });
 
 export async function POST(req: NextRequest) {
@@ -27,14 +37,11 @@ export async function POST(req: NextRequest) {
     }
 
     const body = await req.json();
-    const { itemId, itemKind, customer } = CheckoutSchema.parse(body);
+    const { itemId, itemKind, customer, classMeta } = CheckoutSchema.parse(body);
 
-    const baseUrl =
-      process.env.NEXT_PUBLIC_SITE_URL || `${req.nextUrl.origin}`;
-
-    // Resolver line items según el tipo
     let lineItems;
     let itemName: string;
+    let extraMeta: Record<string, string> = {};
 
     if (itemKind === "plan") {
       const plan = PLANS.find((p) => p.id === itemId);
@@ -50,15 +57,12 @@ export async function POST(req: NextRequest) {
           inline: {
             name: `Membresía ${plan.name}`,
             description: plan.tagline,
-            amount: plan.price * 100, // MXN → centavos
+            amount: plan.price * 100,
             currency: "mxn",
             ...(plan.periodicity === "mensual" && { recurring: "month" as const }),
           },
         },
       ];
-      // Si tiene inscripción, agregar como segundo item one-time (solo para mensuales).
-      // Para que coexistan recurring + one-time se necesita un setup más avanzado;
-      // por ahora si tiene inscripción la metemos en el primer mes.
       if (plan.inscripcion && plan.periodicity === "mensual") {
         lineItems.push({
           inline: {
@@ -69,8 +73,8 @@ export async function POST(req: NextRequest) {
           },
         });
       }
-    } else {
-      // prepayment
+
+    } else if (itemKind === "prepayment") {
       const prePayment = PRE_PAYMENTS.find((p) => p.id === itemId);
       if (!prePayment) {
         return NextResponse.json(
@@ -89,6 +93,35 @@ export async function POST(req: NextRequest) {
           },
         },
       ];
+
+    } else {
+      // class
+      if (!classMeta) {
+        return NextResponse.json(
+          { ok: false, error: "classMeta requerido para itemKind=class" },
+          { status: 400 }
+        );
+      }
+      itemName = `${classMeta.className} · ${classMeta.classDay} ${classMeta.classTime}`;
+      lineItems = [
+        {
+          inline: {
+            name: itemName,
+            description:
+              classMeta.classInstructor !== "—"
+                ? classMeta.classInstructor
+                : "Acceso libre",
+            amount: classMeta.price * 100,
+            currency: "mxn",
+          },
+        },
+      ];
+      extraMeta = {
+        className: classMeta.className,
+        classDay: classMeta.classDay,
+        classTime: classMeta.classTime,
+        classInstructor: classMeta.classInstructor,
+      };
     }
 
     const session = await createEmbeddedCheckoutSession({
@@ -98,13 +131,14 @@ export async function POST(req: NextRequest) {
         itemId,
         itemKind,
         itemName,
+        ...extraMeta,
       },
-      returnUrl: `${baseUrl}/checkout/return`,
     });
 
     return NextResponse.json({
       ok: true,
       clientSecret: session.client_secret,
+      sessionId: session.id,
     });
   } catch (err) {
     if (err instanceof z.ZodError) {
@@ -113,7 +147,6 @@ export async function POST(req: NextRequest) {
         { status: 400 }
       );
     }
-    // eslint-disable-next-line no-console
     console.error("[/api/checkout] error:", err);
     return NextResponse.json(
       { ok: false, error: err instanceof Error ? err.message : "Error" },

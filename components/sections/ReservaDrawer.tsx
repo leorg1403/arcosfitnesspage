@@ -17,9 +17,7 @@ type Props = {
 export function ReservaDrawer({ cls, open, onOpenChange }: Props) {
   useEffect(() => {
     document.body.style.overflow = open ? "hidden" : "";
-    return () => {
-      document.body.style.overflow = "";
-    };
+    return () => { document.body.style.overflow = ""; };
   }, [open]);
 
   return (
@@ -40,10 +38,10 @@ export function ReservaDrawer({ cls, open, onOpenChange }: Props) {
             animate={{ y: 0, opacity: 1, scale: 1 }}
             exit={{ y: 20, opacity: 0, scale: 0.98 }}
             transition={{ duration: 0.4, ease: easeExpo }}
-            className="relative bg-graphite text-paper w-full max-w-4xl max-h-[92vh] overflow-y-auto md:overflow-hidden"
+            className="relative bg-graphite text-paper w-full max-w-4xl max-h-[92vh] overflow-hidden"
             onClick={(e) => e.stopPropagation()}
           >
-            {/* Close button — X simple con hover rotation */}
+            {/* Close button */}
             <button
               onClick={() => onOpenChange(false)}
               aria-label="Cerrar"
@@ -55,7 +53,6 @@ export function ReservaDrawer({ cls, open, onOpenChange }: Props) {
               </span>
             </button>
 
-            {/* Layout: foto+meta a la izquierda, form a la derecha (en desktop) */}
             <div className="grid md:grid-cols-2">
               {/* Photo + meta column */}
               <div className="relative bg-ink min-h-[220px] md:min-h-[560px] flex flex-col justify-end overflow-hidden">
@@ -78,25 +75,21 @@ export function ReservaDrawer({ cls, open, onOpenChange }: Props) {
                     {DAY_LABELS[cls.day]} · {cls.category === "open-gym" ? GYM_HOURS_BY_DAY[cls.day] : cls.time}
                   </p>
                   {cls.category === "open-gym" ? (
-                    <p className="mt-3 text-sm text-paper/70">
-                      Acceso libre a todas las áreas
-                    </p>
+                    <p className="mt-3 text-sm text-paper/70">Acceso libre a todas las áreas</p>
                   ) : (
                     <p className="mt-3 text-sm text-paper/70">
-                      con <span className="text-paper font-medium">{cls.instructor}</span>
+                      {cls.duration} min · {cls.room} · {cls.level}
                     </p>
                   )}
-                  <p className="text-sm text-paper/70">
-                    {cls.category === "open-gym"
-                      ? `Horario completo · ${cls.room} · ${cls.level}`
-                      : `${cls.duration} min · ${cls.room} · ${cls.level}`}
-                  </p>
                 </div>
               </div>
 
-              {/* Form column */}
-              <div className="md:overflow-y-auto md:max-h-[92vh]">
-                <ReservaForm cls={cls} onSuccess={() => {}} />
+              {/* Form column — tamaño fijo; ReservaForm maneja internamente form → payment → confirmed */}
+              <div className="overflow-y-auto md:max-h-[92vh] md:h-[560px]">
+                <ReservaForm
+                  key={cls.id}
+                  cls={cls}
+                />
               </div>
             </div>
           </motion.div>

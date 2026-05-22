@@ -40,14 +40,12 @@ export function OwnerPurchaseEmail(p: OwnerPurchaseProps) {
           {p.customerName}
         </Text>
         <Text className="text-[#0A0A0A] text-sm m-0">
-          📧{" "}
           <a href={`mailto:${p.customerEmail}`} style={{ color: "#0A0A0A" }}>
             {p.customerEmail}
           </a>
         </Text>
         {p.customerPhone && (
           <Text className="text-[#0A0A0A] text-sm mt-1 mb-0">
-            📱{" "}
             <a
               href={`https://wa.me/52${p.customerPhone.replace(/\D/g, "")}`}
               style={{ color: "#0A0A0A" }}

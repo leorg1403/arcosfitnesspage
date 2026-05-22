@@ -1,5 +1,13 @@
 export type ClassCategory = "funcional" | "hyrox" | "boxeo" | "open-gym";
 
+/** Precios por sesión individual (MXN) */
+export const CLASS_PRICE = 380;
+export const OPEN_GYM_PRICE = 300;
+
+export function getClassPrice(cls: { category: ClassCategory }): number {
+  return cls.category === "open-gym" ? OPEN_GYM_PRICE : CLASS_PRICE;
+}
+
 export type DayKey = "lun" | "mar" | "mie" | "jue" | "vie" | "sab" | "dom";
 
 export const DAY_LABELS: Record<DayKey, string> = {

@@ -45,13 +45,12 @@ export type CreateCheckoutOpts = {
     phone?: string;
   };
   metadata: Record<string, string>;
-  /** URL de retorno post-pago. Stripe agrega ?session_id={CHECKOUT_SESSION_ID} */
-  returnUrl: string;
 };
 
 /**
  * Crea una Checkout Session embebida (sin redirect).
- * El frontend monta <EmbeddedCheckout clientSecret={...} /> con el resultado.
+ * Con redirect_on_completion: "never", Stripe dispara onComplete en el cliente
+ * en lugar de redirigir — no se pasa return_url, Stripe no lo permite en este modo.
  */
 export async function createEmbeddedCheckoutSession(opts: CreateCheckoutOpts) {
   if (!stripe) {
@@ -89,6 +88,7 @@ export async function createEmbeddedCheckoutSession(opts: CreateCheckoutOpts) {
 
   return stripe.checkout.sessions.create({
     ui_mode: "embedded_page",
+    redirect_on_completion: "never",
     mode,
     line_items: lineItems,
     customer_email: opts.customer.email,
@@ -97,7 +97,6 @@ export async function createEmbeddedCheckoutSession(opts: CreateCheckoutOpts) {
       customerName: opts.customer.name,
       ...(opts.customer.phone && { customerPhone: opts.customer.phone }),
     },
-    return_url: `${opts.returnUrl}?session_id={CHECKOUT_SESSION_ID}`,
   });
 }
 

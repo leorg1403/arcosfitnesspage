@@ -28,8 +28,7 @@ export function ClientPurchaseEmail(p: ClientPurchaseProps) {
         <span style={{ color: "#C4A572" }}>{p.customerName.split(" ")[0]}</span>.
       </Heading>
       <Text className="text-[#0A0A0A] text-base mt-4 mb-0 leading-relaxed">
-        Tu pago fue procesado con éxito. El equipo te contactará en las próximas
-        24 horas para activar tu membresía y agendar tu visita guiada.
+        Tu pago fue procesado con éxito.
       </Text>
 
       <Hr className="border-[#E5E3DC] my-8" />
@@ -48,11 +47,7 @@ export function ClientPurchaseEmail(p: ClientPurchaseProps) {
 
       <Hr className="border-[#E5E3DC] my-8" />
 
-      <Text className="text-[#0A0A0A] text-sm leading-relaxed m-0">
-        Mientras tanto, prepara tu Análisis Inbody y trae ropa cómoda para tu
-        primera sesión.
-      </Text>
-      <Text className="text-[#0A0A0A] text-sm mt-4 mb-0 leading-relaxed">
+      <Text className="text-[#0A0A0A] text-sm mt-0 mb-0 leading-relaxed">
         Cualquier duda, escríbenos por WhatsApp:{" "}
         <a href="https://wa.me/525591350325" style={{ color: "#C4A572" }}>
           55 9135 0325

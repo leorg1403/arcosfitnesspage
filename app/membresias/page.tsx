@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import { FullBleedHero } from "@/components/sections/FullBleedHero";
 import { MainPlansHome } from "@/components/sections/MainPlansHome";
 import { SegmentPlans } from "@/components/sections/SegmentPlans";
@@ -6,6 +7,7 @@ import { PrePaymentTable } from "@/components/sections/PrePaymentTable";
 import { Accordion } from "@/components/ui/Accordion";
 import { Eyebrow } from "@/components/primitives/Eyebrow";
 import { Reveal } from "@/components/primitives/Reveal";
+import { ConfirmationModal } from "@/components/sections/ConfirmationModal";
 import { MEMBRESIAS, HEROES } from "@/lib/content";
 import { MEMBERSHIP_FAQS } from "@/lib/memberships";
 import { fadeUp } from "@/lib/motion";
@@ -19,6 +21,11 @@ export const metadata: Metadata = {
 export default function MembresiasPage() {
   return (
     <>
+      {/* Modal de confirmación post-pago (lee ?confirmed=1&plan=XXX de la URL) */}
+      <Suspense>
+        <ConfirmationModal />
+      </Suspense>
+
       <FullBleedHero
         image={HEROES.home}
         alt="Lockers Arcos Fitness"

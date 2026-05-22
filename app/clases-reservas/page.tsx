@@ -1,8 +1,10 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import { FullBleedHero } from "@/components/sections/FullBleedHero";
 import { ScheduleGrid } from "@/components/sections/ScheduleGrid";
 import { InstructorsRow } from "@/components/sections/InstructorsRow";
 import { FullBleedCTA } from "@/components/sections/FullBleedCTA";
+import { ConfirmationModal } from "@/components/sections/ConfirmationModal";
 import { CLASES, HEROES } from "@/lib/content";
 
 export const metadata: Metadata = {
@@ -14,6 +16,11 @@ export const metadata: Metadata = {
 export default function ClasesReservasPage() {
   return (
     <>
+      {/* Modal de confirmación post-pago (lee ?confirmed=1&plan=XXX de la URL) */}
+      <Suspense>
+        <ConfirmationModal />
+      </Suspense>
+
       <FullBleedHero
         image={HEROES.clases}
         alt="Clase en Arcos Fitness"

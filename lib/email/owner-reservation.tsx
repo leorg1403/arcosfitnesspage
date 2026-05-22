@@ -10,19 +10,34 @@ export type OwnerReservationProps = {
   customerEmail: string;
   customerPhone?: string;
   customerMessage?: string;
+  /** Si el pago fue procesado online, incluir monto en centavos */
+  amountPaid?: number;
+  currency?: string;
 };
 
+function formatMoney(cents: number, currency: string) {
+  return new Intl.NumberFormat("es-MX", {
+    style: "currency",
+    currency: currency.toUpperCase(),
+  }).format(cents / 100);
+}
+
 export function OwnerReservationEmail(p: OwnerReservationProps) {
+  const paid = p.amountPaid != null && p.amountPaid > 0;
+  const currency = p.currency ?? "mxn";
+
   return (
-    <EmailLayout preview={`Nueva reserva: ${p.className} · ${p.customerName}`}>
-      <Text className="text-[#8A8A88] text-[11px] uppercase tracking-[0.22em] font-mono m-0">
-        Nueva reserva recibida
+    <EmailLayout preview={`Nueva reserva${paid ? " paga" : ""}: ${p.className} · ${p.customerName}`}>
+      <Text className="text-[#C4A572] text-[11px] uppercase tracking-[0.22em] font-mono m-0">
+        {paid
+          ? `Nueva reserva paga · ${formatMoney(p.amountPaid!, currency)}`
+          : "Nueva reserva recibida"}
       </Text>
       <Heading className="text-[#0A0A0A] text-3xl font-bold tracking-tight mt-3 mb-0">
         {p.className}
       </Heading>
       <Text className="text-[#8A8A88] text-sm mt-2 mb-0">
-        {p.classDay} · {p.classTime} · con {p.classInstructor}
+        {p.classDay} · {p.classTime}
       </Text>
 
       <Hr className="border-[#E5E3DC] my-8" />
@@ -35,11 +50,10 @@ export function OwnerReservationEmail(p: OwnerReservationProps) {
           {p.customerName}
         </Text>
         <Text className="text-[#0A0A0A] text-sm m-0">
-          📧 <a href={`mailto:${p.customerEmail}`} style={{ color: "#0A0A0A" }}>{p.customerEmail}</a>
+          <a href={`mailto:${p.customerEmail}`} style={{ color: "#0A0A0A" }}>{p.customerEmail}</a>
         </Text>
         {p.customerPhone && (
           <Text className="text-[#0A0A0A] text-sm mt-1 mb-0">
-            📱{" "}
             <a
               href={`https://wa.me/52${p.customerPhone.replace(/\D/g, "")}`}
               style={{ color: "#0A0A0A" }}
@@ -65,9 +79,6 @@ export function OwnerReservationEmail(p: OwnerReservationProps) {
       )}
 
       <Hr className="border-[#E5E3DC] my-8" />
-      <Text className="text-[#8A8A88] text-xs leading-relaxed m-0">
-        Confirma cupo respondiendo este email o por WhatsApp al cliente. El pago se realiza en mostrador.
-      </Text>
     </EmailLayout>
   );
 }
