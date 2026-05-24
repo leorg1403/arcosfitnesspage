@@ -11,6 +11,7 @@ export type Plan = {
   tagline?: string;
   price: number; // MXN
   inscripcion?: number; // costo único MXN, opcional
+  inscripcionLabel?: string;
   periodicity: "mensual" | "unico";
   features: string[];
   /** Plan destacado (gold accent) */
@@ -48,9 +49,10 @@ export const PLANS: Plan[] = [
   {
     id: "all-access-gold",
     name: "All Access Gold",
-    tagline: "Con programa personalizado.",
+    tagline: "Acceso total al club.",
     price: 2800,
     inscripcion: 5000,
+    inscripcionLabel: "DE PROGRAMAS PERSONALIZADOS",
     periodicity: "mensual",
     highlight: true,
     category: "principal",

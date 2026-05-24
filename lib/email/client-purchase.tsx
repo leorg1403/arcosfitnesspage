@@ -54,6 +54,10 @@ export function ClientPurchaseEmail(p: ClientPurchaseProps) {
         </a>
         .
       </Text>
+
+      <Text className="text-[#8A8A88] text-xs mt-4 mb-0">
+        En caso de requerir factura acudir a recepción.
+      </Text>
     </EmailLayout>
   );
 }

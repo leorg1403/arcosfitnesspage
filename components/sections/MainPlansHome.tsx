@@ -165,7 +165,7 @@ function PlanCard({
         </span>
         {plan.inscripcion && (
           <span className="block w-full font-mono text-[0.65rem] uppercase tracking-[0.22em] text-concrete mt-1">
-            + ${plan.inscripcion.toLocaleString("es-MX")} de inscripción
+            + ${plan.inscripcion.toLocaleString("es-MX")} {plan.inscripcionLabel ?? "de inscripción"}
           </span>
         )}
       </div>

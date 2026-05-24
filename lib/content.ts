@@ -142,10 +142,11 @@ export const HYROX = {
     display: "HYROX",
   },
   manifesto: [
-    "El deporte de fitness",
-    "más exigente del mundo.",
-    "Ocho estaciones.",
+    "La carrera hecha fitness",
+    "número 1 del mundo.",
     "Ocho kilómetros de carrera.",
+    "Ocho estaciones",
+    "de fuerza / funcionales.",
     "Una sola meta.",
   ],
   program: [

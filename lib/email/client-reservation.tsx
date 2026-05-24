@@ -75,6 +75,12 @@ export function ClientReservationEmail(p: ClientReservationProps) {
         </a>
         .
       </Text>
+
+      {paid && (
+        <Text className="text-[#8A8A88] text-xs mt-4 mb-0">
+          En caso de requerir factura acudir a recepción.
+        </Text>
+      )}
     </EmailLayout>
   );
 }
