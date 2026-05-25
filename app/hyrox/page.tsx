@@ -26,8 +26,8 @@ export default function HyroxPage() {
       />
 
       <FullBleedStatement
-        image="/images/hyrox-statement.jpeg"
-        alt="Hyrox race day"
+        image="/images/hyrox-gym.jpeg"
+        alt="Entrenamiento Hyrox en gimnasio"
         body={HYROX.manifesto}
         height="tall"
         align="center"

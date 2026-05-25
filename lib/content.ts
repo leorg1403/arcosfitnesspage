@@ -50,11 +50,11 @@ export const NAV_FOOTER = [
 /** Hero photos curados — dark, architectural, premium */
 export const HEROES = {
   home: "/images/hero/heroLOGO.jpeg",
-  clases: "/images/hero/clases.jpg",
+  clases: "/images/hero/clases-hero.jpeg",
   hyrox: "/images/hero/home.jpg",
   membresias: "/images/hero/membresias.jpg",
   ctaHome: "/images/visita-bg.jpeg",
-  ctaClases: "/images/hero/clases.png",
+  ctaClases: "/images/hero/clases-cta.jpeg",
   ctaHyrox: "/images/hyrox-cta.jpeg",
   ctaMembresias: "https://images.unsplash.com/photo-1534258936925-c58bed479fcb?auto=format&fit=crop&w=2400&q=85",
 };

@@ -8,7 +8,7 @@ import { Accordion } from "@/components/ui/Accordion";
 import { Eyebrow } from "@/components/primitives/Eyebrow";
 import { Reveal } from "@/components/primitives/Reveal";
 import { ConfirmationModal } from "@/components/sections/ConfirmationModal";
-import { MEMBRESIAS, HEROES } from "@/lib/content";
+import { MEMBRESIAS } from "@/lib/content";
 import { MEMBERSHIP_FAQS } from "@/lib/memberships";
 import { fadeUp } from "@/lib/motion";
 
@@ -27,8 +27,8 @@ export default function MembresiasPage() {
       </Suspense>
 
       <FullBleedHero
-        image={HEROES.home}
-        alt="Lockers Arcos Fitness"
+        image="/images/hyrox-statement.jpeg"
+        alt="Atletas Hyrox en competencia"
         eyebrow={MEMBRESIAS.hero.eyebrow}
         headline={MEMBRESIAS.hero.headline}
         italicWord={MEMBRESIAS.hero.italicWord}
