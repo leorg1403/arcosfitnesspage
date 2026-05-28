@@ -22,14 +22,14 @@ export function PrePaymentTable() {
         <div className="grid lg:grid-cols-12 gap-y-6 mb-10 md:mb-14 items-end">
           <Reveal variants={fadeUp} className="lg:col-span-7">
             <h2 className="font-display text-headline tracking-[-0.03em] leading-[0.95] font-bold">
-              Paga adelantado,
+              Cuatro paquetes anticipados
               <br />
-              <span className="font-serif-italic text-gold">ahorra más</span>.
+              <span className="font-serif-italic text-gold">para tu conveniencia</span>.
             </h2>
           </Reveal>
           <Reveal variants={fadeUp} delay={0.15} className="lg:col-span-4 lg:col-start-9 lg:pb-2">
             <p className="text-base text-concrete leading-relaxed max-w-sm">
-              Cuatro paquetes anticipados con descuento progresivo. Sin inscripción adicional.
+              No te preocupes por estar pagando mensualmente.
             </p>
           </Reveal>
         </div>
@@ -52,6 +52,13 @@ export function PrePaymentTable() {
   );
 }
 
+const PREPAYMENT_FEATURES = [
+  "Acceso a todas las instalaciones",
+  "Acceso a todas las clases",
+  "1er Análisis Inbody",
+  "Descuento del 20% en restaurante LIVE AQUA®",
+];
+
 function PrePaymentCard({
   pay,
   onBuy,
@@ -59,14 +66,10 @@ function PrePaymentCard({
   pay: PrePayment;
   onBuy: () => void;
 }) {
-  const savings = pay.originalPrice - pay.price;
   return (
     <div
       className="p-7 md:p-8 flex flex-col border border-line-soft transition-all duration-300 hover:scale-[1.02] hover:shadow-lg hover:border-gold"
     >
-      <p className="font-mono text-[0.625rem] uppercase tracking-[0.22em] text-gold mb-3">
-        {pay.discount}
-      </p>
       <h3 className="font-display text-2xl md:text-3xl font-bold tracking-tight">
         {pay.label}
       </h3>
@@ -80,17 +83,14 @@ function PrePaymentCard({
         </p>
       </div>
 
-      <div className="mt-5 pt-4 border-t border-gold/30">
-        <p className="font-mono text-[0.6rem] uppercase tracking-[0.22em] text-concrete mb-1">
-          Ahorras
-        </p>
-        <p className="font-display text-2xl md:text-3xl font-bold tracking-tight text-gold">
-          ${savings.toLocaleString("es-MX")}
-        </p>
-        <p className="mt-2 font-mono text-[0.625rem] uppercase tracking-[0.22em] text-concrete/70 line-through">
-          Antes ${pay.originalPrice.toLocaleString("es-MX")}
-        </p>
-      </div>
+      <ul className="mt-6 pt-5 border-t border-line-soft space-y-3">
+        {PREPAYMENT_FEATURES.map((feat) => (
+          <li key={feat} className="flex items-start gap-3 text-sm leading-relaxed text-concrete">
+            <span className="mt-1.5 size-1.5 shrink-0 rounded-full bg-concrete/60" aria-hidden />
+            <span>{feat}</span>
+          </li>
+        ))}
+      </ul>
 
       <div className="mt-auto pt-6">
         <button

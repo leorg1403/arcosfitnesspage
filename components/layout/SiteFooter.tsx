@@ -19,8 +19,7 @@ export function SiteFooter() {
           <div className="lg:col-span-4 space-y-6">
             <Logo />
             <p className="text-sm text-paper/60 leading-relaxed max-w-sm">
-              Un club privado en Bosques de las Lomas, CDMX. Donde entrenar se siente
-              como volver a casa.
+              Arcos Fitness Club®. Bosques de las Lomas, CDMX.
             </p>
             <p className="font-mono text-[0.625rem] uppercase tracking-[0.22em] text-gold leading-relaxed">
               Gym · Funcional · Hyrox · Protein Lab
@@ -29,7 +28,7 @@ export function SiteFooter() {
 
           {/* Cols */}
           <div className="lg:col-span-8 grid grid-cols-2 md:grid-cols-3 gap-12">
-            <FooterCol title="Contacto">
+            <FooterCol title="Información de contacto">
               <p>{SITE.address}</p>
               <a
                 href={`tel:+52${SITE.phone.replace(/\s/g, "")}`}

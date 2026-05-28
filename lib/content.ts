@@ -19,7 +19,7 @@ export const SITE = {
   name: "Arcos Fitness Club",
   shortName: "Arcos",
   tagline: "Strength. Recovery. Belonging.",
-  address: "Paseo de los Tamarindos 98, Bosques de las Lomas, CDMX",
+  address: "Paseo Arcos Bosques, CDMX. Dentro del hotel LIVE AQUA®.",
   phone: "55 9135 0325",
   email: "info@arcosfitness.com",
   hours: [

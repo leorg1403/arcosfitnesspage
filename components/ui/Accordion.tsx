@@ -1,11 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/cn";
 import { easeExpo } from "@/lib/motion";
 
-type Item = { q: string; a: string };
+type Item = { q: string; a: ReactNode };
 
 export function Accordion({
   items,
@@ -60,14 +60,14 @@ export function Accordion({
                   transition={{ duration: 0.55, ease: easeExpo }}
                   className="overflow-hidden"
                 >
-                  <p
+                  <div
                     className={cn(
                       "pb-8 pr-12 text-base leading-relaxed max-w-3xl",
                       muteColor
                     )}
                   >
                     {it.a}
-                  </p>
+                  </div>
                 </motion.div>
               )}
             </AnimatePresence>

@@ -63,7 +63,7 @@ export function MainPlansHome({
             {!isHome && (
               <Reveal variants={fadeUp} delay={0.15} className="lg:col-span-4 lg:col-start-9 lg:pb-2">
                 <p className="text-base text-concrete leading-relaxed max-w-sm">
-                  Las dos opciones más elegidas. Si tu vida pide otro ritmo, abajo hay opciones por horario y planes anticipados.
+                  Las dos opciones más elegidas que te aseguran una transformación efectiva y duradera.
                 </p>
               </Reveal>
             )}

@@ -63,6 +63,19 @@ export const PLANS: Plan[] = [
     ],
   },
   {
+    id: "junior",
+    name: "Junior All Access",
+    tagline: "Con credencial de estudiante vigente, hasta 24 años de edad.",
+    price: 1700,
+    periodicity: "mensual",
+    category: "segmento",
+    features: [
+      "Acceso a todas las instalaciones",
+      "Acceso a todas las clases",
+      "Descuento del 20% en restaurante LIVE AQUA®",
+    ],
+  },
+  {
     id: "ejecutiva",
     name: "Ejecutiva",
     tagline: "Horario 12:00 – 17:00 hrs.",
@@ -70,41 +83,36 @@ export const PLANS: Plan[] = [
     inscripcion: 1000,
     periodicity: "mensual",
     category: "segmento",
-    features: [...FEATURES_COMMON, "Estacionamiento preferencial Paseo Arcos Bosques"],
-  },
-  {
-    id: "junior",
-    name: "Junior All Access",
-    tagline: "Con credencial de estudiante vigente.",
-    price: 1700,
-    periodicity: "mensual",
-    category: "segmento",
-    features: [...FEATURES_COMMON, "Estacionamiento preferencial Paseo Arcos Bosques"],
+    features: [
+      "Acceso a todas las instalaciones",
+      "Descuento del 20% en restaurante LIVE AQUA®",
+    ],
   },
   {
     id: "weekend",
     name: "Weekend",
-    tagline: "De jueves a domingo, todo el mes.",
+    tagline: "De jueves a domingo dentro de un mes.",
     price: 1800,
     inscripcion: 1500,
     periodicity: "mensual",
     category: "segmento",
-    features: [...FEATURES_COMMON, "Estacionamiento preferencial Paseo Arcos Bosques"],
+    features: [
+      "Acceso a todas las instalaciones",
+      "Acceso a todas las clases de jueves a domingo",
+      "Descuento del 20% en restaurante LIVE AQUA®",
+    ],
   },
   {
     id: "drop-in",
     name: "7 Day Drop In",
-    tagline: "Una semana completa, pago único.",
+    tagline: "Una semana completa dentro de un mes.",
     price: 2450,
     periodicity: "unico",
     category: "segmento",
     features: [
       "Acceso a todas las instalaciones",
       "Acceso a todas las clases",
-      "Acceso a baños y vestidores",
-      "Acceso a The Protein Station",
-      "Estacionamiento preferencial LIVE AQUA®",
-      "Estacionamiento preferencial Paseo Arcos Bosques",
+      "Descuento del 20% en restaurante LIVE AQUA®",
     ],
   },
 ];
@@ -139,11 +147,11 @@ export const PRE_PAYMENTS: PrePayment[] = [
 export const MEMBERSHIP_FAQS = [
   {
     q: "¿Hay contrato de permanencia?",
-    a: "No. Las membresías mensuales son mes a mes. Cancela cuando quieras avisando con 30 días de anticipación.",
+    a: "No. Las membresías mensuales son mes a mes. Cancela cuando quieras avisando con 15 días de anticipación.",
   },
   {
     q: "¿Hay costo de inscripción?",
-    a: "Sí, varía por plan. All Access y All Access Gold tienen $5,000 de inscripción. Ejecutiva $1,000. Weekend $1,500. Junior y planes anticipados sin inscripción.",
+    a: "Sí, varía por membresía. All Access y All Access Gold tienen $5,000 de inscripción. Ejecutiva $1,000. Weekend $1,500. Junior y membresías anticipadas sin inscripción.",
   },
   {
     q: "¿Puedo congelar mi membresía si viajo?",
@@ -154,11 +162,11 @@ export const MEMBERSHIP_FAQS = [
     a: "Sí. Agenda tu visita guiada por WhatsApp y te invitamos a una clase y un día completo de gimnasio sin costo.",
   },
   {
-    q: "¿Cómo pago la mensualidad?",
-    a: "Cargo automático a tarjeta de débito o crédito. También aceptamos transferencia y efectivo en recepción.",
+    q: "¿Cómo pago la membresía?",
+    a: "Para tu conveniencia, aceptamos pago con tarjeta de crédito o débito, transferencia y efectivo en recepción.",
   },
   {
     q: "¿Puedo cambiar de plan después?",
-    a: "Sí, en cualquier momento. El cambio aplica desde el siguiente ciclo de cobro.",
+    a: "Sí, en cualquier momento.",
   },
 ];
