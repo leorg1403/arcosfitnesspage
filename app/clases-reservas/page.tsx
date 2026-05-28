@@ -30,7 +30,9 @@ export default function ClasesReservasPage() {
         height="full"
       />
 
-      <ScheduleGrid />
+      <div id="schedule" className="scroll-mt-24">
+        <ScheduleGrid />
+      </div>
 
       <InstructorsRow />
 

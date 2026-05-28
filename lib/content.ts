@@ -132,7 +132,7 @@ export const CLASES = {
     eyebrow: "Visita",
     headline: ["Empieza", "esta semana."],
     italicWord: "semana.",
-    cta: { label: "Hablar con un especialista", action: "wa-generic" },
+    cta: { label: "Agenda tu visita", action: "#schedule" },
   },
 };
 
@@ -142,11 +142,10 @@ export const HYROX = {
     display: "HYROX",
   },
   manifesto: [
-    "La carrera hecha fitness",
+    "La carrera de fitness",
     "número 1 del mundo.",
-    "Ocho kilómetros de carrera.",
-    "Ocho estaciones",
-    "de fuerza / funcionales.",
+    "Ocho kilómetros.",
+    "Ocho estaciones de fuerza.",
     "Una sola meta.",
   ],
   program: [

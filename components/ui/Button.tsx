@@ -84,6 +84,7 @@ export function Button({
   const classes = cn(buttonVariants({ variant, size }), className);
 
   if (href) {
+    const { onClick } = props as { onClick?: React.MouseEventHandler<HTMLAnchorElement> };
     if (external || href.startsWith("http")) {
       return (
         <a
@@ -91,13 +92,14 @@ export function Button({
           target="_blank"
           rel="noopener noreferrer"
           className={classes}
+          onClick={onClick}
         >
           {inner}
         </a>
       );
     }
     return (
-      <Link href={href} className={classes}>
+      <Link href={href} className={classes} onClick={onClick}>
         {inner}
       </Link>
     );

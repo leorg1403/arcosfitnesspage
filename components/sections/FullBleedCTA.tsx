@@ -83,9 +83,35 @@ export function FullBleedCTA({
           <motion.div variants={fadeUp} className="mt-10">
             <Button
               href={resolveHref(cta.action)}
-              external={!cta.action.startsWith("/")}
+              external={!cta.action.startsWith("/") && !cta.action.startsWith("#")}
               variant="linkLight"
               size="lg"
+              onClick={(e) => {
+                if (!cta.action.startsWith("#")) return;
+                e.preventDefault();
+                const id = cta.action.slice(1);
+                const el = document.getElementById(id);
+                if (!el) return;
+
+                const targetY = el.getBoundingClientRect().top + window.scrollY;
+                window.scrollTo({ top: targetY, behavior: "smooth" });
+
+                const fireReset = () => {
+                  window.dispatchEvent(
+                    new CustomEvent("arcos:scroll-to", { detail: { id } })
+                  );
+                };
+
+                if ("onscrollend" in window) {
+                  const onEnd = () => {
+                    fireReset();
+                    window.removeEventListener("scrollend", onEnd);
+                  };
+                  window.addEventListener("scrollend", onEnd);
+                } else {
+                  setTimeout(fireReset, 700);
+                }
+              }}
             >
               {cta.label}
             </Button>

@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState, useRef, useLayoutEffect } from "react";
+import { useMemo, useState, useRef, useLayoutEffect, useEffect } from "react";
 import { motion, AnimatePresence, LayoutGroup } from "framer-motion";
 import { ArrowUpRight } from "lucide-react";
 
@@ -32,6 +32,15 @@ export function ScheduleGrid({
   const [category, setCategory] = useState<ClassCategory | "all">(initialCategory);
   const [activeClass, setActiveClass] = useState<ClassItem | null>(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
+
+  useEffect(() => {
+    const handler = (e: Event) => {
+      const detail = (e as CustomEvent<{ id?: string }>).detail;
+      if (!detail || detail.id === "schedule") setCategory("all");
+    };
+    window.addEventListener("arcos:scroll-to", handler);
+    return () => window.removeEventListener("arcos:scroll-to", handler);
+  }, []);
 
   // Animar altura real del wrapper para que el reflow del documento (sección Equipo, etc.)
   // se mueva smoothly al cambiar el filtro. Medimos UNA sola vez por cambio de categoría
