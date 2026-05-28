@@ -5,6 +5,7 @@ import { SinglePhotoSection } from "@/components/sections/SinglePhotoSection";
 import { MainPlansHome } from "@/components/sections/MainPlansHome";
 import { FullBleedCTA } from "@/components/sections/FullBleedCTA";
 import { HOME, HEROES } from "@/lib/content";
+import { WA_MESSAGES } from "@/lib/whatsapp";
 
 export default function HomePage() {
   return (
@@ -20,6 +21,10 @@ export default function HomePage() {
         cta={{
           label: HOME.hero.cta.label,
           href: "/clases-reservas",
+        }}
+        whatsappCta={{
+          label: "Contáctanos por WhatsApp",
+          message: WA_MESSAGES.generic,
         }}
         height="full"
       />

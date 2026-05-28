@@ -5,6 +5,8 @@ import { ParallaxImage } from "@/components/primitives/ParallaxImage";
 import { SplitHeadline } from "@/components/primitives/SplitHeadline";
 import { Eyebrow } from "@/components/primitives/Eyebrow";
 import { Button } from "@/components/ui/Button";
+import { WhatsappIcon } from "@/components/layout/SocialIcons";
+import { buildWhatsAppLink } from "@/lib/whatsapp";
 import { cn } from "@/lib/cn";
 import { easeExpo, heroStagger, fadeUp } from "@/lib/motion";
 
@@ -19,6 +21,11 @@ type Props = {
     label: string;
     href?: string;
     external?: boolean;
+  };
+  /** Enlace directo a WhatsApp debajo del CTA principal */
+  whatsappCta?: {
+    label: string;
+    message: string;
   };
   /** Tamaño del hero */
   height?: "full" | "tall" | "medium";
@@ -45,6 +52,7 @@ export function FullBleedHero({
   headline,
   italicWord,
   cta,
+  whatsappCta,
   height = "full",
   displaySize = "display",
   align = "bottom-left",
@@ -143,15 +151,30 @@ export function FullBleedHero({
           )}
 
           {cta && (
-            <motion.div variants={fadeUp} className="mt-10">
+            <motion.div variants={fadeUp} className="mt-10 flex flex-col items-start gap-5">
               <Button
                 href={cta.href}
                 external={cta.external}
                 variant="linkLight"
                 size="lg"
+                className="px-0"
               >
                 {cta.label}
               </Button>
+              {whatsappCta && (
+                <a
+                  href={buildWhatsAppLink(whatsappCta.message)}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="group inline-flex items-center gap-2.5 text-sm text-paper/85 hover:text-gold transition-colors duration-500"
+                >
+                  <span className="relative inline-flex flex-col overflow-hidden">
+                    <span className="block">{whatsappCta.label}</span>
+                    <span className="block h-px w-full bg-current transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] origin-left scale-x-100 group-hover:scale-x-0" />
+                  </span>
+                  <WhatsappIcon className="size-4 shrink-0 transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:translate-x-1" />
+                </a>
+              )}
             </motion.div>
           )}
         </div>

@@ -66,12 +66,12 @@ export const FACILITIES = [
     image: "/images/facilities/peso-libre.png",
   },
   {
-    title: "Cardio / Funcional",
-    image: "/images/hero/hyrox.jpg",
-  },
-  {
     title: "Peso Integrado",
     image: "/images/facilities/peso-integrado.png",
+  },
+  {
+    title: "Cardio / Funcional",
+    image: "/images/hero/hyrox.jpg",
   },
   {
     title: "Protein Lab",
@@ -92,13 +92,13 @@ export const HOME = {
   },
   statement: {
     eyebrow: "Filosofía",
-    body: "Un club privado en Bosques de las Lomas. Para quienes vuelven no por obligación, sino porque acá se sienten en casa.",
+    body: "Club privado en Bosques de las Lomas. Para quienes vuelven no por obligación, sino por compromiso.",
   },
   hyrox: {
     number: "03",
-    headline: ["HYROX.", "Una sola meta."],
-    italicWord: "meta.",
-    body: "Todo lo que necesitas para tu primer Hyrox.",
+    headline: ["HYROX.", "Fitness hecho carrera."],
+    italicWord: "carrera.",
+    body: "Prepárate para tu primer Hyrox.",
     link: { label: "Conocer más", href: "/hyrox" },
   },
   membresia: {

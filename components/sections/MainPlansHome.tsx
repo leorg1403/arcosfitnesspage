@@ -5,7 +5,7 @@ import { ChevronDown } from "lucide-react";
 import { Eyebrow } from "@/components/primitives/Eyebrow";
 import { Reveal } from "@/components/primitives/Reveal";
 import { Button } from "@/components/ui/Button";
-import { MAIN_PLANS, MAIN_COMPARISON, type Plan } from "@/lib/memberships";
+import { MAIN_PLANS, type Plan } from "@/lib/memberships";
 import { CheckoutDialog, type CheckoutItem } from "./CheckoutDialog";
 import { cn } from "@/lib/cn";
 import { fadeUp } from "@/lib/motion";
@@ -48,7 +48,7 @@ export function MainPlansHome({
               )}
               {isHome ? (
                 <h2 className="mt-6 font-display text-headline tracking-[-0.03em] leading-[0.95] font-bold">
-                  Tu llave
+                  Tu acceso
                   <br />
                   al <span className="font-serif-italic text-gold">club</span>.
                 </h2>
@@ -60,13 +60,13 @@ export function MainPlansHome({
                 </h2>
               )}
             </Reveal>
-            <Reveal variants={fadeUp} delay={0.15} className="lg:col-span-4 lg:col-start-9 lg:pb-2">
-              <p className="text-base text-concrete leading-relaxed max-w-sm">
-                {isHome
-                  ? MAIN_COMPARISON.difference.body
-                  : "Las dos opciones más elegidas. Si tu vida pide otro ritmo, abajo hay opciones por horario y planes anticipados."}
-              </p>
-            </Reveal>
+            {!isHome && (
+              <Reveal variants={fadeUp} delay={0.15} className="lg:col-span-4 lg:col-start-9 lg:pb-2">
+                <p className="text-base text-concrete leading-relaxed max-w-sm">
+                  Las dos opciones más elegidas. Si tu vida pide otro ritmo, abajo hay opciones por horario y planes anticipados.
+                </p>
+              </Reveal>
+            )}
           </div>
         )}
 
