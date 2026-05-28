@@ -3,7 +3,7 @@ import { FullBleedStatement } from "@/components/sections/FullBleedStatement";
 import { FacilitiesScroll } from "@/components/sections/FacilitiesScroll";
 import { SinglePhotoSection } from "@/components/sections/SinglePhotoSection";
 import { MainPlansHome } from "@/components/sections/MainPlansHome";
-import { FullBleedCTA } from "@/components/sections/FullBleedCTA";
+import { ContactSection } from "@/components/sections/ContactSection";
 import { HOME, HEROES } from "@/lib/content";
 import { WA_MESSAGES } from "@/lib/whatsapp";
 
@@ -58,13 +58,8 @@ export default function HomePage() {
         monochrome
       />
 
-      {/* 06 · Cierre (ink + foto) */}
-      <FullBleedCTA
-        image={HEROES.ctaHome}
-        headline={HOME.cierre.headline}
-        italicWord={HOME.cierre.italicWord}
-        cta={HOME.cierre.cta}
-      />
+      {/* 06 · Contacto (lead capture) */}
+      <ContactSection image={HEROES.ctaHome} />
     </>
   );
 }

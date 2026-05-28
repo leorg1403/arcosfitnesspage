@@ -4,6 +4,7 @@ import { FullBleedHero } from "@/components/sections/FullBleedHero";
 import { MainPlansHome } from "@/components/sections/MainPlansHome";
 import { SegmentPlans } from "@/components/sections/SegmentPlans";
 import { PrePaymentTable } from "@/components/sections/PrePaymentTable";
+import { ContactSection } from "@/components/sections/ContactSection";
 import { Accordion } from "@/components/ui/Accordion";
 import { Eyebrow } from "@/components/primitives/Eyebrow";
 import { Reveal } from "@/components/primitives/Reveal";
@@ -97,6 +98,13 @@ export default function MembresiasPage() {
           </div>
         </div>
       </section>
+
+      <ContactSection
+        eyebrow="Sigamos hablando"
+        headline={["¿Todavía", "tienes dudas?"]}
+        italicWord="dudas?"
+        body={null}
+      />
 
     </>
   );

@@ -9,6 +9,7 @@ import { type ClassItem, DAY_LABELS, getClassPrice } from "@/lib/classes";
 import { buildWhatsAppLink, WA_MESSAGES } from "@/lib/whatsapp";
 import { WhatsappIcon } from "@/components/layout/SocialIcons";
 import { Eyebrow } from "@/components/primitives/Eyebrow";
+import { Field } from "@/components/primitives/Field";
 import {
   StripeEmbeddedCheckoutFrame,
   STRIPE_CONFIGURED_CLIENT,
@@ -232,18 +233,3 @@ export function ReservaForm({ cls, onConfirmed }: Props) {
   );
 }
 
-function Field({
-  label, required, error, children,
-}: {
-  label: string; required?: boolean; error?: string; children: React.ReactNode;
-}) {
-  return (
-    <label className="block">
-      <span className="block font-mono text-[0.625rem] uppercase tracking-[0.22em] text-concrete mb-1">
-        {label}{required && <span className="text-gold ml-1">*</span>}
-      </span>
-      {children}
-      {error && <span className="block text-xs text-red-400 mt-1">{error}</span>}
-    </label>
-  );
-}
