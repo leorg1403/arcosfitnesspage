@@ -6,11 +6,11 @@ import type { DayKey } from "@/lib/classes";
 
 /** Rango de horario del gym por día — usado en Open Gym */
 export const GYM_HOURS_BY_DAY: Record<DayKey, string> = {
-  lun: "6:00 — 22:00",
-  mar: "6:00 — 22:00",
-  mie: "6:00 — 22:00",
-  jue: "6:00 — 22:00",
-  vie: "6:00 — 21:00",
+  lun: "06:00 — 22:00",
+  mar: "06:00 — 22:00",
+  mie: "06:00 — 22:00",
+  jue: "06:00 — 22:00",
+  vie: "06:00 — 21:00",
   sab: "8:00 — 17:00",
   dom: "9:00 — 15:00",
 };
@@ -23,8 +23,8 @@ export const SITE = {
   phone: "55 9135 0325",
   email: "info@arcosfitness.com",
   hours: [
-    { day: "Lun a Jue", time: "6:00 — 22:00" },
-    { day: "Viernes", time: "6:00 — 21:00" },
+    { day: "Lun a Jue", time: "06:00 — 22:00" },
+    { day: "Viernes", time: "06:00 — 21:00" },
     { day: "Sábado", time: "8:00 — 17:00" },
     { day: "Domingo", time: "9:00 — 15:00" },
   ],
