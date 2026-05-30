@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useRef } from "react";
 import { motion } from "framer-motion";
 import { ParallaxImage } from "@/components/primitives/ParallaxImage";
 import { SplitHeadline } from "@/components/primitives/SplitHeadline";
@@ -59,6 +60,19 @@ export function FullBleedHero({
   monochrome = false,
   video,
 }: Props) {
+  const videoRef = useRef<HTMLVideoElement>(null);
+
+  useEffect(() => {
+    if (!video) return;
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === "visible") {
+        videoRef.current?.play().catch(() => {});
+      }
+    };
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+    return () => document.removeEventListener("visibilitychange", handleVisibilityChange);
+  }, [video]);
+
   return (
     <section
       className={cn(
@@ -78,6 +92,7 @@ export function FullBleedHero({
       >
         {video ? (
           <video
+            ref={videoRef}
             autoPlay
             muted
             loop
