@@ -174,7 +174,7 @@ export function ScheduleGrid({
                                   {cls.name}
                                 </p>
                                 <p className="font-mono text-[0.65rem] uppercase tracking-[0.18em] text-concrete mt-0.5">
-                                  {cls.category === "open-gym" ? "Acceso libre" : cls.instructor}
+                                  {cls.category === "open-gym" ? "Acceso al gym y clases" : cls.instructor}
                                 </p>
                               </div>
                               <ArrowUpRight
@@ -251,7 +251,7 @@ export function ScheduleGrid({
                             {cls.name}
                           </p>
                           <p className="font-mono text-[0.65rem] uppercase tracking-[0.2em] text-concrete mt-1">
-                            {cls.category === "open-gym" ? "Acceso libre" : `${cls.instructor} · ${cls.duration}min`}
+                            {cls.category === "open-gym" ? "Acceso al gym y clases" : `${cls.instructor} · ${cls.duration}min`}
                           </p>
                         </div>
                         <ArrowUpRight

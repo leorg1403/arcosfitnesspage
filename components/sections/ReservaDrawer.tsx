@@ -75,7 +75,7 @@ export function ReservaDrawer({ cls, open, onOpenChange }: Props) {
                     {DAY_LABELS[cls.day]} · {cls.category === "open-gym" ? GYM_HOURS_BY_DAY[cls.day] : cls.time}
                   </p>
                   {cls.category === "open-gym" ? (
-                    <p className="mt-3 text-sm text-paper/70">Acceso libre a todas las áreas. No incluye clases, solo gimnasio.</p>
+                    <p className="mt-3 text-sm text-paper/70">Acceso al gym y clases.</p>
                   ) : (
                     <p className="mt-3 text-sm text-paper/70">
                       {cls.duration} min · {cls.room} · {cls.level}
