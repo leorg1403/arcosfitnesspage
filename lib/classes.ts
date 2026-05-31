@@ -74,42 +74,42 @@ const DESC = {
 
 export const CLASSES: ClassItem[] = [
   // ─── ENTRENAMIENTO FUNCIONAL · Lun a Vie · 6:10 AM y 7:20 AM ───
-  { id: "func-lun-1", name: "Funcional", category: "funcional", day: "lun", time: "06:10", duration: 50, instructor: COACH_FUNC, room: "Sala Principal", level: "Todos los niveles", capacity: 16, description: DESC.funcional, image: IMG.funcional },
-  { id: "func-lun-2", name: "Funcional", category: "funcional", day: "lun", time: "07:20", duration: 50, instructor: COACH_FUNC, room: "Sala Principal", level: "Todos los niveles", capacity: 16, description: DESC.funcional, image: IMG.funcional },
-  { id: "func-mar-1", name: "Funcional", category: "funcional", day: "mar", time: "06:10", duration: 50, instructor: COACH_FUNC, room: "Sala Principal", level: "Todos los niveles", capacity: 16, description: DESC.funcional, image: IMG.funcional },
-  { id: "func-mar-2", name: "Funcional", category: "funcional", day: "mar", time: "07:20", duration: 50, instructor: COACH_FUNC, room: "Sala Principal", level: "Todos los niveles", capacity: 16, description: DESC.funcional, image: IMG.funcional },
-  { id: "func-mie-1", name: "Funcional", category: "funcional", day: "mie", time: "06:10", duration: 50, instructor: COACH_FUNC, room: "Sala Principal", level: "Todos los niveles", capacity: 16, description: DESC.funcional, image: IMG.funcional },
-  { id: "func-mie-2", name: "Funcional", category: "funcional", day: "mie", time: "07:20", duration: 50, instructor: COACH_FUNC, room: "Sala Principal", level: "Todos los niveles", capacity: 16, description: DESC.funcional, image: IMG.funcional },
-  { id: "func-jue-1", name: "Funcional", category: "funcional", day: "jue", time: "06:10", duration: 50, instructor: COACH_FUNC, room: "Sala Principal", level: "Todos los niveles", capacity: 16, description: DESC.funcional, image: IMG.funcional },
-  { id: "func-jue-2", name: "Funcional", category: "funcional", day: "jue", time: "07:20", duration: 50, instructor: COACH_FUNC, room: "Sala Principal", level: "Todos los niveles", capacity: 16, description: DESC.funcional, image: IMG.funcional },
-  { id: "func-vie-1", name: "Funcional", category: "funcional", day: "vie", time: "06:10", duration: 50, instructor: COACH_FUNC, room: "Sala Principal", level: "Todos los niveles", capacity: 16, description: DESC.funcional, image: IMG.funcional },
-  { id: "func-vie-2", name: "Funcional", category: "funcional", day: "vie", time: "07:20", duration: 50, instructor: COACH_FUNC, room: "Sala Principal", level: "Todos los niveles", capacity: 16, description: DESC.funcional, image: IMG.funcional },
+  { id: "func-lun-1", name: "Funcional", category: "funcional", day: "lun", time: "06:10", duration: 50, instructor: COACH_FUNC, room: "Sala Principal", level: "Todos los niveles", capacity: 20, description: DESC.funcional, image: IMG.funcional },
+  { id: "func-lun-2", name: "Funcional", category: "funcional", day: "lun", time: "07:20", duration: 50, instructor: COACH_FUNC, room: "Sala Principal", level: "Todos los niveles", capacity: 20, description: DESC.funcional, image: IMG.funcional },
+  { id: "func-mar-1", name: "Funcional", category: "funcional", day: "mar", time: "06:10", duration: 50, instructor: COACH_FUNC, room: "Sala Principal", level: "Todos los niveles", capacity: 20, description: DESC.funcional, image: IMG.funcional },
+  { id: "func-mar-2", name: "Funcional", category: "funcional", day: "mar", time: "07:20", duration: 50, instructor: COACH_FUNC, room: "Sala Principal", level: "Todos los niveles", capacity: 20, description: DESC.funcional, image: IMG.funcional },
+  { id: "func-mie-1", name: "Funcional", category: "funcional", day: "mie", time: "06:10", duration: 50, instructor: COACH_FUNC, room: "Sala Principal", level: "Todos los niveles", capacity: 20, description: DESC.funcional, image: IMG.funcional },
+  { id: "func-mie-2", name: "Funcional", category: "funcional", day: "mie", time: "07:20", duration: 50, instructor: COACH_FUNC, room: "Sala Principal", level: "Todos los niveles", capacity: 20, description: DESC.funcional, image: IMG.funcional },
+  { id: "func-jue-1", name: "Funcional", category: "funcional", day: "jue", time: "06:10", duration: 50, instructor: COACH_FUNC, room: "Sala Principal", level: "Todos los niveles", capacity: 20, description: DESC.funcional, image: IMG.funcional },
+  { id: "func-jue-2", name: "Funcional", category: "funcional", day: "jue", time: "07:20", duration: 50, instructor: COACH_FUNC, room: "Sala Principal", level: "Todos los niveles", capacity: 20, description: DESC.funcional, image: IMG.funcional },
+  { id: "func-vie-1", name: "Funcional", category: "funcional", day: "vie", time: "06:10", duration: 50, instructor: COACH_FUNC, room: "Sala Principal", level: "Todos los niveles", capacity: 20, description: DESC.funcional, image: IMG.funcional },
+  { id: "func-vie-2", name: "Funcional", category: "funcional", day: "vie", time: "07:20", duration: 50, instructor: COACH_FUNC, room: "Sala Principal", level: "Todos los niveles", capacity: 20, description: DESC.funcional, image: IMG.funcional },
 
   // ─── HYROX ───
   // Lun, Mar, Mié: 18:00 y 19:00
-  { id: "hyrox-lun-1", name: "Hyrox", category: "hyrox", day: "lun", time: "18:00", duration: 60, instructor: COACH_HYROX, room: "Hyrox Box", level: "Intermedio", capacity: 12, description: DESC.hyrox, image: IMG.hyrox },
-  { id: "hyrox-lun-2", name: "Hyrox", category: "hyrox", day: "lun", time: "19:00", duration: 60, instructor: COACH_HYROX, room: "Hyrox Box", level: "Intermedio", capacity: 12, description: DESC.hyrox, image: IMG.hyrox },
-  { id: "hyrox-mar-1", name: "Hyrox", category: "hyrox", day: "mar", time: "18:00", duration: 60, instructor: COACH_HYROX, room: "Hyrox Box", level: "Intermedio", capacity: 12, description: DESC.hyrox, image: IMG.hyrox },
-  { id: "hyrox-mar-2", name: "Hyrox", category: "hyrox", day: "mar", time: "19:00", duration: 60, instructor: COACH_HYROX, room: "Hyrox Box", level: "Intermedio", capacity: 12, description: DESC.hyrox, image: IMG.hyrox },
-  { id: "hyrox-mie-1", name: "Hyrox", category: "hyrox", day: "mie", time: "18:00", duration: 60, instructor: COACH_HYROX, room: "Hyrox Box", level: "Intermedio", capacity: 12, description: DESC.hyrox, image: IMG.hyrox },
-  { id: "hyrox-mie-2", name: "Hyrox", category: "hyrox", day: "mie", time: "19:00", duration: 60, instructor: COACH_HYROX, room: "Hyrox Box", level: "Intermedio", capacity: 12, description: DESC.hyrox, image: IMG.hyrox },
+  { id: "hyrox-lun-1", name: "Hyrox", category: "hyrox", day: "lun", time: "18:00", duration: 60, instructor: COACH_HYROX, room: "Hyrox Box", level: "Intermedio", capacity: 20, description: DESC.hyrox, image: IMG.hyrox },
+  { id: "hyrox-lun-2", name: "Hyrox", category: "hyrox", day: "lun", time: "19:00", duration: 60, instructor: COACH_HYROX, room: "Hyrox Box", level: "Intermedio", capacity: 20, description: DESC.hyrox, image: IMG.hyrox },
+  { id: "hyrox-mar-1", name: "Hyrox", category: "hyrox", day: "mar", time: "18:00", duration: 60, instructor: COACH_HYROX, room: "Hyrox Box", level: "Intermedio", capacity: 20, description: DESC.hyrox, image: IMG.hyrox },
+  { id: "hyrox-mar-2", name: "Hyrox", category: "hyrox", day: "mar", time: "19:00", duration: 60, instructor: COACH_HYROX, room: "Hyrox Box", level: "Intermedio", capacity: 20, description: DESC.hyrox, image: IMG.hyrox },
+  { id: "hyrox-mie-1", name: "Hyrox", category: "hyrox", day: "mie", time: "18:00", duration: 60, instructor: COACH_HYROX, room: "Hyrox Box", level: "Intermedio", capacity: 20, description: DESC.hyrox, image: IMG.hyrox },
+  { id: "hyrox-mie-2", name: "Hyrox", category: "hyrox", day: "mie", time: "19:00", duration: 60, instructor: COACH_HYROX, room: "Hyrox Box", level: "Intermedio", capacity: 20, description: DESC.hyrox, image: IMG.hyrox },
   // Jueves: 18:30 y 19:30
-  { id: "hyrox-jue-1", name: "Hyrox", category: "hyrox", day: "jue", time: "18:30", duration: 60, instructor: COACH_HYROX, room: "Hyrox Box", level: "Intermedio", capacity: 12, description: DESC.hyrox, image: IMG.hyrox },
-  { id: "hyrox-jue-2", name: "Hyrox", category: "hyrox", day: "jue", time: "19:30", duration: 60, instructor: COACH_HYROX, room: "Hyrox Box", level: "Intermedio", capacity: 12, description: DESC.hyrox, image: IMG.hyrox },
+  { id: "hyrox-jue-1", name: "Hyrox", category: "hyrox", day: "jue", time: "18:30", duration: 60, instructor: COACH_HYROX, room: "Hyrox Box", level: "Intermedio", capacity: 20, description: DESC.hyrox, image: IMG.hyrox },
+  { id: "hyrox-jue-2", name: "Hyrox", category: "hyrox", day: "jue", time: "19:30", duration: 60, instructor: COACH_HYROX, room: "Hyrox Box", level: "Intermedio", capacity: 20, description: DESC.hyrox, image: IMG.hyrox },
   // Viernes: 8:30 AM
-  { id: "hyrox-vie-1", name: "Hyrox", category: "hyrox", day: "vie", time: "08:30", duration: 60, instructor: COACH_HYROX, room: "Hyrox Box", level: "Intermedio", capacity: 12, description: DESC.hyrox, image: IMG.hyrox },
+  { id: "hyrox-vie-1", name: "Hyrox", category: "hyrox", day: "vie", time: "08:30", duration: 60, instructor: COACH_HYROX, room: "Hyrox Box", level: "Intermedio", capacity: 20, description: DESC.hyrox, image: IMG.hyrox },
   // Sábado: 10:00 y 11:00
-  { id: "hyrox-sab-1", name: "Hyrox", category: "hyrox", day: "sab", time: "10:00", duration: 60, instructor: COACH_HYROX, room: "Hyrox Box", level: "Intermedio", capacity: 12, description: DESC.hyrox, image: IMG.hyrox },
-  { id: "hyrox-sab-2", name: "Hyrox", category: "hyrox", day: "sab", time: "11:00", duration: 60, instructor: COACH_HYROX, room: "Hyrox Box", level: "Intermedio", capacity: 12, description: DESC.hyrox, image: IMG.hyrox },
+  { id: "hyrox-sab-1", name: "Hyrox", category: "hyrox", day: "sab", time: "10:00", duration: 60, instructor: COACH_HYROX, room: "Hyrox Box", level: "Intermedio", capacity: 20, description: DESC.hyrox, image: IMG.hyrox },
+  { id: "hyrox-sab-2", name: "Hyrox", category: "hyrox", day: "sab", time: "11:00", duration: 60, instructor: COACH_HYROX, room: "Hyrox Box", level: "Intermedio", capacity: 20, description: DESC.hyrox, image: IMG.hyrox },
   // Domingo: 10:00
-  { id: "hyrox-dom-1", name: "Hyrox", category: "hyrox", day: "dom", time: "10:00", duration: 60, instructor: COACH_HYROX, room: "Hyrox Box", level: "Intermedio", capacity: 12, description: DESC.hyrox, image: IMG.hyrox },
+  { id: "hyrox-dom-1", name: "Hyrox", category: "hyrox", day: "dom", time: "10:00", duration: 60, instructor: COACH_HYROX, room: "Hyrox Box", level: "Intermedio", capacity: 20, description: DESC.hyrox, image: IMG.hyrox },
   // Master Class · Sábado 12:00 y Domingo 11:00
   { id: "hyrox-mc-sab", name: "Hyrox Master Class", category: "hyrox", day: "sab", time: "12:00", duration: 90, instructor: COACH_HYROX, room: "Hyrox Box", level: "Intermedio", capacity: 30, price: 700, description: "Sesión especial guiada por coach: técnica avanzada y simulacro completo de competencia Hyrox.", image: IMG.hyrox },
   { id: "hyrox-mc-dom", name: "Hyrox Master Class", category: "hyrox", day: "dom", time: "11:00", duration: 90, instructor: COACH_HYROX, room: "Hyrox Box", level: "Intermedio", capacity: 30, price: 700, description: "Sesión especial guiada por coach: técnica avanzada y simulacro completo de competencia Hyrox.", image: IMG.hyrox },
 
   // ─── BOXEO ───
-  { id: "box-jue-1", name: "Boxeo", category: "boxeo", day: "jue", time: "09:00", duration: 60, instructor: COACH_BOX, room: "Ring", level: "Todos los niveles", capacity: 10, description: DESC.boxeo, image: IMG.boxeo },
-  { id: "box-sab-1", name: "Boxeo", category: "boxeo", day: "sab", time: "08:30", duration: 60, instructor: COACH_BOX, room: "Ring", level: "Todos los niveles", capacity: 10, description: DESC.boxeo, image: IMG.boxeo },
+  { id: "box-jue-1", name: "Boxeo", category: "boxeo", day: "jue", time: "09:00", duration: 60, instructor: COACH_BOX, room: "Ring", level: "Todos los niveles", capacity: 20, description: DESC.boxeo, image: IMG.boxeo },
+  { id: "box-sab-1", name: "Boxeo", category: "boxeo", day: "sab", time: "08:30", duration: 60, instructor: COACH_BOX, room: "Ring", level: "Todos los niveles", capacity: 20, description: DESC.boxeo, image: IMG.boxeo },
 
   // ─── OPEN GYM · Lun a Dom · horario completo del gym ───
   { id: "og-lun", name: "Open Gym", category: "open-gym", day: "lun", time: "06:00", duration: 960, instructor: "—", room: "Todas las áreas", level: "Todos los niveles", capacity: 50, description: DESC["open-gym"], image: IMG["open-gym"] },

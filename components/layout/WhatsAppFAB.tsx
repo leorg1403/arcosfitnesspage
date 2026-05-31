@@ -3,14 +3,8 @@
 import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import { buildWhatsAppLink, WA_MESSAGES } from "@/lib/whatsapp";
+import { buildWhatsAppLink, messageForPath } from "@/lib/whatsapp";
 import { WhatsappIcon } from "./SocialIcons";
-
-function getMessageForPath(pathname: string): string {
-  if (pathname.startsWith("/hyrox")) return WA_MESSAGES.hyrox;
-  if (pathname.startsWith("/clases")) return WA_MESSAGES.visit;
-  return WA_MESSAGES.generic;
-}
 
 export function WhatsAppFAB() {
   const pathname = usePathname();
@@ -29,7 +23,7 @@ export function WhatsAppFAB() {
           animate={{ y: 0, opacity: 1 }}
           exit={{ y: 80, opacity: 0 }}
           transition={{ ease: [0.16, 1, 0.3, 1], duration: 0.8 }}
-          href={buildWhatsAppLink(getMessageForPath(pathname))}
+          href={buildWhatsAppLink(messageForPath(pathname))}
           target="_blank"
           rel="noopener noreferrer"
           aria-label="Hablar por WhatsApp con Arcos Fitness"

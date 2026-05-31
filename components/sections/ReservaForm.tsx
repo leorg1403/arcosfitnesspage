@@ -62,7 +62,6 @@ export function ReservaForm({ cls, onConfirmed }: Props) {
           name: cls.name,
           day: DAY_LABELS[cls.day].toLowerCase(),
           time: cls.time,
-          instructor: cls.instructor,
         })
   );
 

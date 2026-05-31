@@ -5,7 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { NAV } from "@/lib/content";
-import { buildWhatsAppLink, WA_MESSAGES } from "@/lib/whatsapp";
+import { buildWhatsAppLink, messageForPath } from "@/lib/whatsapp";
 import { Logo } from "./Logo";
 import { WhatsappIcon } from "./SocialIcons";
 import { cn } from "@/lib/cn";
@@ -85,7 +85,7 @@ export function SiteHeader() {
 
           <div className="flex items-center gap-4">
             <a
-              href={buildWhatsAppLink(WA_MESSAGES.generic)}
+              href={buildWhatsAppLink(messageForPath(pathname))}
               target="_blank"
               rel="noopener noreferrer"
               aria-label="WhatsApp"
@@ -183,7 +183,7 @@ export function SiteHeader() {
                 className="mt-16"
               >
                 <a
-                  href={buildWhatsAppLink(WA_MESSAGES.generic)}
+                  href={buildWhatsAppLink(messageForPath(pathname))}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="inline-flex items-center gap-3 text-gold font-mono text-sm uppercase tracking-[0.2em]"
