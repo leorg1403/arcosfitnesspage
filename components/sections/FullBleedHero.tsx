@@ -64,6 +64,7 @@ export function FullBleedHero({
 
   useEffect(() => {
     if (!video) return;
+    videoRef.current?.play().catch(() => {});
     const handleVisibilityChange = () => {
       if (document.visibilityState === "visible") {
         videoRef.current?.play().catch(() => {});
@@ -97,7 +98,7 @@ export function FullBleedHero({
             muted
             loop
             playsInline
-            preload="metadata"
+            preload="auto"
             className={cn(
               "absolute inset-0 h-full w-full object-cover",
               monochrome && "grayscale"
