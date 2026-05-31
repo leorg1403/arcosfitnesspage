@@ -18,7 +18,8 @@ export function FilterRail({ active, onChange, sticky = true }: Props) {
       )}
     >
       <div className="container-wide">
-        <div className="flex items-center gap-2 md:gap-3 overflow-x-auto scrollbar-none py-6 md:py-7 -mx-2 px-2">
+        {/* Móvil · chips que envuelven — los 5 filtros visibles, sin scroll oculto */}
+        <div className="flex flex-wrap gap-2 py-5 md:hidden">
           {CATEGORIES.map((cat) => {
             const isActive = active === cat.key;
             return (
@@ -26,7 +27,28 @@ export function FilterRail({ active, onChange, sticky = true }: Props) {
                 key={cat.key}
                 onClick={() => onChange(cat.key as ClassCategory | "all")}
                 className={cn(
-                  "group shrink-0 px-5 md:px-6 py-2.5 font-mono text-sm md:text-[0.95rem] uppercase tracking-[0.18em] font-medium transition-colors duration-300",
+                  "rounded-full border px-4 py-2 font-mono text-xs uppercase tracking-[0.18em] font-medium transition-colors duration-300",
+                  isActive
+                    ? "border-gold bg-gold/10 text-ink"
+                    : "border-ink/15 text-concrete hover:text-ink hover:border-ink/30"
+                )}
+              >
+                {cat.label}
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Desktop · riel con subrayado dorado */}
+        <div className="hidden md:flex items-center gap-3 overflow-x-auto scrollbar-none py-7 -mx-2 px-2">
+          {CATEGORIES.map((cat) => {
+            const isActive = active === cat.key;
+            return (
+              <button
+                key={cat.key}
+                onClick={() => onChange(cat.key as ClassCategory | "all")}
+                className={cn(
+                  "group shrink-0 px-6 py-2.5 font-mono text-[0.95rem] uppercase tracking-[0.18em] font-medium transition-colors duration-300",
                   isActive
                     ? "text-ink"
                     : "text-concrete hover:text-ink"

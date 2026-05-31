@@ -13,10 +13,11 @@ import {
 export function SiteFooter() {
   return (
     <footer className="bg-ink text-paper">
-      <div className="container-wide pt-24 pb-10">
-        <div className="grid gap-16 lg:grid-cols-12">
+      <div className="container-wide pt-12 md:pt-24 pb-10">
+       <div className="lg:mx-auto lg:max-w-7xl">
+        <div className="grid grid-cols-2 gap-12 lg:flex lg:flex-row lg:justify-between lg:gap-8">
           {/* Brand */}
-          <div className="lg:col-span-4 space-y-6">
+          <div className="col-span-2 space-y-6 lg:col-span-1">
             <Logo />
             <p className="text-sm text-paper/60 leading-relaxed max-w-sm">
               Arcos Fitness Club®. Bosques de las Lomas, CDMX.
@@ -26,9 +27,7 @@ export function SiteFooter() {
             </p>
           </div>
 
-          {/* Cols */}
-          <div className="lg:col-span-8 grid grid-cols-2 md:grid-cols-3 gap-12">
-            <FooterCol title="Información de contacto">
+            <FooterCol title="Información de contacto" className="lg:max-w-xs">
               <p>{SITE.address}</p>
               <a
                 href={`tel:+52${SITE.phone.replace(/\s/g, "")}`}
@@ -77,18 +76,19 @@ export function SiteFooter() {
               ))}
             </FooterCol>
 
-            <FooterCol title="Navegar" className="col-span-2 md:col-span-1">
-              {NAV_FOOTER.map((item) => (
-                <FooterNavLink
-                  key={item.href}
-                  href={item.href}
-                  className="block hover:text-gold transition-colors duration-300"
-                >
-                  {item.label}
-                </FooterNavLink>
-              ))}
+            <FooterCol title="Navegar" className="col-span-2 lg:col-span-1">
+              <div className="flex flex-row flex-wrap gap-x-6 gap-y-3 lg:flex-col">
+                {NAV_FOOTER.map((item) => (
+                  <FooterNavLink
+                    key={item.href}
+                    href={item.href}
+                    className="hover:text-gold transition-colors duration-300"
+                  >
+                    {item.label}
+                  </FooterNavLink>
+                ))}
+              </div>
             </FooterCol>
-          </div>
         </div>
 
         {/* Hairline gold */}
@@ -99,6 +99,7 @@ export function SiteFooter() {
             © {new Date().getFullYear()} Arcos Fitness Club · Todos los derechos reservados®
           </p>
         </div>
+       </div>
       </div>
     </footer>
   );

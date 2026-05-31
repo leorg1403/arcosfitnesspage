@@ -7,6 +7,7 @@ import { ArrowUpRight } from "lucide-react";
 const LAYOUT_TRANSITION = { duration: 0.55, ease: [0.16, 1, 0.3, 1] as const };
 import {
   CLASSES,
+  CATEGORIES,
   DAY_LABELS,
   DAY_ORDER,
   type ClassCategory,
@@ -30,13 +31,18 @@ export function ScheduleGrid({
   sectionPadY = true,
 }: Props) {
   const [category, setCategory] = useState<ClassCategory | "all">(initialCategory);
+  // Resaltado del chip (inmediato); el contenido (category) se aplica tras el scroll
+  const [selected, setSelected] = useState<ClassCategory | "all">(initialCategory);
   const [activeClass, setActiveClass] = useState<ClassItem | null>(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
 
   useEffect(() => {
     const handler = (e: Event) => {
       const detail = (e as CustomEvent<{ id?: string }>).detail;
-      if (!detail || detail.id === "schedule") setCategory("all");
+      if (!detail || detail.id === "schedule") {
+        setCategory("all");
+        setSelected("all");
+      }
     };
     window.addEventListener("arcos:scroll-to", handler);
     return () => window.removeEventListener("arcos:scroll-to", handler);
@@ -47,6 +53,7 @@ export function ScheduleGrid({
   // (no ResizeObserver, que dispara múltiples veces durante las animaciones internas
   // y causa "brinquitos" duplicados).
   const innerRef = useRef<HTMLDivElement>(null);
+  const rootRef = useRef<HTMLDivElement>(null);
   const [containerHeight, setContainerHeight] = useState<number | "auto">("auto");
 
   useLayoutEffect(() => {
@@ -83,15 +90,46 @@ export function ScheduleGrid({
     return map;
   }, [category]);
 
+  // Móvil: solo mostramos los días con clases; "Todas" siempre tiene Open Gym
+  // en cada día, así que ocultar días vacíos solo aplica al filtrar.
+  const visibleDays = DAY_ORDER.filter((day) => grouped[day].length > 0);
+  const categoryLabel = CATEGORIES.find((c) => c.key === category)?.label ?? "";
+
   const handleSelect = (cls: ClassItem) => {
     setActiveClass(cls);
     setDrawerOpen(true);
   };
 
+  // Al cambiar de filtro en móvil estando scrolleado abajo: primero subimos
+  // SUAVE al inicio del calendario con el contenido AÚN sin cambiar (el documento
+  // sigue largo → imposible que el navegador recorte el scroll = sin brinco), y
+  // aplicamos el filtro al terminar el scroll (scrollend). El chip se resalta ya.
+  const handleCategoryChange = (next: ClassCategory | "all") => {
+    setSelected(next);
+    if (typeof window === "undefined" || window.innerWidth >= 768) {
+      setCategory(next);
+      return;
+    }
+    const el = rootRef.current;
+    const top = el ? el.getBoundingClientRect().top + window.scrollY - 80 : 0;
+
+    if (window.scrollY > top + 1) {
+      window.scrollTo({ top, behavior: "smooth" });
+      const apply = () => setCategory(next);
+      if ("onscrollend" in window) {
+        window.addEventListener("scrollend", apply, { once: true });
+      } else {
+        setTimeout(apply, 450);
+      }
+    } else {
+      setCategory(next);
+    }
+  };
+
   return (
-    <div>
+    <div ref={rootRef}>
       {!hideFilter && (
-        <FilterRail active={category} onChange={setCategory} sticky />
+        <FilterRail active={selected} onChange={handleCategoryChange} sticky />
       )}
 
       <div className={cn(sectionPadY && "pt-12 pb-10 md:pt-14 md:pb-12")}>
@@ -195,77 +233,137 @@ export function ScheduleGrid({
           </LayoutGroup>
         </div>
 
-        {/* Mobile · acordeón vertical */}
+        {/* Mobile · agenda semanal */}
         <LayoutGroup>
           <motion.div
             layout
             transition={LAYOUT_TRANSITION}
-            className="md:hidden container-app space-y-10"
+            className="md:hidden container-app space-y-12"
           >
-            {DAY_ORDER.map((day) => (
-              <motion.div layout transition={LAYOUT_TRANSITION} key={day}>
-                <div className="flex items-baseline justify-between pb-4 border-b border-line-soft">
-                  <p className="font-display text-2xl font-semibold tracking-tight">
-                    {DAY_LABELS[day]}
-                  </p>
+            <AnimatePresence mode="popLayout" initial={false}>
+            {visibleDays.length === 0 ? (
+              <motion.p
+                layout
+                key="empty-week"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={LAYOUT_TRANSITION}
+                className="font-mono text-sm text-concrete py-10 text-center"
+              >
+                No hay clases de {categoryLabel} esta semana.
+              </motion.p>
+            ) : (
+              visibleDays.map((day) => {
+              const openGym = grouped[day].find((c) => c.category === "open-gym");
+              const timed = grouped[day].filter((c) => c.category !== "open-gym");
+              return (
+              <motion.div
+                layout
+                key={day}
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0 }}
+                transition={LAYOUT_TRANSITION}
+              >
+                {/* Encabezado de día — layout="position" para que NO se escale/estire
+                    el texto cuando cambian las clases del día; solo se reposiciona. */}
+                <motion.div
+                  layout="position"
+                  transition={LAYOUT_TRANSITION}
+                  className="flex items-end justify-between pb-3 border-b border-ink/15"
+                >
+                  <div>
+                    <p className="font-mono text-[0.6rem] uppercase tracking-[0.22em] text-concrete mb-1">
+                      {day === "sab" || day === "dom" ? "Fin de semana" : "Día"}
+                    </p>
+                    <p className="font-display text-2xl font-semibold tracking-tight">
+                      {DAY_LABELS[day]}
+                    </p>
+                  </div>
                   <p className="font-mono text-[0.625rem] uppercase tracking-[0.22em] text-concrete">
                     {grouped[day].length}
                   </p>
-                </div>
+                </motion.div>
                 <motion.div
                   layout
                   transition={LAYOUT_TRANSITION}
-                  className="mt-5 space-y-4"
+                  className="mt-5 space-y-3"
                 >
                   <AnimatePresence mode="popLayout" initial={false}>
-                    {grouped[day].length === 0 ? (
-                      <motion.p
-                        layout
-                        key="empty"
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 0.4 }}
-                        exit={{ opacity: 0 }}
-                        transition={LAYOUT_TRANSITION}
-                        className="font-mono text-xs text-concrete py-2"
-                      >
-                        —
-                      </motion.p>
-                    ) : (
-                      grouped[day].map((cls) => (
-                        <motion.button
-                          layout
-                          key={cls.id}
-                          onClick={() => handleSelect(cls)}
-                          initial={{ opacity: 0, y: 6 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          exit={{ opacity: 0, scale: 0.98 }}
-                          transition={LAYOUT_TRANSITION}
-                          className="group w-full text-left flex items-center gap-4 py-3 border-b border-line-soft/60 hover:border-gold/60 active:bg-bone/60 transition-colors"
-                          aria-label={`Ver detalle y reservar ${cls.name}`}
-                        >
-                        <span className={cn("font-mono text-sm text-concrete shrink-0", cls.category === "open-gym" ? "w-[6.5rem]" : "w-14")}>
-                          {cls.category === "open-gym" ? GYM_HOURS_BY_DAY[cls.day] : cls.time}
-                        </span>
-                        <div className="flex-1 min-w-0">
-                          <p className="font-display text-lg font-semibold tracking-tight">
-                            {cls.name}
-                          </p>
-                          <p className="font-mono text-[0.65rem] uppercase tracking-[0.2em] text-concrete mt-1">
-                            {cls.category === "open-gym" ? "Acceso al gym y clases" : `${cls.instructor} · ${cls.duration}min`}
-                          </p>
-                        </div>
-                        <ArrowUpRight
-                          className="size-4 text-gold shrink-0 transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
-                          strokeWidth={1.75}
-                          aria-hidden
-                        />
-                        </motion.button>
-                      ))
-                    )}
+                    {[
+                        ...(openGym
+                          ? [
+                              <motion.button
+                                layout
+                                key={openGym.id}
+                                onClick={() => handleSelect(openGym)}
+                                initial={{ opacity: 0, y: 6 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                exit={{ opacity: 0, scale: 0.98 }}
+                                transition={LAYOUT_TRANSITION}
+                                className="group w-full text-left rounded-sm border border-gold/25 bg-gold/[0.06] px-4 py-3.5 transition-colors hover:border-gold/50 active:bg-gold/10"
+                                aria-label="Ver detalle y reservar Open Gym"
+                              >
+                                <div className="flex items-start justify-between gap-3">
+                                  <div className="min-w-0">
+                                    <p className="font-mono text-[0.6rem] uppercase tracking-[0.22em] text-gold mb-1">
+                                      Todo el día · {GYM_HOURS_BY_DAY[day]}
+                                    </p>
+                                    <p className="font-display text-lg font-semibold tracking-tight">
+                                      Open Gym
+                                    </p>
+                                    <p className="font-mono text-[0.65rem] uppercase tracking-[0.2em] text-concrete mt-1">
+                                      Acceso al gym y clases
+                                    </p>
+                                  </div>
+                                  <ArrowUpRight
+                                    className="size-4 text-gold shrink-0 mt-0.5 transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
+                                    strokeWidth={1.75}
+                                    aria-hidden
+                                  />
+                                </div>
+                              </motion.button>,
+                            ]
+                          : []),
+                        ...timed.map((cls) => (
+                          <motion.button
+                            layout
+                            key={cls.id}
+                            onClick={() => handleSelect(cls)}
+                            initial={{ opacity: 0, y: 6 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, scale: 0.98 }}
+                            transition={LAYOUT_TRANSITION}
+                            className="group w-full text-left flex items-start gap-4 py-4 border-b border-line-soft/60 hover:border-gold/60 active:bg-bone/60 transition-colors"
+                            aria-label={`Ver detalle y reservar ${cls.name}`}
+                          >
+                            <span className="font-mono text-sm text-concrete shrink-0 w-14 pt-0.5">
+                              {cls.time}
+                            </span>
+                            <div className="flex-1 min-w-0">
+                              <p className="font-display text-lg font-semibold tracking-tight">
+                                {cls.name}
+                              </p>
+                              <p className="font-mono text-[0.65rem] uppercase tracking-[0.2em] text-concrete mt-1">
+                                {cls.instructor} · {cls.duration}min
+                              </p>
+                            </div>
+                            <ArrowUpRight
+                              className="size-4 text-gold shrink-0 mt-0.5 transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
+                              strokeWidth={1.75}
+                              aria-hidden
+                            />
+                          </motion.button>
+                        )),
+                    ]}
                   </AnimatePresence>
                 </motion.div>
               </motion.div>
-            ))}
+              );
+              })
+            )}
+            </AnimatePresence>
           </motion.div>
         </LayoutGroup>
 

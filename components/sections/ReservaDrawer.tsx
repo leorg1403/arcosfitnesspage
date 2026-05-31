@@ -53,9 +53,9 @@ export function ReservaDrawer({ cls, open, onOpenChange }: Props) {
               </span>
             </button>
 
-            <div className="grid md:grid-cols-2">
+            <div className="grid max-h-[92vh] overflow-y-auto scrollbar-none md:max-h-none md:overflow-visible md:grid-cols-2">
               {/* Photo + meta column */}
-              <div className="relative bg-ink min-h-[220px] md:min-h-[560px] flex flex-col justify-end overflow-hidden">
+              <div className="relative bg-ink min-h-[150px] md:min-h-[560px] flex flex-col justify-end overflow-hidden">
                 <Image
                   src={cls.image}
                   alt={cls.name}
@@ -64,11 +64,11 @@ export function ReservaDrawer({ cls, open, onOpenChange }: Props) {
                   className="object-cover"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-ink via-ink/40 to-ink/30" />
-                <div className="relative px-7 md:px-9 py-7 md:py-9">
-                  <p className="font-mono text-[0.625rem] uppercase tracking-[0.22em] text-gold mb-4">
+                <div className="relative px-7 md:px-9 py-5 md:py-9">
+                  <p className="font-mono text-[0.625rem] uppercase tracking-[0.22em] text-gold mb-3">
                     {cls.category === "open-gym" ? "Open Gym" : "Detalle de clase"}
                   </p>
-                  <h2 className="font-display text-3xl md:text-4xl font-bold tracking-[-0.02em] leading-tight text-paper">
+                  <h2 className="font-display text-2xl md:text-4xl font-bold tracking-[-0.02em] leading-tight text-paper">
                     {cls.name}
                   </h2>
                   <p className="mt-3 font-mono text-[0.6875rem] uppercase tracking-[0.22em] text-gold">

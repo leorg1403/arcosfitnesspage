@@ -111,9 +111,9 @@ export function ReservaForm({ cls, onConfirmed }: Props) {
 
   /* ── Form / Payment steps ────────────────────────────────── */
   return (
-    <div className="px-7 md:px-9 py-7 md:py-9 flex flex-col min-h-[400px] md:min-h-[560px]">
+    <div className="px-7 md:px-9 py-6 md:py-9 flex flex-col min-h-0 md:min-h-[560px]">
       {/* Step indicator */}
-      <div className="flex items-center gap-3 mb-5">
+      <div className="flex items-center gap-3 mb-4">
         {step === "payment" && (
           <button
             onClick={() => setStep("form")}
@@ -129,8 +129,8 @@ export function ReservaForm({ cls, onConfirmed }: Props) {
       </div>
 
       {/* Price */}
-      <div className="mb-6">
-        <span className="font-display text-4xl font-light tracking-tight text-paper">
+      <div className="mb-5">
+        <span className="font-display text-3xl md:text-4xl font-light tracking-tight text-paper">
           {priceLine}
         </span>
         <p className="font-mono text-[0.65rem] uppercase tracking-[0.22em] text-concrete mt-1">

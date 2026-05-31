@@ -71,7 +71,7 @@ export function ContactSection({
         variants={heroStagger}
         initial="hidden"
         animate={shown ? "visible" : "hidden"}
-        className="container-wide relative pt-32 md:pt-40 pb-20 md:pb-28 w-full"
+        className="container-wide relative pt-32 md:pt-40 pb-10 md:pb-28 w-full"
       >
         <div className="grid lg:grid-cols-12 gap-y-12 lg:gap-x-16 items-start">
           {/* Columna izquierda — copy editorial */}
