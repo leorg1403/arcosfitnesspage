@@ -109,7 +109,7 @@ export function FullBleedHero({
           </video>
         ) : (
           <ParallaxImage
-            src={image}
+            src={video && videoBlocked ? "/images/hero/hero-video-poster.jpeg" : image}
             alt={alt}
             className="h-full w-full"
             imgClassName={cn(monochrome && "grayscale")}
