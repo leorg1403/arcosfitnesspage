@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
 import { ParallaxImage } from "@/components/primitives/ParallaxImage";
 import { SplitHeadline } from "@/components/primitives/SplitHeadline";
@@ -61,17 +61,18 @@ export function FullBleedHero({
   video,
 }: Props) {
   const videoRef = useRef<HTMLVideoElement>(null);
+  const [videoBlocked, setVideoBlocked] = useState(false);
 
   useEffect(() => {
     if (!video) return;
-    videoRef.current?.play().catch(() => {});
-    const handleVisibilityChange = () => {
-      if (document.visibilityState === "visible") {
-        videoRef.current?.play().catch(() => {});
-      }
+    const el = videoRef.current;
+    if (!el) return;
+    el.play().catch(() => setVideoBlocked(true));
+    const onVisibility = () => {
+      if (document.visibilityState === "visible") el.play().catch(() => {});
     };
-    document.addEventListener("visibilitychange", handleVisibilityChange);
-    return () => document.removeEventListener("visibilitychange", handleVisibilityChange);
+    document.addEventListener("visibilitychange", onVisibility);
+    return () => document.removeEventListener("visibilitychange", onVisibility);
   }, [video]);
 
   return (
@@ -91,7 +92,7 @@ export function FullBleedHero({
         }}
         className="absolute inset-0"
       >
-        {video ? (
+        {video && !videoBlocked ? (
           <video
             ref={videoRef}
             autoPlay
