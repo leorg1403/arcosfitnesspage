@@ -189,7 +189,7 @@ export function SiteHeader() {
                   className="inline-flex items-center gap-3 text-gold font-mono text-sm uppercase tracking-[0.2em]"
                 >
                   <WhatsappIcon className="size-4" />
-                  Hablar con el dueño →
+                  WhatsApp →
                 </a>
               </motion.div>
             </nav>
