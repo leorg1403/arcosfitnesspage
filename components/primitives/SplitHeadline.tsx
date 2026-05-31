@@ -66,7 +66,7 @@ export function SplitHeadline({
       {lines.map((line, lineIdx) => {
         const words = line.split(" ");
         return (
-          <span key={lineIdx} className="block overflow-hidden pb-[0.1em] mb-[0.05em]">
+          <span key={lineIdx} className="block overflow-hidden pb-[0.3em] mb-[-0.15em]">
             <span
               className={cn(
                 "flex flex-wrap gap-x-[0.25em]",
