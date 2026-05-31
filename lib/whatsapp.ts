@@ -11,15 +11,15 @@ export function buildWhatsAppLink(message: string): string {
 
 export const WA_MESSAGES = {
   generic:
-    "Hola Arcos Fitness 👋, me gustaría más información sobre el club.",
+    "Hola Arcos Fitness, me gustaría más información sobre el club.",
   visit:
-    "Hola Arcos Fitness 👋, me gustaría agendar una visita al club.",
+    "Hola Arcos Fitness, me gustaría agendar una visita al club.",
   hyrox:
-    "Hola Arcos Fitness 👋, estoy interesado en el programa Hyrox. ¿Podemos hablar?",
+    "Hola Arcos Fitness, estoy interesado en el programa Hyrox. ¿Podemos hablar?",
   membership: (plan: string) =>
-    `Hola Arcos Fitness 👋, me interesa el plan ${plan}. ¿Podemos agendar una visita?`,
+    `Hola Arcos Fitness, me interesa el plan ${plan}. ¿Podemos agendar una visita?`,
   classBooking: (cls: { name: string; day: string; time: string; instructor: string }) =>
-    `Hola Arcos Fitness 👋, quiero reservar la clase de ${cls.name} el ${cls.day} a las ${cls.time} con ${cls.instructor}. ¿Hay cupo disponible?`,
+    `Hola Arcos Fitness, quiero reservar la clase de ${cls.name} el ${cls.day} a las ${cls.time} con ${cls.instructor}. ¿Hay cupo disponible?`,
   openGym: (day: string) =>
-    `Hola Arcos Fitness 👋, quiero reservar Open Gym el ${day}. ¿Hay disponibilidad?`,
+    `Hola Arcos Fitness, quiero reservar Open Gym el ${day}. ¿Hay disponibilidad?`,
 } as const;

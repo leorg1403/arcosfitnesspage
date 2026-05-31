@@ -4,7 +4,8 @@ export type ClassCategory = "funcional" | "hyrox" | "boxeo" | "open-gym";
 export const CLASS_PRICE = 380;
 export const OPEN_GYM_PRICE = 420;
 
-export function getClassPrice(cls: { category: ClassCategory }): number {
+export function getClassPrice(cls: { category: ClassCategory; price?: number }): number {
+  if (cls.price != null) return cls.price;
   return cls.category === "open-gym" ? OPEN_GYM_PRICE : CLASS_PRICE;
 }
 
@@ -41,6 +42,8 @@ export type ClassItem = {
   room: string;
   level: "Principiante" | "Intermedio" | "Avanzado" | "Todos los niveles";
   capacity: number;
+  /** Precio propio (override). Si no se define, usa el precio por categoría. */
+  price?: number;
   description: string;
   image: string;
 };
@@ -100,6 +103,9 @@ export const CLASSES: ClassItem[] = [
   { id: "hyrox-sab-2", name: "Hyrox", category: "hyrox", day: "sab", time: "11:00", duration: 60, instructor: COACH_HYROX, room: "Hyrox Box", level: "Intermedio", capacity: 12, description: DESC.hyrox, image: IMG.hyrox },
   // Domingo: 10:00
   { id: "hyrox-dom-1", name: "Hyrox", category: "hyrox", day: "dom", time: "10:00", duration: 60, instructor: COACH_HYROX, room: "Hyrox Box", level: "Intermedio", capacity: 12, description: DESC.hyrox, image: IMG.hyrox },
+  // Master Class · Sábado 12:00 y Domingo 11:00
+  { id: "hyrox-mc-sab", name: "Hyrox Master Class", category: "hyrox", day: "sab", time: "12:00", duration: 90, instructor: COACH_HYROX, room: "Hyrox Box", level: "Intermedio", capacity: 30, price: 700, description: "Sesión especial guiada por coach: técnica avanzada y simulacro completo de competencia Hyrox.", image: IMG.hyrox },
+  { id: "hyrox-mc-dom", name: "Hyrox Master Class", category: "hyrox", day: "dom", time: "11:00", duration: 90, instructor: COACH_HYROX, room: "Hyrox Box", level: "Intermedio", capacity: 30, price: 700, description: "Sesión especial guiada por coach: técnica avanzada y simulacro completo de competencia Hyrox.", image: IMG.hyrox },
 
   // ─── BOXEO ───
   { id: "box-jue-1", name: "Boxeo", category: "boxeo", day: "jue", time: "09:00", duration: 60, instructor: COACH_BOX, room: "Ring", level: "Todos los niveles", capacity: 10, description: DESC.boxeo, image: IMG.boxeo },

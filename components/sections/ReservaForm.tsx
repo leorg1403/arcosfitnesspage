@@ -225,7 +225,7 @@ export function ReservaForm({ cls, onConfirmed }: Props) {
             )
           )}
           <p className="font-mono text-[0.6rem] uppercase tracking-[0.22em] text-concrete/50 text-center pt-1 shrink-0">
-            🔒 Pago encriptado por Stripe
+            &#x1F512; Pago encriptado por Stripe
           </p>
         </div>
       )}

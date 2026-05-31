@@ -303,7 +303,7 @@ export function CheckoutDialog({ item, open, onOpenChange }: Props) {
                         )
                       )}
                       <p className="font-mono text-[0.6rem] uppercase tracking-[0.22em] text-concrete text-center pt-1">
-                        🔒 Pago encriptado por Stripe
+                        &#x1F512; Pago encriptado por Stripe
                       </p>
                     </div>
                   )}
