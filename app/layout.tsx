@@ -7,6 +7,8 @@ import { WhatsAppFAB } from "@/components/layout/WhatsAppFAB";
 import { ScrollProgressBar } from "@/components/layout/ScrollProgressBar";
 import { PageTransition } from "@/components/layout/PageTransition";
 import { Analytics } from "@vercel/analytics/next";
+import { JsonLd } from "@/components/seo/JsonLd";
+import { healthClubSchema } from "@/lib/structuredData";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -63,6 +65,7 @@ export default function RootLayout({
       className={`${inter.variable} ${serif.variable} ${mono.variable}`}
     >
       <body className="bg-paper text-ink">
+        <JsonLd data={healthClubSchema()} />
         <ScrollProgressBar />
         <SiteHeader />
         <main>

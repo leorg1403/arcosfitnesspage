@@ -10,6 +10,8 @@ type Props = {
   italicWord?: string | string[];
   /** Tamaño y peso del display */
   size?: "display" | "headline" | "h2";
+  /** Elemento semántico a renderizar. Default "h2" (el estilo es 100% CSS, no cambia visualmente). */
+  as?: "h1" | "h2";
   /** Color base del texto */
   tone?: "ink" | "paper" | "gold";
   /** Alineación */
@@ -45,14 +47,16 @@ export function SplitHeadline({
   align = "left",
   delay = 0,
   stagger = 80,
+  as = "h2",
   className,
 }: Props) {
   const [ref, shown] = useInViewSafe<HTMLHeadingElement>();
   const italicWords = Array.isArray(italicWord) ? italicWord : italicWord ? [italicWord] : [];
   let wordIndex = 0;
+  const Heading = as;
 
   return (
-    <h2
+    <Heading
       ref={ref}
       className={cn(
         "font-display",
@@ -104,6 +108,6 @@ export function SplitHeadline({
           </span>
         );
       })}
-    </h2>
+    </Heading>
   );
 }

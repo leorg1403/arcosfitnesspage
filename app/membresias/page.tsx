@@ -14,6 +14,8 @@ import { MEMBERSHIP_FAQS } from "@/lib/memberships";
 import { fadeUp } from "@/lib/motion";
 import { buildWhatsAppLink, WA_MESSAGES } from "@/lib/whatsapp";
 import { WhatsappIcon } from "@/components/layout/SocialIcons";
+import { JsonLd } from "@/components/seo/JsonLd";
+import { faqSchema } from "@/lib/structuredData";
 
 export const metadata: Metadata = {
   title: "Membresías",
@@ -46,6 +48,8 @@ const FAQS_WITH_LINKS = MEMBERSHIP_FAQS.map((faq) =>
 export default function MembresiasPage() {
   return (
     <>
+      <JsonLd data={faqSchema()} />
+
       {/* Modal de confirmación post-pago (lee ?confirmed=1&plan=XXX de la URL) */}
       <Suspense>
         <ConfirmationModal />

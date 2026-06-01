@@ -159,6 +159,7 @@ export function FullBleedHero({
           ) : (
             <div className="mt-6">
               <SplitHeadline
+                as="h1"
                 lines={headline}
                 italicWord={italicWord}
                 size={displaySize}
