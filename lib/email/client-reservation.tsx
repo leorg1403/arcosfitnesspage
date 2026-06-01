@@ -16,6 +16,10 @@ export type ClientReservationProps = {
   /** Socio: clase incluida en su membresía → sin cobro */
   member?: boolean;
   currency?: string;
+  /** Código corto de reserva (últimos 6) que el cliente presenta en recepción */
+  reservationCode?: string;
+  /** Enlace único de cancelación (UUID). Si se omite, no se muestra. */
+  cancelUrl?: string;
 };
 
 function formatMoney(cents: number, currency: string) {
@@ -80,6 +84,12 @@ export function ClientReservationEmail(p: ClientReservationProps) {
         <Text className="text-[#0A0A0A] text-base mt-1 mb-0">
           {p.classDay} · {p.classTime}
         </Text>
+        {p.reservationCode && (
+          <Text className="text-[#0A0A0A] text-base mt-3 mb-0">
+            Código de reserva:{" "}
+            <strong style={{ letterSpacing: "0.1em" }}>{p.reservationCode}</strong>
+          </Text>
+        )}
         {paid && (
           <Text className="text-[#0A0A0A] text-base mt-3 mb-0">
             Total cobrado:{" "}
@@ -108,6 +118,16 @@ export function ClientReservationEmail(p: ClientReservationProps) {
         </a>
         .
       </Text>
+
+      {p.cancelUrl && (
+        <Text className="text-[#8A8A88] text-xs mt-4 mb-0">
+          ¿No podrás asistir?{" "}
+          <a href={p.cancelUrl} style={{ color: "#C4A572" }}>
+            Cancela tu reserva aquí
+          </a>
+          .
+        </Text>
+      )}
 
       {paid && (
         <Text className="text-[#8A8A88] text-xs mt-4 mb-0">

@@ -6,26 +6,36 @@ import { ArrowUpRight } from "lucide-react";
 
 const LAYOUT_TRANSITION = { duration: 0.55, ease: [0.16, 1, 0.3, 1] as const };
 import {
-  CLASSES,
   CATEGORIES,
   DAY_LABELS,
   DAY_ORDER,
   type ClassCategory,
-  type ClassItem,
   type DayKey,
 } from "@/lib/classes";
+import type { BookableClass } from "@/lib/types";
 import { GYM_HOURS_BY_DAY } from "@/lib/content";
 import { ReservaDrawer } from "./ReservaDrawer";
 import { FilterRail } from "./FilterRail";
 import { cn } from "@/lib/cn";
 
 type Props = {
+  /** Horario reservable (próxima ocurrencia por clase + cupos) servido por el server. */
+  entries: BookableClass[];
   initialCategory?: ClassCategory | "all";
   hideFilter?: boolean;
   sectionPadY?: boolean;
 };
 
+/** Etiqueta de cupos: "Lleno" / "Quedan N" (cuando quedan pocos) / null. */
+function spotsLabel(c: BookableClass): { text: string; tone: "full" | "low" } | null {
+  if (c.full) return { text: "Lleno", tone: "full" };
+  if (c.availableSpots != null && c.availableSpots <= 5)
+    return { text: `Quedan ${c.availableSpots}`, tone: "low" };
+  return null;
+}
+
 export function ScheduleGrid({
+  entries,
   initialCategory = "all",
   hideFilter,
   sectionPadY = true,
@@ -33,7 +43,7 @@ export function ScheduleGrid({
   const [category, setCategory] = useState<ClassCategory | "all">(initialCategory);
   // Resaltado del chip (inmediato); el contenido (category) se aplica tras el scroll
   const [selected, setSelected] = useState<ClassCategory | "all">(initialCategory);
-  const [activeClass, setActiveClass] = useState<ClassItem | null>(null);
+  const [activeClass, setActiveClass] = useState<BookableClass | null>(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
 
   useEffect(() => {
@@ -48,24 +58,17 @@ export function ScheduleGrid({
     return () => window.removeEventListener("arcos:scroll-to", handler);
   }, []);
 
-  // Animar altura real del wrapper para que el reflow del documento (sección Equipo, etc.)
-  // se mueva smoothly al cambiar el filtro. Medimos UNA sola vez por cambio de categoría
-  // (no ResizeObserver, que dispara múltiples veces durante las animaciones internas
-  // y causa "brinquitos" duplicados).
+  // Animar altura real del wrapper para que el reflow del documento se mueva
+  // smoothly al cambiar el filtro.
   const innerRef = useRef<HTMLDivElement>(null);
   const rootRef = useRef<HTMLDivElement>(null);
   const [containerHeight, setContainerHeight] = useState<number | "auto">("auto");
 
   useLayoutEffect(() => {
     if (!innerRef.current) return;
-    // Medir la altura natural del contenido recién renderizado (popLayout
-    // ya sacó los items que están saliendo, así que scrollHeight refleja el final).
-    const next = innerRef.current.scrollHeight;
-    setContainerHeight(next);
+    setContainerHeight(innerRef.current.scrollHeight);
   }, [category]);
 
-  // Medir también en resize de ventana (responsive) para que el wrapper
-  // se ajuste si el usuario cambia el ancho del browser.
   useLayoutEffect(() => {
     if (typeof window === "undefined") return;
     const onResize = () => {
@@ -76,34 +79,28 @@ export function ScheduleGrid({
   }, []);
 
   const grouped = useMemo(() => {
-    const map: Record<DayKey, ClassItem[]> = {
+    const map: Record<DayKey, BookableClass[]> = {
       lun: [], mar: [], mie: [], jue: [], vie: [], sab: [], dom: [],
     };
-    for (const cls of CLASSES) {
+    for (const cls of entries) {
       if (category === "all" || cls.category === category) {
         map[cls.day].push(cls);
       }
     }
     for (const k of DAY_ORDER) {
-      map[k].sort((a, b) => a.time.localeCompare(b.time));
+      map[k].sort((a, b) => a.startTime.localeCompare(b.startTime));
     }
     return map;
-  }, [category]);
+  }, [category, entries]);
 
-  // Móvil: solo mostramos los días con clases; "Todas" siempre tiene Open Gym
-  // en cada día, así que ocultar días vacíos solo aplica al filtrar.
   const visibleDays = DAY_ORDER.filter((day) => grouped[day].length > 0);
   const categoryLabel = CATEGORIES.find((c) => c.key === category)?.label ?? "";
 
-  const handleSelect = (cls: ClassItem) => {
+  const handleSelect = (cls: BookableClass) => {
     setActiveClass(cls);
     setDrawerOpen(true);
   };
 
-  // Al cambiar de filtro en móvil estando scrolleado abajo: primero subimos
-  // SUAVE al inicio del calendario con el contenido AÚN sin cambiar (el documento
-  // sigue largo → imposible que el navegador recorte el scroll = sin brinco), y
-  // aplicamos el filtro al terminar el scroll (scrollend). El chip se resalta ya.
   const handleCategoryChange = (next: ClassCategory | "all") => {
     setSelected(next);
     if (typeof window === "undefined" || window.innerWidth >= 768) {
@@ -133,15 +130,12 @@ export function ScheduleGrid({
       )}
 
       <div className={cn(sectionPadY && "pt-12 pb-10 md:pt-14 md:pb-12")}>
-        {/* Hint editorial — affordance de "click para reservar" */}
         <div className="container-wide mb-6 md:mb-8">
           <p className="font-mono text-[0.65rem] uppercase tracking-[0.22em] text-gold">
             —&nbsp;&nbsp;Selecciona una clase o sesión para reservar
           </p>
         </div>
 
-        {/* Wrapper que anima la altura real del schedule —
-            así los elementos siguientes (Equipo) reflowan smoothly */}
         <motion.div
           animate={{ height: containerHeight }}
           transition={LAYOUT_TRANSITION}
@@ -191,34 +185,44 @@ export function ScheduleGrid({
                           Sin clases
                         </motion.p>
                       ) : (
-                        grouped[day].map((cls) => (
+                        grouped[day].map((cls) => {
+                          const spots = spotsLabel(cls);
+                          return (
                           <motion.button
                             layout
-                            key={cls.id}
+                            key={cls.templateId}
                             onClick={() => handleSelect(cls)}
                             initial={{ opacity: 0, y: 8 }}
                             animate={{ opacity: 1, y: 0 }}
                             exit={{ opacity: 0, y: -4, scale: 0.98 }}
                             transition={LAYOUT_TRANSITION}
                             className="group relative block text-left w-full -mx-2 px-2 py-1.5 rounded-sm cursor-pointer hover:bg-bone/60 transition-colors duration-300"
-                            aria-label={`Ver detalle y reservar ${cls.name}${cls.category !== "open-gym" ? ` de ${cls.instructor}` : ""}`}
+                            aria-label={`Ver detalle y reservar ${cls.name}${!cls.isOpenGym ? ` de ${cls.instructor}` : ""} · ${cls.dateLabel}`}
                           >
                             <div className="flex items-start justify-between gap-2">
                               <div className="flex-1 min-w-0">
                                 <p className="font-mono text-[0.6875rem] tracking-[0.18em] text-concrete group-hover:text-gold transition-colors">
-                                  {cls.category === "open-gym" ? GYM_HOURS_BY_DAY[cls.day] : cls.time}
+                                  {cls.isOpenGym ? GYM_HOURS_BY_DAY[cls.day] : cls.startTime}
                                 </p>
-                                {cls.dateLabel && (
-                                  <p className="font-mono text-[0.6rem] uppercase tracking-[0.22em] text-gold mt-0.5">
-                                    {cls.dateLabel}
-                                  </p>
-                                )}
+                                <p className="font-mono text-[0.6rem] uppercase tracking-[0.22em] text-gold mt-0.5">
+                                  {cls.dateLabel}
+                                </p>
                                 <p className="font-display text-base font-semibold tracking-tight mt-0.5 group-hover:text-gold transition-colors">
                                   {cls.name}
                                 </p>
                                 <p className="font-mono text-[0.65rem] uppercase tracking-[0.18em] text-concrete mt-0.5">
-                                  {cls.category === "open-gym" ? "Acceso al gym y clases" : cls.instructor}
+                                  {cls.isOpenGym ? "Acceso al gym y clases" : cls.instructor}
                                 </p>
+                                {spots && (
+                                  <p
+                                    className={cn(
+                                      "font-mono text-[0.6rem] uppercase tracking-[0.18em] mt-1",
+                                      spots.tone === "full" ? "text-red-500/80" : "text-gold"
+                                    )}
+                                  >
+                                    {spots.text}
+                                  </p>
+                                )}
                               </div>
                               <ArrowUpRight
                                 className="size-3.5 text-concrete/50 group-hover:text-gold shrink-0 mt-0.5 transition-all duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
@@ -228,7 +232,8 @@ export function ScheduleGrid({
                             </div>
                             <span className="block mt-2 h-px w-0 bg-gold transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:w-8" />
                           </motion.button>
-                        ))
+                          );
+                        })
                       )}
                     </AnimatePresence>
                   </motion.div>
@@ -260,8 +265,8 @@ export function ScheduleGrid({
               </motion.p>
             ) : (
               visibleDays.map((day) => {
-              const openGym = grouped[day].find((c) => c.category === "open-gym");
-              const timed = grouped[day].filter((c) => c.category !== "open-gym");
+              const openGym = grouped[day].find((c) => c.isOpenGym);
+              const timed = grouped[day].filter((c) => !c.isOpenGym);
               return (
               <motion.div
                 layout
@@ -271,8 +276,6 @@ export function ScheduleGrid({
                 exit={{ opacity: 0 }}
                 transition={LAYOUT_TRANSITION}
               >
-                {/* Encabezado de día — layout="position" para que NO se escale/estire
-                    el texto cuando cambian las clases del día; solo se reposiciona. */}
                 <motion.div
                   layout="position"
                   transition={LAYOUT_TRANSITION}
@@ -301,7 +304,7 @@ export function ScheduleGrid({
                           ? [
                               <motion.button
                                 layout
-                                key={openGym.id}
+                                key={openGym.templateId}
                                 onClick={() => handleSelect(openGym)}
                                 initial={{ opacity: 0, y: 6 }}
                                 animate={{ opacity: 1, y: 0 }}
@@ -319,7 +322,7 @@ export function ScheduleGrid({
                                       Open Gym
                                     </p>
                                     <p className="font-mono text-[0.65rem] uppercase tracking-[0.2em] text-concrete mt-1">
-                                      Acceso al gym y clases
+                                      Acceso al gym y clases · {openGym.dateLabel}
                                     </p>
                                   </div>
                                   <ArrowUpRight
@@ -331,33 +334,43 @@ export function ScheduleGrid({
                               </motion.button>,
                             ]
                           : []),
-                        ...timed.map((cls) => (
+                        ...timed.map((cls) => {
+                          const spots = spotsLabel(cls);
+                          return (
                           <motion.button
                             layout
-                            key={cls.id}
+                            key={cls.templateId}
                             onClick={() => handleSelect(cls)}
                             initial={{ opacity: 0, y: 6 }}
                             animate={{ opacity: 1, y: 0 }}
                             exit={{ opacity: 0, scale: 0.98 }}
                             transition={LAYOUT_TRANSITION}
                             className="group w-full text-left flex items-start gap-4 py-4 border-b border-line-soft/60 hover:border-gold/60 active:bg-bone/60 transition-colors"
-                            aria-label={`Ver detalle y reservar ${cls.name}`}
+                            aria-label={`Ver detalle y reservar ${cls.name} · ${cls.dateLabel}`}
                           >
                             <span className="font-mono text-sm text-concrete shrink-0 w-14 pt-0.5">
-                              {cls.time}
+                              {cls.startTime}
                             </span>
                             <div className="flex-1 min-w-0">
-                              {cls.dateLabel && (
-                                <p className="font-mono text-[0.6rem] uppercase tracking-[0.22em] text-gold mb-0.5">
-                                  {cls.dateLabel}
-                                </p>
-                              )}
+                              <p className="font-mono text-[0.6rem] uppercase tracking-[0.22em] text-gold mb-0.5">
+                                {cls.dateLabel}
+                              </p>
                               <p className="font-display text-lg font-semibold tracking-tight">
                                 {cls.name}
                               </p>
                               <p className="font-mono text-[0.65rem] uppercase tracking-[0.2em] text-concrete mt-1">
-                                {cls.instructor} · {cls.duration}min
+                                {cls.instructor} · {cls.durationMin}min
                               </p>
+                              {spots && (
+                                <p
+                                  className={cn(
+                                    "font-mono text-[0.6rem] uppercase tracking-[0.18em] mt-1",
+                                    spots.tone === "full" ? "text-red-500/80" : "text-gold"
+                                  )}
+                                >
+                                  {spots.text}
+                                </p>
+                              )}
                             </div>
                             <ArrowUpRight
                               className="size-4 text-gold shrink-0 mt-0.5 transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
@@ -365,7 +378,8 @@ export function ScheduleGrid({
                               aria-hidden
                             />
                           </motion.button>
-                        )),
+                          );
+                        }),
                     ]}
                   </AnimatePresence>
                 </motion.div>

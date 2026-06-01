@@ -45,6 +45,8 @@ export type CreateCheckoutOpts = {
     phone?: string;
   };
   metadata: Record<string, string>;
+  /** Epoch (segundos) de expiración de la sesión. Mínimo de Stripe: +30 min. */
+  expiresAt?: number;
 };
 
 /**
@@ -92,6 +94,7 @@ export async function createEmbeddedCheckoutSession(opts: CreateCheckoutOpts) {
     mode,
     line_items: lineItems,
     customer_email: opts.customer.email,
+    ...(opts.expiresAt && { expires_at: opts.expiresAt }),
     metadata: {
       ...opts.metadata,
       customerName: opts.customer.name,

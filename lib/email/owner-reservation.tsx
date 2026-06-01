@@ -19,6 +19,8 @@ export type OwnerReservationProps = {
   /** Socio: clase incluida en su membresía → sin cobro, verificar membresía */
   member?: boolean;
   currency?: string;
+  /** Código corto de reserva (últimos 6) */
+  reservationCode?: string;
 };
 
 function formatMoney(cents: number, currency: string) {
@@ -59,6 +61,14 @@ export function OwnerReservationEmail(p: OwnerReservationProps) {
       <Text className="text-[#8A8A88] text-sm mt-2 mb-0">
         {p.classDay} · {p.classTime}
       </Text>
+      {p.reservationCode && (
+        <Text className="text-[#8A8A88] text-sm mt-1 mb-0">
+          Código:{" "}
+          <strong style={{ color: "#0A0A0A", letterSpacing: "0.1em" }}>
+            {p.reservationCode}
+          </strong>
+        </Text>
+      )}
       {member && (
         <Text className="text-[#0A0A0A] text-base mt-3 mb-0">
           Socio · <strong>sin cobro</strong> — verificar que la membresía esté activa en recepción.

@@ -1,14 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Inter, Instrument_Serif, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
-import { SiteHeader } from "@/components/layout/SiteHeader";
-import { SiteFooter } from "@/components/layout/SiteFooter";
-import { WhatsAppFAB } from "@/components/layout/WhatsAppFAB";
-import { ScrollProgressBar } from "@/components/layout/ScrollProgressBar";
-import { PageTransition } from "@/components/layout/PageTransition";
 import { Analytics } from "@vercel/analytics/next";
-import { JsonLd } from "@/components/seo/JsonLd";
-import { healthClubSchema } from "@/lib/structuredData";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -69,23 +62,9 @@ export default function RootLayout({
       className={`${inter.variable} ${serif.variable} ${mono.variable}`}
     >
       <body className="bg-ink text-ink">
-        {/* Tira de muestreo para Safari 26 (iOS): el navegador tiñe su status
-            bar muestreando el background-color de elementos fixed cerca del
-            borde superior (ya NO respeta theme-color). Esta tira ink le da un
-            color sólido y determinista. Queda OCULTA detrás del header; solo en
-            móvil. La barra inferior de Safari cae sola al fondo ink del root. */}
-        <div
-          aria-hidden
-          className="pointer-events-none fixed inset-x-0 top-0 h-1 bg-ink z-[5] md:hidden"
-        />
-        <JsonLd data={healthClubSchema()} />
-        <ScrollProgressBar />
-        <SiteHeader />
-        <main>
-          <PageTransition>{children}</PageTransition>
-        </main>
-        <SiteFooter />
-        <WhatsAppFAB />
+        {/* El header/footer/FAB del sitio público viven en app/(site)/layout.tsx
+            (envuelve todas las páginas públicas). /recepcion queda sin ese chrome. */}
+        {children}
         <Analytics />
       </body>
     </html>

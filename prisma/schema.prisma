@@ -1,0 +1,327 @@
+// Prisma schema — Arcos Fitness
+// Todas las tablas viven en el esquema `app`, FUERA de `public`, para que la
+// auto-API (PostgREST) de Supabase NO las exponga. Prisma es el ÚNICO cliente
+// de BD; nunca se importa desde el navegador (ver lib/db/client.ts · server-only).
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL") // pooler 6543 ?pgbouncer=true&connection_limit=1&schema=app
+  directUrl = env("DIRECT_URL") //   directo 5432 ?schema=app (migraciones)
+  schemas   = ["app"]
+}
+
+// ─── Enums ────────────────────────────────────────────────────────────────
+enum ClassCategory {
+  funcional
+  hyrox
+  boxeo
+  open_gym
+
+  @@schema("app")
+}
+
+enum ClassLevel {
+  principiante
+  intermedio
+  avanzado
+  todos
+
+  @@schema("app")
+}
+
+enum ClassKind {
+  weekly
+  oneoff
+
+  @@schema("app")
+}
+
+enum SessionStatus {
+  open
+  closed
+  cancelled
+
+  @@schema("app")
+}
+
+enum ReservationKind {
+  member
+  reception
+  online
+
+  @@schema("app")
+}
+
+enum ReservationStatus {
+  pending
+  confirmed
+  cancelled
+  expired
+
+  @@schema("app")
+}
+
+enum ClassPaymentStatus {
+  none
+  pending_reception
+  paid
+
+  @@schema("app")
+}
+
+enum ItemKind {
+  plan
+  prepayment
+  class
+
+  @@schema("app")
+}
+
+enum PaymentStatus {
+  pending
+  paid
+  failed
+  expired
+
+  @@schema("app")
+}
+
+enum SubscriptionStatus {
+  active
+  past_due
+  canceled
+  incomplete
+  trialing
+  unpaid
+
+  @@schema("app")
+}
+
+enum LeadStatus {
+  new
+  contacted
+  converted
+  archived
+
+  @@schema("app")
+}
+
+enum AttendanceStatus {
+  pending
+  attended
+  no_show
+  late_cancel
+
+  @@schema("app")
+}
+
+enum CustomerStatus {
+  active
+  flagged
+  blocked
+
+  @@schema("app")
+}
+
+enum AdminRole {
+  owner
+  staff
+
+  @@schema("app")
+}
+
+// ─── Modelos ──────────────────────────────────────────────────────────────
+
+/// Administradores del panel de recepción (auth propia). Se siembra uno por
+/// defecto con ensureDefaultAdmin() si la tabla está vacía.
+model Admin {
+  id           String    @id @default(cuid())
+  email        String    @unique
+  name         String
+  passwordHash String // bcrypt; nunca texto plano
+  role         AdminRole @default(owner)
+  active       Boolean   @default(true)
+  lastLoginAt  DateTime?
+  createdAt    DateTime  @default(now())
+
+  @@schema("app")
+}
+
+/// Cuenta de cliente (CRM) auto-creada/vinculada por correo. NO es un login.
+model Customer {
+  id            String         @id @default(cuid())
+  email         String         @unique // normalizado a minúsculas; clave de vinculación
+  name          String
+  phone         String?
+  status        CustomerStatus @default(active) // blocked => no puede reservar
+  notes         String? // notas del dueño (admin)
+  firstSeenAt   DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  reservations  Reservation[]
+  payments      Payment[]
+  subscriptions Subscription[]
+
+  @@index([status])
+  @@schema("app")
+}
+
+/// Catálogo editable de clases (reemplaza la constante CLASSES de lib/classes.ts).
+model ClassTemplate {
+  id            String         @id // slug, p.ej. "func-lun-1"
+  name          String
+  category      ClassCategory
+  kind          ClassKind      @default(weekly) // weekly = recurrente | oneoff = evento puntual
+  weekday       Int? // 0=Dom..6=Sáb (kind=weekly)
+  intervalWeeks Int            @default(1) // cada cuánto se repite: 1=cada semana, 2=cada 2 semanas…
+  anchorDate    DateTime?      @db.Date // semana de referencia (solo si intervalWeeks > 1)
+  eventDate     DateTime?      @db.Date // fecha única (kind=oneoff, Master Class)
+  startTime     String // "06:10" civil CDMX
+  durationMin   Int
+  instructor    String
+  room          String
+  level         ClassLevel     @default(todos)
+  description   String
+  image         String
+  capacity      Int            @default(20)
+  priceCents    Int? // override; null => default por categoría
+  onlineOnly    Boolean        @default(false)
+  tracksSpots   Boolean        @default(true) // false para Open Gym (sin inventario)
+  active        Boolean        @default(true)
+  sortOrder     Int            @default(0)
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  sessions      ClassSession[]
+
+  @@index([active, category])
+  @@schema("app")
+}
+
+/// Ocurrencia concreta de una clase en una fecha + inventario de cupos.
+model ClassSession {
+  id             String        @id @default(cuid())
+  template       ClassTemplate @relation(fields: [templateId], references: [id])
+  templateId     String
+  date           DateTime      @db.Date // fecha civil CDMX
+  startTime      String
+  capacity       Int // CONGELADA al materializar
+  availableSpots Int? // null => sin tracking (Open Gym)
+  status         SessionStatus @default(open)
+  createdAt      DateTime      @default(now())
+  reservations   Reservation[]
+
+  @@unique([templateId, date])
+  @@index([date])
+  @@schema("app")
+}
+
+/// Dudas / contacto (formulario de ContactSection). Registro APARTE del CRM.
+model Lead {
+  id              String     @id @default(cuid())
+  firstName       String
+  lastName        String
+  email           String
+  message         String
+  dedupeHash      String     @unique // hash(emailLower + '|' + mensaje normalizado)
+  resubmitCount   Int        @default(0) // reenvíos idénticos (dedupe silencioso)
+  source          String     @default("contact-form")
+  status          LeadStatus @default(new)
+  createdAt       DateTime   @default(now())
+  lastSubmittedAt DateTime   @default(now())
+
+  @@index([email])
+  @@schema("app")
+}
+
+/// Reserva de una clase (recepción / socio / pagada en línea).
+model Reservation {
+  id                 String             @id @default(cuid())
+  code               String             @unique @default(uuid()) // UUID por reserva (autoridad)
+  shortCode          String // últimos 6 (mayúsculas) — display + filtro rápido
+  session            ClassSession       @relation(fields: [sessionId], references: [id])
+  sessionId          String
+  customer           Customer           @relation(fields: [customerId], references: [id])
+  customerId         String
+  customerName       String // snapshot al momento de reservar
+  customerEmail      String
+  customerEmailLower String // normalizado para dedupe
+  customerPhone      String
+  kind               ReservationKind
+  status             ReservationStatus  @default(pending)
+  attendance         AttendanceStatus   @default(pending) // lo marca recepción
+  paymentStatus      ClassPaymentStatus @default(none)
+  amountDueCents     Int
+  holdExpiresAt      DateTime? // solo online (hold)
+  stripeSessionId    String?            @unique
+  payment            Payment?           @relation(fields: [paymentId], references: [id])
+  paymentId          String?            @unique
+  createdAt          DateTime           @default(now())
+  updatedAt          DateTime           @updatedAt
+
+  @@index([sessionId, status])
+  @@index([customerId])
+  @@index([shortCode])
+  @@index([status, holdExpiresAt]) // barrido de holds vencidos
+  @@schema("app")
+  // + índice único PARCIAL (sessionId, customerEmailLower) WHERE status IN ('pending','confirmed')
+  //   se añade vía SQL crudo en la migración (evita doble reserva del mismo correo).
+}
+
+/// Todo pago de Stripe (clase / plan / anticipado).
+model Payment {
+  id                    String        @id @default(cuid())
+  stripeSessionId       String        @unique
+  stripePaymentIntentId String?
+  stripeSubscriptionId  String?
+  itemKind              ItemKind
+  itemId                String
+  itemName              String
+  amountTotalCents      Int
+  currency              String        @default("mxn")
+  status                PaymentStatus @default(pending)
+  customerName          String
+  customerEmail         String
+  customerPhone         String?
+  customer              Customer?     @relation(fields: [customerId], references: [id])
+  customerId            String?
+  reservation           Reservation?
+  subscription          Subscription? @relation(fields: [subscriptionId], references: [id])
+  subscriptionId        String?
+  createdAt             DateTime      @default(now())
+  updatedAt             DateTime      @updatedAt
+
+  @@schema("app")
+}
+
+/// Suscripción recurrente (membresía mensual) sincronizada desde Stripe.
+model Subscription {
+  id                   String             @id @default(cuid())
+  stripeSubscriptionId String             @unique
+  stripeCustomerId     String
+  planId               String
+  planName             String
+  status               SubscriptionStatus @default(active)
+  customerName         String
+  customerEmail        String
+  customerPhone        String?
+  customer             Customer?          @relation(fields: [customerId], references: [id])
+  customerId           String?
+  currentPeriodEnd     DateTime?
+  payments             Payment[]
+  createdAt            DateTime           @default(now())
+  updatedAt            DateTime           @updatedAt
+
+  @@schema("app")
+}
+
+/// Idempotencia de webhooks de Stripe.
+model WebhookEvent {
+  id          String   @id // event.id de Stripe
+  type        String
+  processedAt DateTime @default(now())
+
+  @@schema("app")
+}

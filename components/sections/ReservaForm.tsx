@@ -5,7 +5,8 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { ArrowLeft, ArrowRight, Check, Loader2 } from "lucide-react";
-import { type ClassItem, DAY_LABELS, getClassPrice } from "@/lib/classes";
+import { DAY_LABELS } from "@/lib/classes";
+import type { BookableClass } from "@/lib/types";
 import { buildWhatsAppLink, WA_MESSAGES } from "@/lib/whatsapp";
 import { WhatsappIcon } from "@/components/layout/SocialIcons";
 import { Eyebrow } from "@/components/primitives/Eyebrow";
@@ -30,7 +31,7 @@ type Step = "membership" | "form" | "method" | "payment" | "confirmed";
 type ConfirmedKind = "online" | "reception";
 
 type Props = {
-  cls: ClassItem;
+  cls: BookableClass;
   onSuccess?: () => void;
   /** Llamado cuando la confirmación está lista — para cerrar el drawer desde el padre */
   onConfirmed?: (result: ConfirmResult) => void;
@@ -44,6 +45,8 @@ export function ReservaForm({ cls, onConfirmed }: Props) {
   const [confirmedKind, setConfirmedKind] = useState<ConfirmedKind>("online");
   const [reserving, setReserving] = useState(false);
   const [reserveError, setReserveError] = useState<string | null>(null);
+  // Código de reserva (últimos 6) para mostrar al cliente en la confirmación.
+  const [reservationCode, setReservationCode] = useState<string | null>(null);
   // Solo afirmamos "te enviamos un correo" si de verdad se entregó al cliente.
   const [clientEmailSent, setClientEmailSent] = useState(false);
   // Honeypot anti-bot como estado controlado (leer estado en el handler es seguro
@@ -55,19 +58,19 @@ export function ReservaForm({ cls, onConfirmed }: Props) {
     defaultValues: { name: "", email: "", phone: "" },
   });
 
-  const isOpenGym = cls.category === "open-gym";
+  const isOpenGym = cls.isOpenGym;
   // Clase que cobra sí o sí (ej. Master Class): salta socio/recepción → pago en línea.
   const onlineOnly = Boolean(cls.onlineOnly);
-  const price = getClassPrice(cls);
+  const price = cls.priceMxn;
   const priceLine = `$${price.toLocaleString("es-MX")} MXN`;
   const priceDesc = isOpenGym ? "Open Gym · pago único" : "Clase individual · pago único";
 
-  const dayLabel = `${DAY_LABELS[cls.day]}${cls.dateLabel ? ` ${cls.dateLabel}` : ""}`;
+  const dayLabel = cls.dateLabel;
 
   const classMeta: ClassMeta = {
     className: cls.name,
-    classDay: DAY_LABELS[cls.day],
-    classTime: cls.time,
+    classDay: cls.dateLabel,
+    classTime: cls.startTime,
     classInstructor: cls.instructor,
     price,
   };
@@ -78,7 +81,7 @@ export function ReservaForm({ cls, onConfirmed }: Props) {
       : WA_MESSAGES.classBooking({
           name: cls.name,
           day: DAY_LABELS[cls.day].toLowerCase(),
-          time: cls.time,
+          time: cls.startTime,
           date: cls.dateLabel,
         })
   );
@@ -92,11 +95,11 @@ export function ReservaForm({ cls, onConfirmed }: Props) {
     setReserveError(null);
     try {
       const result = await createReservation({
-        classId: cls.id,
+        templateId: cls.templateId,
+        date: cls.date,
         name: cust.name,
         email: cust.email,
         phone: cust.phone,
-        payment: "reception",
         member: isMember,
         website: honeypot,
       });
@@ -107,6 +110,7 @@ export function ReservaForm({ cls, onConfirmed }: Props) {
         return;
       }
       setClientEmailSent(result.clientEmailSent);
+      setReservationCode(result.shortCode || null);
       setConfirmedKind("reception");
       setStep("confirmed");
     } catch {
@@ -156,6 +160,17 @@ export function ReservaForm({ cls, onConfirmed }: Props) {
             <>Te esperamos en tu clase de <span className="text-gold">{cls.name}</span>.</>
           )}
         </h3>
+
+        {reservationCode && (
+          <div className="mt-5 inline-flex items-center gap-3 self-start border border-gold/30 bg-gold/[0.06] px-4 py-2.5">
+            <span className="font-mono text-[0.6rem] uppercase tracking-[0.2em] text-gold">
+              Código
+            </span>
+            <span className="font-mono text-lg tracking-[0.25em] text-paper">
+              {reservationCode}
+            </span>
+          </div>
+        )}
 
         {reception ? (
           memberReception ? (
@@ -552,8 +567,9 @@ export function ReservaForm({ cls, onConfirmed }: Props) {
             customer && (
               <div className="overflow-y-auto flex-1">
                 <StripeEmbeddedCheckoutFrame
-                  itemId={cls.id}
+                  itemId={cls.templateId}
                   itemKind="class"
+                  date={cls.date}
                   customer={customer}
                   classMeta={classMeta}
                   onConfirmed={handleConfirmed}
