@@ -166,8 +166,8 @@ export function ReservaForm({ cls, onConfirmed }: Props) {
                 {clientEmailSent && " Te enviamos un correo con tu confirmación."}
               </p>
               <p className="mt-2 text-sm text-paper/60">
-                Tu clase está incluida en tu membresía — en recepción validamos tu acceso,
-                sin cobro. Llega 10 minutos antes para registro.
+                Tu clase está incluida en tu membresía, sin cobro. Llega 10 minutos
+                antes para registro.
               </p>
             </>
           ) : (
@@ -235,7 +235,7 @@ export function ReservaForm({ cls, onConfirmed }: Props) {
   );
 
   return (
-    <div className="px-7 md:px-9 py-6 md:py-9 flex flex-col min-h-0 md:min-h-[560px]">
+    <div className="px-7 md:px-9 py-6 md:py-7 flex flex-col min-h-0 md:min-h-[560px]">
       {/* Step indicator */}
       <div className="flex items-center gap-3 mb-4">
         {!(step === "membership" || (onlineOnly && step === "form")) && (
@@ -253,7 +253,7 @@ export function ReservaForm({ cls, onConfirmed }: Props) {
       </div>
 
       {/* Price — para socios se muestra incluido (sin cobro) */}
-      <div className="mb-5">
+      <div className="mb-4">
         {member === true ? (
           <>
             <span className="font-display text-3xl md:text-4xl font-light tracking-tight text-paper/40 line-through">
@@ -276,7 +276,7 @@ export function ReservaForm({ cls, onConfirmed }: Props) {
       </div>
 
       {step === "membership" && (
-        <div className="flex flex-col gap-3 flex-1">
+        <div className="flex flex-col gap-2 flex-1">
           <div className="mb-1">
             <p className="font-display text-xl font-semibold tracking-tight text-paper">
               ¿Ya eres socio?
@@ -292,15 +292,18 @@ export function ReservaForm({ cls, onConfirmed }: Props) {
               setReserveError(null);
               setStep("form");
             }}
-            className="group relative text-left border border-gold/30 bg-gold/[0.06] px-5 py-4 transition-colors hover:border-gold/60"
+            className="group relative text-left border border-gold/30 bg-gold/[0.06] px-5 py-3 transition-colors hover:border-gold/60"
           >
             <div className="flex items-start justify-between gap-3">
               <div className="min-w-0">
                 <p className="font-display text-lg font-semibold tracking-tight text-paper">
                   Soy socio
                 </p>
-                <p className="mt-1 text-sm leading-relaxed text-paper/65">
-                  Tu clase está incluida — reservas y validas tu acceso en recepción.
+                <p className="mt-0.5 text-xs font-medium text-gold/90">
+                  o vengo con TotalPass / Wellhub
+                </p>
+                <p className="mt-1.5 text-sm leading-relaxed text-paper/65">
+                  Tu acceso está incluido, sin cobro.
                 </p>
               </div>
               <ArrowRight
@@ -308,7 +311,7 @@ export function ReservaForm({ cls, onConfirmed }: Props) {
                 strokeWidth={1.75}
               />
             </div>
-            <span className="mt-3 inline-block font-mono text-[0.55rem] uppercase tracking-[0.22em] text-gold/80">
+            <span className="mt-2 inline-block font-mono text-[0.55rem] uppercase tracking-[0.22em] text-gold/80">
               Sin cobro
             </span>
           </button>
@@ -321,7 +324,7 @@ export function ReservaForm({ cls, onConfirmed }: Props) {
               setReserveError(null);
               setStep("form");
             }}
-            className="group relative text-left border border-paper/15 px-5 py-4 transition-colors hover:border-gold/60 active:bg-paper/[0.03]"
+            className="group relative text-left border border-paper/15 px-5 py-3 transition-colors hover:border-gold/60 active:bg-paper/[0.03]"
           >
             <div className="flex items-start justify-between gap-3">
               <div className="min-w-0">
@@ -337,7 +340,7 @@ export function ReservaForm({ cls, onConfirmed }: Props) {
                 strokeWidth={1.75}
               />
             </div>
-            <span className="mt-3 inline-block font-mono text-[0.55rem] uppercase tracking-[0.22em] text-paper/40">
+            <span className="mt-2 inline-block font-mono text-[0.55rem] uppercase tracking-[0.22em] text-paper/40">
               Visitante
             </span>
           </button>
@@ -370,20 +373,7 @@ export function ReservaForm({ cls, onConfirmed }: Props) {
             className="absolute left-[-9999px] top-0 h-0 w-0 opacity-0"
           />
 
-          {/* Disclaimer de socio — sin cobro, validación en recepción */}
-          {member && (
-            <div className="border border-gold/30 bg-gold/[0.06] px-4 py-3">
-              <p className="font-mono text-[0.6rem] uppercase tracking-[0.2em] text-gold/90 mb-1">
-                Socio · sin cobro
-              </p>
-              <p className="text-xs leading-relaxed text-paper/75">
-                Tu clase está incluida en tu membresía. No se cobra en línea ni en recepción
-                — en recepción solo validamos que tu membresía esté activa.
-              </p>
-            </div>
-          )}
-
-          <div className="space-y-4">
+          <div className="space-y-3">
             <Field label="Nombre completo" required error={formState.errors.name?.message}>
               <input
                 {...register("name")}
@@ -411,7 +401,14 @@ export function ReservaForm({ cls, onConfirmed }: Props) {
               />
             </Field>
           </div>
-          <div className="pt-5 space-y-3 mt-auto">
+
+          {member && (
+            <p className="text-sm leading-relaxed text-paper/60">
+              Solo apartas tu lugar — tu clase está incluida en tu membresía, sin cobro.
+            </p>
+          )}
+
+          <div className="pt-4 space-y-3 mt-auto">
             {member && errorBlock}
             <button
               type="submit"
@@ -474,7 +471,7 @@ export function ReservaForm({ cls, onConfirmed }: Props) {
                 )}
               </span>
             </div>
-            <span className="mt-3 inline-block font-mono text-[0.55rem] uppercase tracking-[0.22em] text-paper/40">
+            <span className="mt-2 inline-block font-mono text-[0.55rem] uppercase tracking-[0.22em] text-paper/40">
               {reserving ? "Apartando tu lugar…" : "Sin tarjeta"}
             </span>
           </button>
@@ -500,7 +497,7 @@ export function ReservaForm({ cls, onConfirmed }: Props) {
                 strokeWidth={1.75}
               />
             </div>
-            <span className="mt-3 inline-block font-mono text-[0.55rem] uppercase tracking-[0.22em] text-gold/80">
+            <span className="mt-2 inline-block font-mono text-[0.55rem] uppercase tracking-[0.22em] text-gold/80">
               Inmediato · pago seguro
             </span>
           </button>
