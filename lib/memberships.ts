@@ -5,7 +5,7 @@
 export type PlanCategory = "principal" | "segmento";
 
 export type Plan = {
-  id: "all-access" | "all-access-gold" | "ejecutiva" | "junior" | "weekend" | "drop-in";
+  id: "all-access" | "all-access-gold" | "ejecutiva" | "junior" | "weekend" | "drop-in" | "test-1-peso";
   name: string;
   /** Subtítulo/contexto: restricción horaria, ideal para, etc. */
   tagline?: string;
@@ -29,6 +29,15 @@ const FEATURES_COMMON = [
 ];
 
 export const PLANS: Plan[] = [
+  {
+    id: "test-1-peso",
+    name: "TEST $1",
+    tagline: "Solo para pruebas internas.",
+    price: 1,
+    periodicity: "unico",
+    category: "principal",
+    features: ["Prueba de cobro Stripe"],
+  },
   {
     id: "all-access",
     name: "All Access",
