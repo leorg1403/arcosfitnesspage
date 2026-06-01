@@ -69,18 +69,14 @@ export default function RootLayout({
       className={`${inter.variable} ${serif.variable} ${mono.variable}`}
     >
       <body className="bg-ink text-ink">
-        {/* Tiras de muestreo para Safari 26 (iOS): el navegador tiñe su status
-            bar y su tool bar inferior muestreando el background-color de
-            elementos fixed cerca de los bordes (ya NO respeta theme-color).
-            Estas tiras ink le dan un color sólido y determinista a ambas barras.
-            La de arriba queda detrás del header; solo en móvil. */}
+        {/* Tira de muestreo para Safari 26 (iOS): el navegador tiñe su status
+            bar muestreando el background-color de elementos fixed cerca del
+            borde superior (ya NO respeta theme-color). Esta tira ink le da un
+            color sólido y determinista. Queda OCULTA detrás del header; solo en
+            móvil. La barra inferior de Safari cae sola al fondo ink del root. */}
         <div
           aria-hidden
           className="pointer-events-none fixed inset-x-0 top-0 h-1 bg-ink z-[5] md:hidden"
-        />
-        <div
-          aria-hidden
-          className="pointer-events-none fixed inset-x-0 bottom-0 h-1 bg-ink z-[5] md:hidden"
         />
         <JsonLd data={healthClubSchema()} />
         <ScrollProgressBar />
