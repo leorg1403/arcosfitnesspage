@@ -2,8 +2,10 @@ import { Eyebrow } from "@/components/primitives/Eyebrow";
 import { Reveal } from "@/components/primitives/Reveal";
 import { ScheduleGrid } from "./ScheduleGrid";
 import { fadeUp } from "@/lib/motion";
+import { getBookableSchedule } from "@/lib/db/sessions";
 
-export function HyroxSchedule() {
+export async function HyroxSchedule() {
+  const entries = await getBookableSchedule();
   return (
     <section className="bg-paper">
       <div className="container-wide pt-24 md:pt-32 pb-12">
@@ -16,7 +18,7 @@ export function HyroxSchedule() {
           </h2>
         </Reveal>
       </div>
-      <ScheduleGrid initialCategory="hyrox" hideFilter sectionPadY={false} />
+      <ScheduleGrid entries={entries} initialCategory="hyrox" hideFilter sectionPadY={false} />
       <div className="h-24" aria-hidden />
     </section>
   );

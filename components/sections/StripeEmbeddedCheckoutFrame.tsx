@@ -32,6 +32,8 @@ type Props = {
   itemId: string;
   itemKind: "plan" | "prepayment" | "class";
   customer: { name: string; email: string; phone: string };
+  /** Fecha ISO (YYYY-MM-DD) de la ocurrencia — requerido cuando itemKind === "class" */
+  date?: string;
   /** Requerido cuando itemKind === "class" */
   classMeta?: ClassMeta;
   /** Se llama cuando el pago fue confirmado (sin redirect de página) */
@@ -43,6 +45,7 @@ export function StripeEmbeddedCheckoutFrame({
   itemId,
   itemKind,
   customer,
+  date,
   classMeta,
   onConfirmed,
   onError,
@@ -60,6 +63,7 @@ export function StripeEmbeddedCheckoutFrame({
         itemId,
         itemKind,
         customer,
+        ...(date && { date }),
         ...(classMeta && { classMeta }),
       }),
     });
@@ -73,7 +77,7 @@ export function StripeEmbeddedCheckoutFrame({
     // Guardar sessionId para usarlo en onComplete
     sessionIdRef.current = data.sessionId ?? null;
     return data.clientSecret;
-  }, [itemId, itemKind, customer, classMeta, onError]);
+  }, [itemId, itemKind, customer, date, classMeta, onError]);
 
   // Se llama cuando Stripe completa el pago — sin redirigir
   const handleComplete = useCallback(async () => {

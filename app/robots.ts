@@ -22,8 +22,9 @@ const AI_SEARCH_BOTS = [
 export default function robots(): MetadataRoute.Robots {
   return {
     rules: [
-      { userAgent: "*", allow: "/" },
-      ...AI_SEARCH_BOTS.map((userAgent) => ({ userAgent, allow: "/" })),
+      // /recepcion es el panel privado: no debe listarse ni indexarse.
+      { userAgent: "*", allow: "/", disallow: "/recepcion" },
+      ...AI_SEARCH_BOTS.map((userAgent) => ({ userAgent, allow: "/", disallow: "/recepcion" })),
     ],
     sitemap: "https://www.arcosfitness.com/sitemap.xml",
   };

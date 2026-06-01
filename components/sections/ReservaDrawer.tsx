@@ -3,13 +3,13 @@
 import { useEffect } from "react";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
-import { type ClassItem, DAY_LABELS } from "@/lib/classes";
+import type { BookableClass } from "@/lib/types";
 import { GYM_HOURS_BY_DAY } from "@/lib/content";
 import { ReservaForm } from "./ReservaForm";
 import { easeExpo } from "@/lib/motion";
 
 type Props = {
-  cls: ClassItem | null;
+  cls: BookableClass | null;
   open: boolean;
   onOpenChange: (open: boolean) => void;
 };
@@ -66,28 +66,28 @@ export function ReservaDrawer({ cls, open, onOpenChange }: Props) {
                 <div className="absolute inset-0 bg-gradient-to-t from-ink via-ink/40 to-ink/30" />
                 <div className="relative px-7 md:px-9 py-5 md:py-9">
                   <p className="font-mono text-[0.625rem] uppercase tracking-[0.22em] text-gold mb-3">
-                    {cls.category === "open-gym" ? "Open Gym" : "Detalle de clase"}
+                    {cls.isOpenGym ? "Open Gym" : "Detalle de clase"}
                   </p>
                   <h2 className="font-display text-2xl md:text-4xl font-bold tracking-[-0.02em] leading-tight text-paper">
                     {cls.name}
                   </h2>
                   <p className="mt-3 font-mono text-[0.6875rem] uppercase tracking-[0.22em] text-gold">
-                    {DAY_LABELS[cls.day]}{cls.dateLabel ? ` ${cls.dateLabel}` : ""} · {cls.category === "open-gym" ? GYM_HOURS_BY_DAY[cls.day] : cls.time}
+                    {cls.dateLabel} · {cls.isOpenGym ? GYM_HOURS_BY_DAY[cls.day] : cls.startTime}
                   </p>
-                  {cls.category === "open-gym" ? (
+                  {cls.isOpenGym ? (
                     <p className="mt-3 text-sm text-paper/70">Acceso al gym y clases.</p>
                   ) : (
                     <p className="mt-3 text-sm text-paper/70">
-                      {cls.duration} min · {cls.room} · {cls.level}
+                      {cls.durationMin} min · {cls.room} · {cls.level}
                     </p>
                   )}
                 </div>
               </div>
 
-              {/* Form column — tamaño fijo; ReservaForm maneja internamente form → payment → confirmed */}
+              {/* Form column */}
               <div className="overflow-y-auto md:max-h-[92vh] md:h-[560px]">
                 <ReservaForm
-                  key={cls.id}
+                  key={`${cls.templateId}-${cls.date}`}
                   cls={cls}
                 />
               </div>

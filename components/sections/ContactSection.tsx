@@ -40,6 +40,8 @@ export function ContactSection({
 }: Props) {
   const [ref, shown] = useInViewSafe<HTMLDivElement>();
   const [submitted, setSubmitted] = useState(false);
+  // Honeypot anti-bot como estado controlado (igual que ReservaForm).
+  const [honeypot, setHoneypot] = useState("");
 
   const { register, handleSubmit, formState, reset } = useForm<FormValues>({
     resolver: zodResolver(Schema),
@@ -47,8 +49,10 @@ export function ContactSection({
   });
 
   const onSubmit = async (values: FormValues) => {
-    await submitLead(values);
+    // La acción SIEMPRE devuelve ok; el usuario nunca sabe de dedupe/rate-limit.
+    await submitLead({ ...values, website: honeypot });
     reset();
+    setHoneypot("");
     setSubmitted(true);
   };
 
@@ -116,6 +120,18 @@ export function ContactSection({
                   className="space-y-6"
                   noValidate
                 >
+                  {/* Honeypot anti-bot — invisible para humanos, debe quedar vacío */}
+                  <input
+                    value={honeypot}
+                    onChange={(e) => setHoneypot(e.target.value)}
+                    type="text"
+                    name="website"
+                    tabIndex={-1}
+                    autoComplete="off"
+                    aria-hidden="true"
+                    className="absolute left-[-9999px] top-0 h-0 w-0 opacity-0"
+                  />
+
                   <div className="grid sm:grid-cols-2 gap-6">
                     <Field
                       label="Nombre"

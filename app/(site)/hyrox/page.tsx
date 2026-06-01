@@ -12,6 +12,9 @@ export const metadata: Metadata = {
     "Único Hyrox Box certificado en Bosques de las Lomas. Programa de 12 semanas, simulacros cronometrados, coaches especializados.",
 };
 
+// El calendario Hyrox muestra cupos en vivo → render dinámico.
+export const dynamic = "force-dynamic";
+
 export default function HyroxPage() {
   return (
     <>

@@ -2,24 +2,29 @@
 
 import { z } from "zod";
 import { headers } from "next/headers";
-import { CLASSES, DAY_LABELS, getClassPrice } from "@/lib/classes";
 import { GYM_HOURS_BY_DAY } from "@/lib/content";
 import { sendEmail, OWNER_EMAIL } from "@/lib/email";
 import { OwnerReservationEmail } from "@/lib/email/owner-reservation";
 import { ClientReservationEmail } from "@/lib/email/client-reservation";
 import { checkRateLimit } from "@/lib/rate-limit";
+import { resolveOccurrence, createReceptionReservation } from "@/lib/db/reservations";
+import { priceMxnFromTemplate } from "@/lib/db/sessions";
+import { reservationCancelUrl } from "@/lib/urls";
+import { WEEKDAY_TO_DAY, weekdayOfISO, formatDateLabel } from "@/lib/booking/window";
 
 /**
- * El cliente SOLO manda el id de la clase + sus datos de contacto.
- * Nombre, día, hora, instructor y precio se derivan del catálogo en el
- * servidor — nunca se confía en lo que llega del cliente.
+ * Reserva de recepción / socio (sin Stripe). El cliente manda SOLO el id de la
+ * plantilla + la fecha de la ocurrencia + sus datos; el servidor revalida la
+ * ocurrencia, deriva precio/nombre del catálogo (BD), descuenta cupo de forma
+ * atómica y registra la reserva ligada a su cuenta (Customer). El pago en línea
+ * NO pasa por aquí (va por el checkout de Stripe).
  */
 const InputSchema = z.object({
-  classId: z.string().min(1).max(64),
+  templateId: z.string().min(1).max(64),
+  date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
   name: z.string().min(2).max(80),
   email: z.string().email().max(120),
   phone: z.string().min(8).max(40),
-  payment: z.enum(["reception", "online"]).optional(),
   // socio: la clase está incluida en su membresía → sin cobro, validan en recepción
   member: z.boolean().optional(),
   // honeypot: debe llegar vacío; si trae algo, es un bot
@@ -27,14 +32,13 @@ const InputSchema = z.object({
 });
 
 export type CreateReservationResult =
-  | { ok: true; clientEmailSent: boolean }
+  | { ok: true; clientEmailSent: boolean; code: string; shortCode: string }
   | { ok: false; error: string };
 
 export async function createReservation(
   input: unknown
 ): Promise<CreateReservationResult> {
-  // 1) Rate limit — frena spam de correos / abuso de cuota de Postmark.
-  //    Capa edge (Vercel) por IP confiable + respaldo en memoria por IP de header.
+  // 1) Rate limit por IP.
   const hdrs = await headers();
   const ip =
     hdrs.get("x-forwarded-for")?.split(",")[0]?.trim() ||
@@ -45,61 +49,77 @@ export async function createReservation(
     headers: Object.fromEntries(hdrs.entries()),
   });
   if (rateLimited) {
-    return {
-      ok: false,
-      error: "Demasiados intentos. Espera un momento e inténtalo de nuevo.",
-    };
+    return { ok: false, error: "Demasiados intentos. Espera un momento e inténtalo de nuevo." };
   }
 
-  // 2) Validar el payload (Server Actions ya bloquean orígenes cruzados / CSRF,
-  //    pero igual no confiamos en el contenido).
+  // 2) Validar payload.
   const parsed = InputSchema.safeParse(input);
-  if (!parsed.success) {
-    return { ok: false, error: "Datos inválidos." };
-  }
+  if (!parsed.success) return { ok: false, error: "Datos inválidos." };
   const data = parsed.data;
 
-  // 2b) Honeypot: si viene lleno, fingimos éxito para no darle señal al bot.
+  // 2b) Honeypot: fingimos éxito para no darle señal al bot.
   if (data.website && data.website.trim() !== "") {
-    return { ok: true, clientEmailSent: false };
+    return { ok: true, clientEmailSent: false, code: "", shortCode: "" };
   }
 
-  // 3) La clase DEBE existir en el catálogo. Todo lo sensible se deriva aquí.
-  const cls = CLASSES.find((c) => c.id === data.classId);
-  if (!cls) {
-    return { ok: false, error: "Clase no encontrada." };
+  // 3) Revalidar la ocurrencia en el servidor (plantilla activa + fecha vigente).
+  const occ = await resolveOccurrence(data.templateId, data.date);
+  if (!occ.ok) {
+    return {
+      ok: false,
+      error:
+        occ.reason === "not_found"
+          ? "Clase no encontrada."
+          : "Ese horario ya no está disponible. Refresca la página.",
+    };
   }
-  // Clases que cobran sí o sí (Master Class): no se permite reservar por recepción.
-  if (cls.onlineOnly) {
+  const template = occ.template;
+
+  // Clases que cobran sí o sí (Master Class): no se reservan por recepción.
+  if (template.onlineOnly) {
     return { ok: false, error: "Esta clase requiere pago en línea." };
   }
 
-  const isOpenGym = cls.category === "open-gym";
-  const className = cls.name;
-  const classDay = `${DAY_LABELS[cls.day]}${cls.dateLabel ? ` ${cls.dateLabel}` : ""}`;
-  const classTime = isOpenGym ? GYM_HOURS_BY_DAY[cls.day] : cls.time;
-  const classInstructor = cls.instructor;
-  const amountDue = getClassPrice(cls) * 100; // centavos, derivado del servidor
   const isMember = data.member === true;
-  // Socio: incluido en su membresía (sin cobro). Visitante por recepción: pendiente a pago.
-  const paymentPending = !isMember && data.payment !== "online";
+
+  // 4) Crear la reserva (upsert Customer + decremento atómico + registro).
+  const result = await createReceptionReservation({
+    template,
+    dateISO: data.date,
+    name: data.name,
+    email: data.email,
+    phone: data.phone,
+    member: isMember,
+  });
+
+  if (!result.ok) {
+    const msg =
+      result.reason === "full"
+        ? "Esta clase ya está llena. Elige otro horario."
+        : result.reason === "duplicate"
+        ? "Ya tienes una reserva para esta clase."
+        : "No pudimos completar tu reserva. Escríbenos por WhatsApp y te ayudamos.";
+    return { ok: false, error: msg };
+  }
+
+  // 5) Datos derivados para los correos.
+  const day = WEEKDAY_TO_DAY[weekdayOfISO(data.date)];
+  const isOpenGym = template.category === "open_gym";
+  const className = template.name;
+  const classDay = formatDateLabel(data.date);
+  const classTime = isOpenGym ? GYM_HOURS_BY_DAY[day] : template.startTime;
+  const amountDue = Math.round(priceMxnFromTemplate(template) * 100);
+  const paymentPending = !isMember;
 
   const ownerSubject = isMember
     ? `Reserva de socio · verificar membresía · ${className} · ${classDay} ${classTime}`
-    : paymentPending
-    ? `Reserva pendiente a pago · ${className} · ${classDay} ${classTime}`
-    : `Nueva reserva · ${className} · ${classDay} ${classTime}`;
-
+    : `Reserva pendiente a pago · ${className} · ${classDay} ${classTime}`;
   const clientSubject = isMember
     ? `Reserva apartada (socio) · ${className} · ${classDay}`
-    : paymentPending
-    ? `Reserva apartada · ${className} · ${classDay}`
-    : `Tu reserva en Arcos: ${className} · ${classDay}`;
+    : `Reserva apartada · ${className} · ${classDay}`;
 
-  // El correo al owner es el REGISTRO de la reserva → crítico. Va a un correo del
-  // propio dominio, así que sale aun con la cuenta de Postmark pendiente.
-  // El correo al cliente es best-effort (`optional`): mientras Postmark esté
-  // pendiente no deja enviar fuera del dominio, pero eso NO debe romper la reserva.
+  // El correo al owner es el registro secundario (la fila ya es el registro de
+  // verdad). El correo al cliente es best-effort.
   const [ownerRes, clientRes] = await Promise.allSettled([
     sendEmail({
       to: OWNER_EMAIL,
@@ -108,13 +128,14 @@ export async function createReservation(
         className,
         classDay,
         classTime,
-        classInstructor,
+        classInstructor: template.instructor,
         customerName: data.name,
         customerEmail: data.email,
         customerPhone: data.phone,
         paymentPending,
         amountDue,
         member: isMember,
+        reservationCode: result.shortCode,
       }),
       replyTo: data.email,
     }),
@@ -127,24 +148,25 @@ export async function createReservation(
         className,
         classDay,
         classTime,
-        classInstructor,
+        classInstructor: template.instructor,
         paymentPending,
         amountDue,
         member: isMember,
+        reservationCode: result.shortCode,
+        cancelUrl: reservationCancelUrl(result.code),
       }),
     }),
   ]);
 
   if (ownerRes.status === "rejected") {
+    // La reserva YA está registrada en BD; solo falló el correo de aviso.
     console.error("[createReservation] owner email error:", ownerRes.reason);
-    return { ok: false, error: "No se pudo registrar tu reserva. Intenta de nuevo." };
   }
 
-  // ¿El correo al cliente realmente salió? (no demo, no omitido por Postmark pendiente)
   const clientEmailSent =
     clientRes.status === "fulfilled" &&
     clientRes.value.mock === false &&
     clientRes.value.id != null;
 
-  return { ok: true, clientEmailSent };
+  return { ok: true, clientEmailSent, code: result.code, shortCode: result.shortCode };
 }
