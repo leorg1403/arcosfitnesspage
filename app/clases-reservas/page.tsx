@@ -5,7 +5,6 @@ import { ScheduleGrid } from "@/components/sections/ScheduleGrid";
 import { InstructorsRow } from "@/components/sections/InstructorsRow";
 import { FullBleedCTA } from "@/components/sections/FullBleedCTA";
 import { ConfirmationModal } from "@/components/sections/ConfirmationModal";
-import { CancelModal } from "@/components/sections/CancelModal";
 import { CLASES, HEROES } from "@/lib/content";
 
 export const metadata: Metadata = {
@@ -20,11 +19,6 @@ export default function ClasesReservasPage() {
       {/* Modal de confirmación post-pago (lee ?confirmed=1&plan=XXX de la URL) */}
       <Suspense>
         <ConfirmationModal />
-      </Suspense>
-
-      {/* Modal de cancelación (lee ?cancel=<token> del link del correo) */}
-      <Suspense>
-        <CancelModal />
       </Suspense>
 
       <FullBleedHero

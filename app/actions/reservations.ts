@@ -7,11 +7,7 @@ import { GYM_HOURS_BY_DAY } from "@/lib/content";
 import { sendEmail, OWNER_EMAIL } from "@/lib/email";
 import { OwnerReservationEmail } from "@/lib/email/owner-reservation";
 import { ClientReservationEmail } from "@/lib/email/client-reservation";
-import { OwnerCancellationEmail } from "@/lib/email/owner-cancellation";
 import { checkRateLimit } from "@/lib/rate-limit";
-import { signCancelToken, verifyCancelToken } from "@/lib/cancelToken";
-
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.arcosfitness.com";
 
 /**
  * El cliente SOLO manda el id de la clase + sus datos de contacto.
@@ -83,16 +79,6 @@ export async function createReservation(
   // Socio: incluido en su membresía (sin cobro). Visitante por recepción: pendiente a pago.
   const paymentPending = !isMember && data.payment !== "online";
 
-  // Link de cancelación firmado — solo para socio o pago en recepción (no online pagado).
-  const cancelUrl =
-    isMember || paymentPending
-      ? `${SITE_URL}/clases-reservas?cancel=${signCancelToken({
-          classId: cls.id,
-          name: data.name,
-          email: data.email,
-        })}`
-      : undefined;
-
   const ownerSubject = isMember
     ? `Reserva de socio · verificar membresía · ${className} · ${classDay} ${classTime}`
     : paymentPending
@@ -140,7 +126,6 @@ export async function createReservation(
         paymentPending,
         amountDue,
         member: isMember,
-        cancelUrl,
       }),
     }),
   ]);
@@ -157,73 +142,4 @@ export async function createReservation(
     clientRes.value.id != null;
 
   return { ok: true, clientEmailSent };
-}
-
-export type CancelReservationResult =
-  | { ok: true; className: string; classDay: string }
-  | { ok: false; error: string };
-
-/**
- * Cancela una reserva a partir del token firmado del correo. No hay DB: solo
- * notifica a Arcos por correo (lo gestionan manual). El nombre/correo vienen
- * firmados en el token; la clase se deriva del catálogo por su id.
- */
-export async function cancelReservation(
-  token: unknown
-): Promise<CancelReservationResult> {
-  const hdrs = await headers();
-  const ip =
-    hdrs.get("x-forwarded-for")?.split(",")[0]?.trim() ||
-    hdrs.get("x-real-ip") ||
-    "unknown";
-  const { rateLimited } = await checkRateLimit("cancel", {
-    ip,
-    headers: Object.fromEntries(hdrs.entries()),
-  });
-  if (rateLimited) {
-    return { ok: false, error: "Demasiados intentos. Espera un momento." };
-  }
-
-  if (typeof token !== "string") {
-    return { ok: false, error: "Link de cancelación inválido." };
-  }
-  const payload = verifyCancelToken(token);
-  if (!payload) {
-    return {
-      ok: false,
-      error: "Este link de cancelación no es válido o ya expiró.",
-    };
-  }
-
-  const cls = CLASSES.find((c) => c.id === payload.classId);
-  if (!cls) {
-    return { ok: false, error: "No encontramos la clase de tu reserva." };
-  }
-  const isOpenGym = cls.category === "open-gym";
-  const className = cls.name;
-  const classDay = `${DAY_LABELS[cls.day]}${cls.dateLabel ? ` ${cls.dateLabel}` : ""}`;
-  const classTime = isOpenGym ? GYM_HOURS_BY_DAY[cls.day] : cls.time;
-
-  try {
-    await sendEmail({
-      to: OWNER_EMAIL,
-      subject: `Reserva cancelada · ${className} · ${classDay} ${classTime}`,
-      react: OwnerCancellationEmail({
-        className,
-        classDay,
-        classTime,
-        customerName: payload.name,
-        customerEmail: payload.email,
-      }),
-      replyTo: payload.email,
-    });
-  } catch (e) {
-    console.error("[cancelReservation] owner email error:", e);
-    return {
-      ok: false,
-      error: "No se pudo procesar la cancelación. Intenta de nuevo.",
-    };
-  }
-
-  return { ok: true, className, classDay };
 }
