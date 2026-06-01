@@ -208,6 +208,11 @@ export function ScheduleGrid({
                                 <p className="font-mono text-[0.6875rem] tracking-[0.18em] text-concrete group-hover:text-gold transition-colors">
                                   {cls.category === "open-gym" ? GYM_HOURS_BY_DAY[cls.day] : cls.time}
                                 </p>
+                                {cls.dateLabel && (
+                                  <p className="font-mono text-[0.6rem] uppercase tracking-[0.22em] text-gold mt-0.5">
+                                    {cls.dateLabel}
+                                  </p>
+                                )}
                                 <p className="font-display text-base font-semibold tracking-tight mt-0.5 group-hover:text-gold transition-colors">
                                   {cls.name}
                                 </p>
@@ -342,6 +347,11 @@ export function ScheduleGrid({
                               {cls.time}
                             </span>
                             <div className="flex-1 min-w-0">
+                              {cls.dateLabel && (
+                                <p className="font-mono text-[0.6rem] uppercase tracking-[0.22em] text-gold mb-0.5">
+                                  {cls.dateLabel}
+                                </p>
+                              )}
                               <p className="font-display text-lg font-semibold tracking-tight">
                                 {cls.name}
                               </p>

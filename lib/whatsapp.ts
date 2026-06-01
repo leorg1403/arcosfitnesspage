@@ -22,8 +22,8 @@ export const WA_MESSAGES = {
     "Hola Arcos Fitness, me interesan las membresías. ¿Me pueden dar más información?",
   membership: (plan: string) =>
     `Hola Arcos Fitness, me interesa el plan ${plan}. ¿Podemos agendar una visita?`,
-  classBooking: (cls: { name: string; day: string; time: string }) =>
-    `Hola Arcos Fitness, quiero reservar la clase de ${cls.name} el ${cls.day} a las ${cls.time}. ¿Hay cupo disponible?`,
+  classBooking: (cls: { name: string; day: string; time: string; date?: string }) =>
+    `Hola Arcos Fitness, quiero reservar la clase de ${cls.name} el ${cls.day}${cls.date ? ` ${cls.date}` : ""} a las ${cls.time}. ¿Hay cupo disponible?`,
   openGym: (day: string) =>
     `Hola Arcos Fitness, quiero reservar Open Gym el ${day}. ¿Hay disponibilidad?`,
 } as const;
