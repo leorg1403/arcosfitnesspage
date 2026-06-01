@@ -1,16 +1,21 @@
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
+## Package manager
+
+Este proyecto usa **[bun](https://bun.sh)** como gestor de paquetes y runtime. **No uses npm/yarn/pnpm.**
+
+```bash
+bun install        # instalar dependencias
+bun add <paquete>  # agregar una dependencia
+bun run <script>   # correr scripts de package.json
+bunx <herramienta> # ejecutar binarios (equivalente a npx)
+```
+
 ## Getting Started
 
 First, run the development server:
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
 bun dev
 ```
 
@@ -20,30 +25,36 @@ You can start editing the page by modifying `app/page.tsx`. The page auto-update
 
 This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
 
-## Correo (Resend) — `info@arcosfitness.com`
+## Correo (Postmark) — `info@arcosfitness.com`
 
-El remitente oficial del cliente es **info@arcosfitness.com**. En Resend no “creas” el buzón ahí: conectas el **dominio** del correo y luego envías con esa dirección como `From`.
+Los 4 correos transaccionales (compra cliente/dueño, reserva cliente/dueño) se envían con **Postmark**. Todo el transporte vive en `lib/email.ts`; los templates son React Email (`lib/email/*.tsx`).
 
-### Dominio que debes verificar en Resend
+> **¿Por qué Postmark y no Resend?** El DNS de `arcosfitness.com` está en Wix, y Wix **no permite registros MX en subdominios**. Resend exige un MX en `send.` para verificar el dominio → no es viable con DNS en Wix. Postmark verifica solo con **DKIM (TXT)** + Return-Path opcional (**CNAME → `pm.mtasv.net`**), ambos tipos de registro que Wix sí soporta.
 
-- En Resend → **Domains** → **Add domain**: **`arcosfitness.com`** (la parte después de `@` en `info@arcosfitness.com`).
-- Cuando el dominio quede **Verified**, en `.env` / hosting puedes usar por ejemplo:
-  - `FROM_EMAIL=Arcos Fitness <info@arcosfitness.com>`
-  - `OWNER_EMAIL=info@arcosfitness.com` (u otra bandeja interna; ver `lib/email.ts`).
+### Variables de entorno
 
-### DNS sin tener la web hosteada
+```
+POSTMARK_API_KEY=<server token de Postmark>
+FROM_EMAIL=Arcos Fitness <no-reply@arcosfitness.com>
+OWNER_EMAIL=info@arcosfitness.com
+```
 
-Verificar el dominio en Resend **no depende** de dónde esté la página (Vercel, etc.). Los registros DKIM/SPF que pide Resend van en el **DNS del dominio** (donde estén apuntando las NS de `arcosfitness.com`: Cloudflare, GoDaddy, el registrador, etc.). Puedes hacerlo **antes** de publicar el sitio.
+Sin `POSTMARK_API_KEY` el proyecto corre en **modo demo**: loguea los correos a consola y no envía (útil en local).
 
-### Pruebas sin dominio propio verificado
+### Verificar el dominio en Postmark
 
-Sí, con limitaciones típicas de Resend:
+1. Postmark → **Sender Signatures / Domains** → agregar `arcosfitness.com`.
+2. Copiar el **DKIM (TXT)** y el **Return-Path (CNAME → `pm.mtasv.net`)** al panel **DNS de Wix** (Manage DNS Records). No hace falta ningún MX.
+3. El `From` debe ser de un dominio/sender verificado. Verificar el dominio **no depende** de dónde esté hosteada la web.
+4. Cuenta nueva de Postmark suele empezar en **aprobación pendiente**: al inicio solo permite enviar a direcciones del propio dominio hasta que Postmark aprueba el envío. El build y el modo demo no se ven afectados.
 
-1. Pon `RESEND_API_KEY` en `.env.local` (clave real, no placeholder).
-2. Deja el remitente por defecto del proyecto (`Arcos Fitness <onboarding@resend.dev>` en `lib/email.ts` si no defines `FROM_EMAIL`) **o** el que indique la documentación actual de Resend para entorno de prueba.
-3. Resend suele permitir envíos de prueba solo hacia **correos autorizados** (por ejemplo el email de tu cuenta o direcciones que añadas como verificadas en el dashboard). Revisa en el panel de Resend la sección de límites / “sandbox” del plan gratuito.
+### Previsualizar los templates
 
-Cuando `arcosfitness.com` esté verificado, cambia `FROM_EMAIL` a `info@arcosfitness.com` y sube las mismas variables al hosting.
+El HTML renderizado de cada correo está en `templates/` (abrir en el navegador). Para regenerarlos tras editar los templates:
+
+```bash
+bunx tsx scripts/render-emails.tsx
+```
 
 ## Learn More
 

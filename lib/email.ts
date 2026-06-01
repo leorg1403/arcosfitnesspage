@@ -1,14 +1,15 @@
-import { Resend } from "resend";
+import { ServerClient } from "postmark";
+import { render } from "@react-email/components";
 import type { ReactElement } from "react";
 
-const apiKey = process.env.RESEND_API_KEY;
+const apiKey = process.env.POSTMARK_API_KEY;
 const isConfigured = Boolean(apiKey && !apiKey.includes("PLACEHOLDER"));
 
 export const OWNER_EMAIL = process.env.OWNER_EMAIL || "info@arcosfitness.com";
 export const FROM_EMAIL =
-  process.env.FROM_EMAIL || "Arcos Fitness <onboarding@resend.dev>";
+  process.env.FROM_EMAIL || "Arcos Fitness <no-reply@arcosfitness.com>";
 
-const resend = isConfigured ? new Resend(apiKey) : null;
+const client = isConfigured ? new ServerClient(apiKey as string) : null;
 
 type SendOpts = {
   to: string | string[];
@@ -18,12 +19,15 @@ type SendOpts = {
 };
 
 /**
- * Wrapper unificado de Resend.
- * - Si RESEND_API_KEY está configurada → envía email real
- * - Si no → loggea en consola para que el flujo siga funcionando en local
+ * Wrapper unificado de Postmark.
+ * - Si POSTMARK_API_KEY está configurada → renderiza el template y envía email real
+ * - Si no → loggea en consola para que el flujo siga funcionando en local (modo demo)
+ *
+ * Los templates son componentes React Email (lib/email/*.tsx); aquí se renderizan a
+ * HTML + texto plano y se mandan por el stream "outbound" de Postmark.
  */
 export async function sendEmail({ to, subject, react, replyTo }: SendOpts) {
-  if (!resend) {
+  if (!client) {
     // eslint-disable-next-line no-console
     console.log(
       "\n[Email · modo demo · no enviado]\n",
@@ -33,21 +37,28 @@ export async function sendEmail({ to, subject, react, replyTo }: SendOpts) {
     return { id: "mock", mock: true as const };
   }
 
-  const { data, error } = await resend.emails.send({
-    from: FROM_EMAIL,
-    to,
-    subject,
-    react,
-    replyTo,
-  });
+  const [HtmlBody, TextBody] = await Promise.all([
+    render(react),
+    render(react, { plainText: true }),
+  ]);
 
-  if (error) {
+  try {
+    const res = await client.sendEmail({
+      From: FROM_EMAIL,
+      To: Array.isArray(to) ? to.join(",") : to,
+      Subject: subject,
+      HtmlBody,
+      TextBody,
+      ReplyTo: replyTo,
+      MessageStream: "outbound",
+    });
+
+    return { id: res.MessageID, mock: false as const };
+  } catch (err) {
     // eslint-disable-next-line no-console
-    console.error("[Email · error Resend]", error);
-    throw new Error(error.message);
+    console.error("[Email · error Postmark]", err);
+    throw new Error(err instanceof Error ? err.message : "Error al enviar email");
   }
-
-  return { id: data?.id ?? "unknown", mock: false as const };
 }
 
 export const emailIsConfigured = isConfigured;
