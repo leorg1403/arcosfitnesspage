@@ -123,12 +123,40 @@ export async function listCustomers() {
     if (g.attendance === "attended") s.attended += g._count._all;
     stats.set(g.customerId, s);
   }
+
+  // Membresía vigente por cliente: manual activa primero, luego suscripción Stripe.
+  const today = isoToDbDate(cdmxTodayISO());
+  const [activeMemberships, activeSubs] = await Promise.all([
+    prisma.membership.findMany({
+      where: { status: "active", OR: [{ endsAt: null }, { endsAt: { gte: today } }] },
+      orderBy: { createdAt: "desc" },
+      select: { customerId: true, planName: true },
+    }),
+    prisma.subscription.findMany({
+      where: { status: { in: ACTIVE_SUB_STATUSES } },
+      orderBy: { createdAt: "desc" },
+      select: { customerId: true, planName: true },
+    }),
+  ]);
+  const memByCustomer = new Map<string, string>();
+  for (const m of activeMemberships) if (!memByCustomer.has(m.customerId)) memByCustomer.set(m.customerId, m.planName);
+  for (const s of activeSubs) if (s.customerId && !memByCustomer.has(s.customerId)) memByCustomer.set(s.customerId, s.planName);
+
   return customers.map((c) => ({
     ...c,
     reservations: stats.get(c.id)?.total ?? 0,
     noShows: stats.get(c.id)?.noShow ?? 0,
     attended: stats.get(c.id)?.attended ?? 0,
+    currentMembership: memByCustomer.get(c.id) ?? null,
   }));
+}
+
+/** Lista membresías MANUALES (con su cliente) para la vista unificada. */
+export async function listMemberships() {
+  return prisma.membership.findMany({
+    orderBy: { createdAt: "desc" },
+    include: { customer: { select: { id: true, name: true, email: true } } },
+  });
 }
 
 export async function getCustomerDetail(id: string) {
