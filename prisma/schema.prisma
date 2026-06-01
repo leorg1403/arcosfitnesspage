@@ -86,6 +86,8 @@ enum PaymentStatus {
   paid
   failed
   expired
+  disputed // contracargo (charge.dispute.created)
+  refunded // reembolso (charge.refunded)
 
   @@schema("app")
 }
@@ -267,8 +269,9 @@ model Reservation {
   @@index([shortCode])
   @@index([status, holdExpiresAt]) // barrido de holds vencidos
   @@schema("app")
-  // + índice único PARCIAL (sessionId, customerEmailLower) WHERE status IN ('pending','confirmed')
-  //   se añade vía SQL crudo en la migración (evita doble reserva del mismo correo).
+  // Nota: SE PERMITEN múltiples reservas del mismo correo en la misma clase
+  // (apartar para amigos). El índice único parcial original se eliminó en la
+  // migración 2_allow_multiple_reservations.
 }
 
 /// Todo pago de Stripe (clase / plan / anticipado).

@@ -6,8 +6,9 @@ import { OwnerPurchaseEmail } from "@/lib/email/owner-purchase";
 import { ClientPurchaseEmail } from "@/lib/email/client-purchase";
 import { OwnerReservationEmail } from "@/lib/email/owner-reservation";
 import { ClientReservationEmail } from "@/lib/email/client-reservation";
+import { OwnerAlertEmail } from "@/lib/email/owner-alert";
 import { claimWebhookEvent } from "@/lib/db/webhooks";
-import { finalizeCheckout, releaseHoldByStripeSession } from "@/lib/db/payments";
+import { finalizeCheckout, releaseHoldByStripeSession, markPaymentByIntent } from "@/lib/db/payments";
 import { upsertSubscription, updateSubscriptionStatus } from "@/lib/db/subscriptions";
 import { reservationCancelUrl } from "@/lib/urls";
 
@@ -73,6 +74,24 @@ export async function POST(req: NextRequest) {
         );
         break;
       }
+      case "charge.dispute.created": {
+        const dispute = event.data.object as Stripe.Dispute;
+        const pi = strId(dispute.payment_intent);
+        if (pi) {
+          const p = await markPaymentByIntent(pi, "disputed");
+          if (p) await sendOwnerAlert("Contracargo recibido", p, dispute.reason);
+        }
+        break;
+      }
+      case "charge.refunded": {
+        const charge = event.data.object as Stripe.Charge;
+        const pi = strId(charge.payment_intent);
+        if (pi) {
+          const p = await markPaymentByIntent(pi, "refunded");
+          if (p) await sendOwnerAlert("Reembolso aplicado", p);
+        }
+        break;
+      }
       default:
         break;
     }
@@ -83,6 +102,25 @@ export async function POST(req: NextRequest) {
   }
 
   return NextResponse.json({ received: true });
+}
+
+async function sendOwnerAlert(
+  title: string,
+  p: { itemName: string; customerName: string; customerEmail: string; amountTotalCents: number; currency: string },
+  detail?: string
+) {
+  const amount = new Intl.NumberFormat("es-MX", {
+    style: "currency",
+    currency: p.currency.toUpperCase(),
+  }).format(p.amountTotalCents / 100);
+  const body = `${p.customerName} (${p.customerEmail}) · ${p.itemName} · ${amount}${
+    detail ? ` · motivo: ${detail}` : ""
+  }. Revísalo en Stripe y en /recepcion/pagos.`;
+  await sendEmail({
+    to: OWNER_EMAIL,
+    subject: `${title} · ${p.itemName} · ${p.customerName}`,
+    react: OwnerAlertEmail({ title, body }),
+  });
 }
 
 async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {

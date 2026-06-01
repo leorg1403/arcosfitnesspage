@@ -1,5 +1,5 @@
 import "server-only";
-import { Prisma, type ItemKind } from "@prisma/client";
+import type { ItemKind } from "@prisma/client";
 import { prisma } from "./client";
 import { ensureSession, priceMxnFromTemplate } from "./sessions";
 import { upsertCustomer, normalizeEmail } from "./customers";
@@ -11,18 +11,12 @@ export const HOLD_MINUTES = 10;
 export const MAX_ACTIVE_HOLDS = 2;
 
 class FullErr extends Error {}
-function isUniqueViolation(e: unknown): boolean {
-  return e instanceof Prisma.PrismaClientKnownRequestError && e.code === "P2002";
-}
-function isoToDbDate(iso: string): Date {
-  return new Date(`${iso}T00:00:00Z`);
-}
 
 export type HoldResult =
   | { ok: true; reservationId: string; amountCents: number; code: string; shortCode: string }
   | {
       ok: false;
-      reason: "full" | "blocked" | "too_many_holds" | "not_bookable" | "not_found" | "duplicate";
+      reason: "full" | "blocked" | "too_many_holds" | "not_bookable" | "not_found";
     };
 
 /**
@@ -53,30 +47,8 @@ export async function createClassHold(args: {
   });
   if (customer.status === "blocked") return { ok: false, reason: "blocked" };
 
-  const dbDate = isoToDbDate(args.dateISO);
-
-  // Reutilizar hold activo del mismo cliente para esta sesión (sin doble decremento).
-  const existing = await prisma.reservation.findFirst({
-    where: {
-      customerId: customer.id,
-      kind: "online",
-      status: "pending",
-      holdExpiresAt: { gt: now },
-      session: { templateId: template.id, date: dbDate },
-    },
-    select: { id: true, code: true, shortCode: true },
-  });
-  if (existing) {
-    return {
-      ok: true,
-      reservationId: existing.id,
-      amountCents,
-      code: existing.code,
-      shortCode: existing.shortCode,
-    };
-  }
-
-  // Tope de holds activos por cliente.
+  // Tope de holds activos SIN PAGAR por cliente (anti-DoS). Se permiten varios
+  // (apartar para amigos): cada checkout crea su propio hold/cupo.
   const activeHolds = await prisma.reservation.count({
     where: { customerId: customer.id, kind: "online", status: "pending", holdExpiresAt: { gt: now } },
   });
@@ -118,7 +90,6 @@ export async function createClassHold(args: {
     return { ok: true, reservationId, amountCents, code, shortCode };
   } catch (e) {
     if (e instanceof FullErr) return { ok: false, reason: "full" };
-    if (isUniqueViolation(e)) return { ok: false, reason: "duplicate" };
     throw e;
   }
 }
@@ -316,6 +287,29 @@ export async function sweepExpiredHolds(now: Date = new Date()): Promise<number>
   });
   for (const r of expired) await releaseHoldById(r.id, r.sessionId);
   return expired.length;
+}
+
+/**
+ * Marca un pago por su payment_intent como `disputed` (contracargo) o `refunded`.
+ * En contracargo, además marca al cliente como `flagged` para revisión.
+ * Devuelve el pago (para avisar al dueño) o null si no se encontró.
+ */
+export async function markPaymentByIntent(
+  paymentIntentId: string,
+  status: "disputed" | "refunded"
+) {
+  const payment = await prisma.payment.findFirst({
+    where: { stripePaymentIntentId: paymentIntentId },
+  });
+  if (!payment) return null;
+  await prisma.payment.update({ where: { id: payment.id }, data: { status } });
+  if (status === "disputed" && payment.customerId) {
+    await prisma.customer.updateMany({
+      where: { id: payment.customerId, status: "active" },
+      data: { status: "flagged" },
+    });
+  }
+  return payment;
 }
 
 /** Lectura para confirm/return (solo lectura, sin correos). */

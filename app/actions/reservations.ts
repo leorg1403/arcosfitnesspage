@@ -93,8 +93,6 @@ export async function createReservation(
     const msg =
       result.reason === "full"
         ? "Esta clase ya está llena. Elige otro horario."
-        : result.reason === "duplicate"
-        ? "Ya tienes una reserva para esta clase."
         : "No pudimos completar tu reserva. Escríbenos por WhatsApp y te ayudamos.";
     return { ok: false, error: msg };
   }
