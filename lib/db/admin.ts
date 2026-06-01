@@ -103,6 +103,30 @@ export async function listReservationsByDate(dateISO: string) {
   });
 }
 
+/** Busca reservas por código (shortCode o code completo), independiente de la fecha. */
+export async function findReservationsByCode(query: string) {
+  const q = query.trim();
+  if (!q) return [];
+  return prisma.reservation.findMany({
+    where: { OR: [{ shortCode: { contains: q.toUpperCase() } }, { code: q.toLowerCase() }] },
+    orderBy: { createdAt: "desc" },
+    take: 50,
+    select: {
+      id: true,
+      code: true,
+      shortCode: true,
+      customerName: true,
+      customerEmail: true,
+      kind: true,
+      status: true,
+      attendance: true,
+      session: {
+        select: { date: true, startTime: true, template: { select: { name: true } } },
+      },
+    },
+  });
+}
+
 /** Marca como no-show las reservas PENDIENTES de una sesión concreta. */
 export async function markSessionNoShow(sessionId: string): Promise<number> {
   const { count } = await prisma.reservation.updateMany({

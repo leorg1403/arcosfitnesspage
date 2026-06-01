@@ -85,7 +85,13 @@ export default async function CustomerDetailPage({
   });
 
   const resvRows = c.reservations.map((r) => [
-    <span key="c" className="font-mono tracking-[0.18em] text-gold">{r.shortCode}</span>,
+    <Link
+      key="c"
+      href={`/recepcion/reservas?code=${r.shortCode}`}
+      className="font-mono tracking-[0.18em] text-gold hover:text-gold-soft underline-offset-2 hover:underline"
+    >
+      {r.shortCode}
+    </Link>,
     r.session.date.toISOString().slice(0, 10),
     r.session.startTime,
     r.session.template.name,
