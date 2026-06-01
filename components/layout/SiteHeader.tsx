@@ -55,15 +55,22 @@ export function SiteHeader() {
 
   return (
     <>
-      <header
-        className={cn(
-          "fixed inset-x-0 top-0 z-40 transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)]",
-          scrolled
-            ? "bg-ink/85 backdrop-blur-xl border-b border-charcoal"
-            : "bg-transparent border-b border-transparent"
-        )}
-      >
-        <div className="container-wide flex h-20 items-center justify-between">
+      <header className="fixed inset-x-0 top-0 z-40">
+        {/* Fondo glass como hijo ABSOLUTE. Safari 26 ya no respeta theme-color:
+            tiñe la barra superior muestreando el background-color de elementos
+            fixed/sticky cerca del borde, e IGNORA los hijos position:absolute de
+            un fixed. Al mover el glass aquí, el <header> fixed no aporta color y
+            Safari cae al fondo ink del root → status bar negra. */}
+        <div
+          aria-hidden
+          className={cn(
+            "absolute inset-0 transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)]",
+            scrolled
+              ? "bg-ink/85 backdrop-blur-xl border-b border-charcoal"
+              : "border-b border-transparent"
+          )}
+        />
+        <div className="relative container-wide flex h-20 items-center justify-between">
           <Logo />
 
           <nav className="hidden lg:flex items-center gap-1">

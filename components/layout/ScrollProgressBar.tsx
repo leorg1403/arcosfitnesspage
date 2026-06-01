@@ -10,11 +10,19 @@ export function ScrollProgressBar() {
     mass: 0.5,
   });
 
+  // El wrapper fixed NO lleva background: Safari 26 muestrea el bg de elementos
+  // fixed cerca del borde superior para teñir la status bar. La barra dorada va
+  // como hijo position:absolute (que Safari ignora al teñir), así no pinta la
+  // barra de estado de dorado.
   return (
-    <motion.div
+    <div
       aria-hidden
-      style={{ scaleX, transformOrigin: "0% 50%" }}
-      className="fixed top-0 inset-x-0 h-[1.5px] bg-gold z-50 pointer-events-none"
-    />
+      className="fixed top-0 inset-x-0 h-[1.5px] z-50 pointer-events-none"
+    >
+      <motion.div
+        style={{ scaleX, transformOrigin: "0% 50%" }}
+        className="absolute inset-0 bg-gold"
+      />
+    </div>
   );
 }
