@@ -228,6 +228,29 @@ export async function listPayments(limit = 100) {
   return prisma.payment.findMany({ orderBy: { createdAt: "desc" }, take: limit });
 }
 
+/** Detalle de un pago (con cliente, reserva y suscripción ligados). */
+export async function getPaymentDetail(id: string) {
+  return prisma.payment.findUnique({
+    where: { id },
+    include: {
+      customer: { select: { id: true, name: true, email: true } },
+      reservation: {
+        select: {
+          shortCode: true,
+          status: true,
+          attendance: true,
+          session: {
+            select: { date: true, startTime: true, template: { select: { name: true } } },
+          },
+        },
+      },
+      subscription: {
+        select: { planName: true, status: true, currentPeriodEnd: true, stripeSubscriptionId: true },
+      },
+    },
+  });
+}
+
 export async function listSubscriptions(filter: "active" | "expired" | "all" = "all") {
   const where =
     filter === "active"

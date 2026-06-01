@@ -1,6 +1,6 @@
 import "server-only";
 import { randomUUID } from "node:crypto";
-import { Prisma, type ClassTemplate, type ReservationStatus } from "@prisma/client";
+import type { ClassTemplate, ReservationStatus } from "@prisma/client";
 import { prisma } from "./client";
 import { ensureSession, priceMxnFromTemplate } from "./sessions";
 import { upsertCustomer, normalizeEmail } from "./customers";
@@ -13,10 +13,6 @@ export function makeReservationCode(): { code: string; shortCode: string } {
   const code = randomUUID();
   const shortCode = code.replace(/-/g, "").slice(-6).toUpperCase();
   return { code, shortCode };
-}
-
-function isUniqueViolation(e: unknown): boolean {
-  return e instanceof Prisma.PrismaClientKnownRequestError && e.code === "P2002";
 }
 
 class FullError extends Error {}
@@ -46,7 +42,7 @@ export async function resolveOccurrence(
 
 export type ReserveResult =
   | { ok: true; code: string; shortCode: string; sessionId: string }
-  | { ok: false; reason: "full" | "blocked" | "duplicate" };
+  | { ok: false; reason: "full" | "blocked" };
 
 type ReceptionArgs = {
   template: ClassTemplate;
@@ -111,9 +107,8 @@ export async function createReceptionReservation(args: ReceptionArgs): Promise<R
     return { ok: true, code, shortCode, sessionId };
   } catch (e) {
     if (e instanceof FullError) return { ok: false, reason: "full" };
-    // El índice único parcial (sessionId, emailLower) WHERE status activo:
-    // la tx hace rollback (deshace el decremento) → reserva duplicada.
-    if (isUniqueViolation(e)) return { ok: false, reason: "duplicate" };
+    // Se permiten múltiples reservas del mismo correo en la misma clase
+    // (apartar para amigos), así que un error aquí es real → propagar.
     throw e;
   }
 }

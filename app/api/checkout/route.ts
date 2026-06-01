@@ -118,7 +118,6 @@ export async function POST(req: NextRequest) {
           full: { status: 409, error: "Esta clase ya está llena." },
           blocked: { status: 403, error: "No es posible reservar con esta cuenta. Contáctanos." },
           too_many_holds: { status: 429, error: "Tienes apartados pendientes. Termínalos o espera unos minutos." },
-          duplicate: { status: 409, error: "Ya tienes una reserva para esta clase." },
         };
         const m = map[hold.reason];
         return NextResponse.json({ ok: false, error: m.error }, { status: m.status });

@@ -105,7 +105,9 @@ export default async function CustomerDetailPage({
 
   const payRows = c.payments.map((p) => [
     p.createdAt.toISOString().slice(0, 10),
-    p.itemName,
+    <Link key="i" href={`/recepcion/pagos/${p.id}`} className="text-paper hover:text-gold transition-colors">
+      {p.itemName}
+    </Link>,
     fmtMoney(p.amountTotalCents, p.currency.toUpperCase()),
     <Badge key="s" tone={p.status === "paid" ? "green" : "neutral"}>{p.status}</Badge>,
   ]);
