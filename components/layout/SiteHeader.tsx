@@ -45,7 +45,14 @@ export function SiteHeader() {
       body.style.left = "";
       body.style.right = "";
       body.style.width = "";
+      // Restaurar la posición SIN animación: el <html> tiene
+      // scroll-behavior: smooth, que si no haría un scroll visible (la página
+      // "se recorre") al cerrar el menú. Forzamos auto solo para este salto.
+      const html = document.documentElement;
+      const prevBehavior = html.style.scrollBehavior;
+      html.style.scrollBehavior = "auto";
       window.scrollTo(0, scrollY);
+      html.style.scrollBehavior = prevBehavior;
     };
   }, [open]);
 
