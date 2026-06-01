@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { listCustomers } from "@/lib/db/admin";
 import { setCustomerStatusAction, createCustomerAction } from "@/app/actions/admin";
-import { Table, Badge, Card, PageHeader } from "@/components/recepcion/ui";
+import { Table, Badge, Card, PageHeader, membershipBadgeTone } from "@/components/recepcion/ui";
 
 const inputClass =
   "w-full bg-transparent border border-paper/15 focus:border-gold px-3 py-2 text-sm text-paper outline-none [color-scheme:dark] placeholder:text-paper/25";
@@ -56,6 +56,11 @@ export default async function ClientesPage({
       {c.email}
       {c.phone ? <div>{c.phone}</div> : null}
     </div>,
+    c.currentMembership ? (
+      <Badge key="m" tone={membershipBadgeTone(c.currentMembership)}>{c.currentMembership}</Badge>
+    ) : (
+      <span key="m" className="text-paper/25">—</span>
+    ),
     c.reservations,
     <span key="a" className="text-green-400">{c.attended}</span>,
     <span key="ns" className={c.noShows > 0 ? "text-red-400 font-semibold" : "text-paper/50"}>
@@ -124,7 +129,7 @@ export default async function ClientesPage({
       </form>
 
       <Table
-        columns={["Nombre", "Contacto", "Reservas", "Asistió", "No-shows", "Estado", ""]}
+        columns={["Nombre", "Contacto", "Membresía", "Reservas", "Asistió", "No-shows", "Estado", ""]}
         rows={rows}
         empty="Sin clientes"
       />

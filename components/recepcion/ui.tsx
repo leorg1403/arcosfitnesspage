@@ -43,18 +43,26 @@ export function StatCard({ label, value, hint }: { label: string; value: ReactNo
 }
 
 const BADGE: Record<string, string> = {
-  gold: "border-gold/40 text-gold bg-gold/[0.08]",
+  gold: "border-gold/50 text-gold bg-gold/[0.1]",
+  silver: "border-zinc-300/40 text-zinc-200 bg-zinc-300/[0.08]",
   green: "border-green-500/40 text-green-400 bg-green-500/[0.08]",
   red: "border-red-500/40 text-red-400 bg-red-500/[0.08]",
   amber: "border-amber-500/40 text-amber-300 bg-amber-500/[0.08]",
   neutral: "border-paper/20 text-paper/60 bg-paper/[0.04]",
 };
 
+export type BadgeTone = "gold" | "silver" | "green" | "red" | "amber" | "neutral";
+
+/** Color del badge de membresía: dorado SOLO si el plan dice "Gold"; resto plateado. */
+export function membershipBadgeTone(planName: string): BadgeTone {
+  return /gold/i.test(planName) ? "gold" : "silver";
+}
+
 export function Badge({
   tone = "neutral",
   children,
 }: {
-  tone?: "gold" | "green" | "red" | "amber" | "neutral";
+  tone?: BadgeTone;
   children: ReactNode;
 }) {
   return (
