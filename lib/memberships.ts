@@ -33,7 +33,7 @@ export const PLANS: Plan[] = [
     id: "test-1-peso",
     name: "TEST $1",
     tagline: "Solo para pruebas internas.",
-    price: 1,
+    price: 11,
     periodicity: "unico",
     category: "principal",
     features: ["Prueba de cobro Stripe"],
