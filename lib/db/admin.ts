@@ -96,6 +96,8 @@ export async function listReservationsByDate(dateISO: string) {
         select: {
           id: true,
           startTime: true,
+          capacity: true,
+          availableSpots: true,
           template: { select: { name: true, category: true, durationMin: true } },
         },
       },

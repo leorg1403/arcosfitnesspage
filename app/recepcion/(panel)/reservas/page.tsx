@@ -134,6 +134,8 @@ type Group = {
   endTime: string;
   startMs: number;
   phase: "inProgress" | "upcoming" | "past";
+  availableSpots: number | null;
+  capacity: number;
   reservations: Resv[];
 };
 
@@ -205,6 +207,8 @@ export default async function ReservasPage({
         endTime: addMinutesToHHMM(s.startTime, s.template.durationMin),
         startMs,
         phase,
+        availableSpots: s.availableSpots,
+        capacity: s.capacity,
         reservations: [],
       };
       map.set(s.id, g);
@@ -285,6 +289,24 @@ export default async function ReservasPage({
                   <span className="font-mono text-[0.6rem] uppercase tracking-[0.18em] text-paper/40">
                     {g.reservations.length} reserva(s)
                   </span>
+                  {g.availableSpots == null ? (
+                    <span className="font-mono text-[0.6rem] uppercase tracking-[0.18em] text-paper/40">
+                      Sin límite
+                    </span>
+                  ) : (
+                    <span
+                      className={cn(
+                        "font-mono text-[0.6rem] uppercase tracking-[0.18em]",
+                        g.availableSpots <= 0
+                          ? "text-red-400"
+                          : g.availableSpots <= 3
+                          ? "text-amber-300"
+                          : "text-green-400"
+                      )}
+                    >
+                      {g.availableSpots <= 0 ? "Lleno" : `Quedan ${g.availableSpots} / ${g.capacity}`}
+                    </span>
+                  )}
                 </div>
                 <form action={sessionNoShowAction}>
                   <input type="hidden" name="sessionId" value={g.sessionId} />
