@@ -119,10 +119,7 @@ export function ReservaForm({ cls, onConfirmed }: Props) {
   const onFormSubmit = (values: FormValues) => {
     setCustomer(values);
     setReserveError(null);
-    if (onlineOnly) {
-      // Cobra sí o sí → directo a pago en línea.
-      setStep("payment");
-    } else if (member) {
+    if (member) {
       // Socio → directo a la reserva en recepción, sin preguntar método.
       handleReception(values, true);
     } else {
@@ -214,7 +211,7 @@ export function ReservaForm({ cls, onConfirmed }: Props) {
 
   const goBack = () => {
     setReserveError(null);
-    if (step === "payment") setStep(onlineOnly ? "form" : "method");
+    if (step === "payment") setStep("method");
     else if (step === "method") setStep("form");
     else if (step === "form") {
       setMember(null); // vuelve a la pregunta en estado neutro
@@ -510,7 +507,8 @@ export function ReservaForm({ cls, onConfirmed }: Props) {
 
           {errorBlock}
 
-          {/* Atajo: si en realidad es socio */}
+          {/* Atajo: si en realidad es socio (no aplica en eventos que todos pagan) */}
+          {!onlineOnly && (
           <div className="mt-auto pt-4 border-t border-paper/10">
             <p className="text-xs leading-relaxed text-paper/50">
               ¿En realidad eres socio?{" "}
@@ -527,6 +525,7 @@ export function ReservaForm({ cls, onConfirmed }: Props) {
               </button>
             </p>
           </div>
+          )}
         </div>
       )}
 

@@ -69,18 +69,13 @@ export async function createReservation(
   if (!cls) {
     return { ok: false, error: "Clase no encontrada." };
   }
-  // Clases que cobran sí o sí (Master Class): no se permite reservar por recepción.
-  if (cls.onlineOnly) {
-    return { ok: false, error: "Esta clase requiere pago en línea." };
-  }
-
   const isOpenGym = cls.category === "open-gym";
   const className = cls.name;
   const classDay = `${DAY_LABELS[cls.day]}${cls.dateLabel ? ` ${cls.dateLabel}` : ""}`;
   const classTime = isOpenGym ? GYM_HOURS_BY_DAY[cls.day] : cls.time;
   const classInstructor = cls.instructor;
   const amountDue = getClassPrice(cls) * 100; // centavos, derivado del servidor
-  const isMember = data.member === true;
+  const isMember = cls.onlineOnly ? false : data.member === true;
   // Socio: incluido en su membresía (sin cobro). Visitante por recepción: pendiente a pago.
   const paymentPending = !isMember && data.payment !== "online";
 
