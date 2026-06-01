@@ -164,6 +164,7 @@ model Customer {
   reservations  Reservation[]
   payments      Payment[]
   subscriptions Subscription[]
+  memberships   Membership[]
 
   @@index([status])
   @@schema("app")
@@ -323,5 +324,35 @@ model WebhookEvent {
   type        String
   processedAt DateTime @default(now())
 
+  @@schema("app")
+}
+
+enum MembershipStatus {
+  active
+  expired
+  cancelled
+
+  @@schema("app")
+}
+
+/// Membresía asignada MANUALMENTE en recepción (no es de Stripe). El owner la da
+/// de alta eligiendo un paquete del catálogo (PLANS/PRE_PAYMENTS) o una custom.
+model Membership {
+  id          String           @id @default(cuid())
+  customer    Customer         @relation(fields: [customerId], references: [id])
+  customerId  String
+  planId      String // id del plan/paquete del catálogo, o "custom"
+  planName    String
+  priceCents  Int
+  periodicity String // "mensual" | "unico" | "custom"
+  status      MembershipStatus @default(active)
+  startsAt    DateTime         @db.Date
+  endsAt      DateTime?        @db.Date // null = sin vencimiento definido
+  notes       String?
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+
+  @@index([customerId])
+  @@index([status])
   @@schema("app")
 }

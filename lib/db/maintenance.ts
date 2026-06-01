@@ -6,6 +6,16 @@ import { cdmxTodayISO } from "@/lib/booking/window";
 const DEAD_STATUSES: ReservationStatus[] = ["expired", "cancelled"];
 const ACTIVE_STATUSES: ReservationStatus[] = ["confirmed", "pending"];
 
+/** Marca como vencidas las membresías manuales cuya fecha de fin ya pasó. */
+export async function expireMemberships(): Promise<{ membershipsExpired: number }> {
+  const today = new Date(`${cdmxTodayISO()}T00:00:00Z`);
+  const { count } = await prisma.membership.updateMany({
+    where: { status: "active", endsAt: { not: null, lt: today } },
+    data: { status: "expired" },
+  });
+  return { membershipsExpired: count };
+}
+
 /** Retención: purga datos viejos para minimizar PII y mantener tablas chicas. */
 export async function purgeOldData(now: Date = new Date()) {
   const ninetyDaysAgo = new Date(now.getTime() - 90 * 86_400_000);

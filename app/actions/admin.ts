@@ -18,6 +18,10 @@ import {
   setClassTemplateActive,
   setClassCapacity,
   deleteClassTemplate,
+  createOrGetCustomer,
+  updateCustomer,
+  addMembership,
+  cancelMembership,
 } from "@/lib/db/admin";
 import { performCancellation } from "@/lib/cancellations";
 
@@ -146,6 +150,91 @@ export async function deleteClassTemplateAction(formData: FormData) {
   if (!id.success) return;
   const res = await deleteClassTemplate(id.data);
   redirect(res.ok ? "/recepcion/clases?ok=deleted" : "/recepcion/clases?err=reservas");
+}
+
+// ─── Clientes (alta/edición) + membresías ─────────────────────────────────────
+const NewCustomerSchema = z.object({
+  name: z.string().min(2).max(80),
+  email: z.string().email().max(120),
+  phone: z.string().max(40).optional(),
+});
+
+export async function createCustomerAction(formData: FormData) {
+  await assertAdmin();
+  const p = NewCustomerSchema.safeParse({
+    name: formData.get("name"),
+    email: formData.get("email"),
+    phone: formData.get("phone") ?? undefined,
+  });
+  if (!p.success) redirect("/recepcion/clientes?err=datos");
+  const c = await createOrGetCustomer({
+    name: p.data.name,
+    email: p.data.email,
+    phone: p.data.phone ?? null,
+  });
+  redirect(`/recepcion/clientes/${c.id}`);
+}
+
+const UpdateCustomerSchema = z.object({
+  id: z.string().min(1).max(40),
+  name: z.string().min(2).max(80),
+  phone: z.string().max(40).optional(),
+  notes: z.string().max(2000).optional(),
+});
+
+export async function updateCustomerAction(formData: FormData) {
+  await assertAdmin();
+  const p = UpdateCustomerSchema.safeParse({
+    id: formData.get("id"),
+    name: formData.get("name"),
+    phone: formData.get("phone") ?? undefined,
+    notes: formData.get("notes") ?? undefined,
+  });
+  if (!p.success) return;
+  await updateCustomer(p.data.id, {
+    name: p.data.name,
+    phone: p.data.phone ?? null,
+    notes: p.data.notes ?? null,
+  });
+  revalidatePath(`/recepcion/clientes/${p.data.id}`);
+}
+
+const AddMembershipSchema = z.object({
+  customerId: z.string().min(1).max(40),
+  planId: z.string().min(1).max(40),
+  planName: z.string().min(1).max(80),
+  priceMxn: z.coerce.number().min(0).max(1_000_000),
+  periodicity: z.string().max(20),
+  startsAt: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+  endsAt: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional().or(z.literal("")),
+  notes: z.string().max(500).optional(),
+});
+
+export async function addMembershipAction(formData: FormData) {
+  await assertAdmin();
+  const p = AddMembershipSchema.safeParse(Object.fromEntries(formData.entries()));
+  if (!p.success) return;
+  const d = p.data;
+  await addMembership({
+    customerId: d.customerId,
+    planId: d.planId,
+    planName: d.planName,
+    priceCents: Math.round(d.priceMxn * 100),
+    periodicity: d.periodicity,
+    startsAtISO: d.startsAt,
+    endsAtISO: d.endsAt && d.endsAt !== "" ? d.endsAt : null,
+    notes: d.notes ?? null,
+  });
+  revalidatePath(`/recepcion/clientes/${d.customerId}`);
+}
+
+export async function cancelMembershipAction(formData: FormData) {
+  await assertAdmin();
+  const id = z.string().min(1).max(40).safeParse(formData.get("id"));
+  const customerId = z.string().min(1).max(40).safeParse(formData.get("customerId"));
+  if (!id.success) return;
+  await cancelMembership(id.data);
+  if (customerId.success) revalidatePath(`/recepcion/clientes/${customerId.data}`);
 }
 
 export async function toggleClassActiveAction(formData: FormData) {
