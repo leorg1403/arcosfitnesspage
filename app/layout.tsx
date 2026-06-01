@@ -6,6 +6,7 @@ import { SiteFooter } from "@/components/layout/SiteFooter";
 import { WhatsAppFAB } from "@/components/layout/WhatsAppFAB";
 import { ScrollProgressBar } from "@/components/layout/ScrollProgressBar";
 import { PageTransition } from "@/components/layout/PageTransition";
+import { Analytics } from "@vercel/analytics/next";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -69,6 +70,7 @@ export default function RootLayout({
         </main>
         <SiteFooter />
         <WhatsAppFAB />
+        <Analytics />
       </body>
     </html>
   );
