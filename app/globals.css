@@ -69,7 +69,10 @@
   body {
     min-height: 100dvh;
     overflow-x: hidden;
-    background: var(--color-paper);
+    /* Fondo ink (no paper): iOS Safari lee el background-color del body para
+       pintar la barra de estado/safe-area. Con paper se veía una franja blanca
+       arriba. Las secciones claras fijan su propio bg-paper/bg-bone. */
+    background: var(--color-ink);
     color: var(--color-ink);
   }
 

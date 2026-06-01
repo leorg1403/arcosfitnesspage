@@ -127,7 +127,7 @@ export function ScheduleGrid({
   };
 
   return (
-    <div ref={rootRef}>
+    <div ref={rootRef} className="bg-paper">
       {!hideFilter && (
         <FilterRail active={selected} onChange={handleCategoryChange} sticky />
       )}
