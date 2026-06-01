@@ -75,12 +75,9 @@ export async function createReservation(
   }
   const template = occ.template;
 
-  // Clases que cobran sí o sí (Master Class): no se reservan por recepción.
-  if (template.onlineOnly) {
-    return { ok: false, error: "Esta clase requiere pago en línea." };
-  }
-
-  const isMember = data.member === true;
+  // Master Class (onlineOnly) SÍ permite recepción, pero SIN socio: en esos
+  // eventos nadie es socio (todos pagan, en recepción o en línea).
+  const isMember = template.onlineOnly ? false : data.member === true;
 
   // 4) Crear la reserva (upsert Customer + decremento atómico + registro).
   const result = await createReceptionReservation({
