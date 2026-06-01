@@ -37,7 +37,7 @@ type Props = {
 };
 
 export function ReservaForm({ cls, onConfirmed }: Props) {
-  const [step, setStep] = useState<Step>("membership");
+  const [step, setStep] = useState<Step>(cls.onlineOnly ? "form" : "membership");
   const [member, setMember] = useState<boolean | null>(null);
   const [customer, setCustomer] = useState<FormValues | null>(null);
   const [confirmed, setConfirmed] = useState<ConfirmResult | null>(null);
@@ -56,6 +56,8 @@ export function ReservaForm({ cls, onConfirmed }: Props) {
   });
 
   const isOpenGym = cls.category === "open-gym";
+  // Clase que cobra sí o sí (ej. Master Class): salta socio/recepción → pago en línea.
+  const onlineOnly = Boolean(cls.onlineOnly);
   const price = getClassPrice(cls);
   const priceLine = `$${price.toLocaleString("es-MX")} MXN`;
   const priceDesc = isOpenGym ? "Open Gym · pago único" : "Clase individual · pago único";
@@ -117,7 +119,10 @@ export function ReservaForm({ cls, onConfirmed }: Props) {
   const onFormSubmit = (values: FormValues) => {
     setCustomer(values);
     setReserveError(null);
-    if (member) {
+    if (onlineOnly) {
+      // Cobra sí o sí → directo a pago en línea.
+      setStep("payment");
+    } else if (member) {
       // Socio → directo a la reserva en recepción, sin preguntar método.
       handleReception(values, true);
     } else {
@@ -209,7 +214,7 @@ export function ReservaForm({ cls, onConfirmed }: Props) {
 
   const goBack = () => {
     setReserveError(null);
-    if (step === "payment") setStep("method");
+    if (step === "payment") setStep(onlineOnly ? "form" : "method");
     else if (step === "method") setStep("form");
     else if (step === "form") {
       setMember(null); // vuelve a la pregunta en estado neutro
@@ -236,7 +241,7 @@ export function ReservaForm({ cls, onConfirmed }: Props) {
     <div className="px-7 md:px-9 py-6 md:py-9 flex flex-col min-h-0 md:min-h-[560px]">
       {/* Step indicator */}
       <div className="flex items-center gap-3 mb-4">
-        {step !== "membership" && (
+        {!(step === "membership" || (onlineOnly && step === "form")) && (
           <button
             onClick={goBack}
             aria-label="Volver"
@@ -419,7 +424,9 @@ export function ReservaForm({ cls, onConfirmed }: Props) {
                 "hover:bg-gold-soft active:scale-[0.99] transition-all duration-300 disabled:opacity-70"
               )}
             >
-              {member
+              {onlineOnly
+                ? "Continuar al pago →"
+                : member
                 ? reserving
                   ? "Apartando tu lugar…"
                   : "Reservar mi lugar →"

@@ -69,6 +69,10 @@ export async function createReservation(
   if (!cls) {
     return { ok: false, error: "Clase no encontrada." };
   }
+  // Clases que cobran sí o sí (Master Class): no se permite reservar por recepción.
+  if (cls.onlineOnly) {
+    return { ok: false, error: "Esta clase requiere pago en línea." };
+  }
 
   const isOpenGym = cls.category === "open-gym";
   const className = cls.name;
