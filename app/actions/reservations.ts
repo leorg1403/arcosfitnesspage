@@ -20,12 +20,14 @@ const InputSchema = z.object({
   email: z.string().email().max(120),
   phone: z.string().min(8).max(40),
   payment: z.enum(["reception", "online"]).optional(),
+  // socio: la clase está incluida en su membresía → sin cobro, validan en recepción
+  member: z.boolean().optional(),
   // honeypot: debe llegar vacío; si trae algo, es un bot
   website: z.string().max(200).optional(),
 });
 
 export type CreateReservationResult =
-  | { ok: true }
+  | { ok: true; clientEmailSent: boolean }
   | { ok: false; error: string };
 
 export async function createReservation(
@@ -59,7 +61,7 @@ export async function createReservation(
 
   // 2b) Honeypot: si viene lleno, fingimos éxito para no darle señal al bot.
   if (data.website && data.website.trim() !== "") {
-    return { ok: true };
+    return { ok: true, clientEmailSent: false };
   }
 
   // 3) La clase DEBE existir en el catálogo. Todo lo sensible se deriva aquí.
@@ -74,51 +76,71 @@ export async function createReservation(
   const classTime = isOpenGym ? GYM_HOURS_BY_DAY[cls.day] : cls.time;
   const classInstructor = cls.instructor;
   const amountDue = getClassPrice(cls) * 100; // centavos, derivado del servidor
-  const paymentPending = data.payment !== "online"; // recepción por defecto
+  const isMember = data.member === true;
+  // Socio: incluido en su membresía (sin cobro). Visitante por recepción: pendiente a pago.
+  const paymentPending = !isMember && data.payment !== "online";
 
-  try {
-    await Promise.all([
-      sendEmail({
-        to: OWNER_EMAIL,
-        subject: paymentPending
-          ? `Reserva pendiente a pago · ${className} · ${classDay} ${classTime}`
-          : `Nueva reserva · ${className} · ${classDay} ${classTime}`,
-        react: OwnerReservationEmail({
-          className,
-          classDay,
-          classTime,
-          classInstructor,
-          customerName: data.name,
-          customerEmail: data.email,
-          customerPhone: data.phone,
-          paymentPending,
-          amountDue,
-        }),
-        replyTo: data.email,
+  const ownerSubject = isMember
+    ? `Reserva de socio · verificar membresía · ${className} · ${classDay} ${classTime}`
+    : paymentPending
+    ? `Reserva pendiente a pago · ${className} · ${classDay} ${classTime}`
+    : `Nueva reserva · ${className} · ${classDay} ${classTime}`;
+
+  const clientSubject = isMember
+    ? `Reserva apartada (socio) · ${className} · ${classDay}`
+    : paymentPending
+    ? `Reserva apartada · ${className} · ${classDay}`
+    : `Tu reserva en Arcos: ${className} · ${classDay}`;
+
+  // El correo al owner es el REGISTRO de la reserva → crítico. Va a un correo del
+  // propio dominio, así que sale aun con la cuenta de Postmark pendiente.
+  // El correo al cliente es best-effort (`optional`): mientras Postmark esté
+  // pendiente no deja enviar fuera del dominio, pero eso NO debe romper la reserva.
+  const [ownerRes, clientRes] = await Promise.allSettled([
+    sendEmail({
+      to: OWNER_EMAIL,
+      subject: ownerSubject,
+      react: OwnerReservationEmail({
+        className,
+        classDay,
+        classTime,
+        classInstructor,
+        customerName: data.name,
+        customerEmail: data.email,
+        customerPhone: data.phone,
+        paymentPending,
+        amountDue,
+        member: isMember,
       }),
-      sendEmail({
-        to: data.email,
-        subject: paymentPending
-          ? `Reserva apartada · ${className} · ${classDay}`
-          : `Tu reserva en Arcos: ${className} · ${classDay}`,
-        react: ClientReservationEmail({
-          customerName: data.name,
-          className,
-          classDay,
-          classTime,
-          classInstructor,
-          paymentPending,
-          amountDue,
-        }),
+      replyTo: data.email,
+    }),
+    sendEmail({
+      to: data.email,
+      subject: clientSubject,
+      optional: true,
+      react: ClientReservationEmail({
+        customerName: data.name,
+        className,
+        classDay,
+        classTime,
+        classInstructor,
+        paymentPending,
+        amountDue,
+        member: isMember,
       }),
-    ]);
-  } catch (err) {
-    console.error("[createReservation] email error:", err);
-    return {
-      ok: false,
-      error: "No se pudo enviar la confirmación. Intenta de nuevo.",
-    };
+    }),
+  ]);
+
+  if (ownerRes.status === "rejected") {
+    console.error("[createReservation] owner email error:", ownerRes.reason);
+    return { ok: false, error: "No se pudo registrar tu reserva. Intenta de nuevo." };
   }
 
-  return { ok: true };
+  // ¿El correo al cliente realmente salió? (no demo, no omitido por Postmark pendiente)
+  const clientEmailSent =
+    clientRes.status === "fulfilled" &&
+    clientRes.value.mock === false &&
+    clientRes.value.id != null;
+
+  return { ok: true, clientEmailSent };
 }

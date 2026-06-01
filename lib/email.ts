@@ -16,6 +16,12 @@ type SendOpts = {
   subject: string;
   react: ReactElement;
   replyTo?: string;
+  /**
+   * Correo "best-effort" (p. ej. confirmación al cliente): si Postmark falla
+   * —típico mientras la cuenta está pendiente de aprobación y no deja enviar
+   * fuera del dominio— se loggea un aviso breve y NO se lanza el error.
+   */
+  optional?: boolean;
 };
 
 /**
@@ -26,7 +32,7 @@ type SendOpts = {
  * Los templates son componentes React Email (lib/email/*.tsx); aquí se renderizan a
  * HTML + texto plano y se mandan por el stream "outbound" de Postmark.
  */
-export async function sendEmail({ to, subject, react, replyTo }: SendOpts) {
+export async function sendEmail({ to, subject, react, replyTo, optional }: SendOpts) {
   if (!client) {
     // eslint-disable-next-line no-console
     console.log(
@@ -55,6 +61,14 @@ export async function sendEmail({ to, subject, react, replyTo }: SendOpts) {
 
     return { id: res.MessageID, mock: false as const };
   } catch (err) {
+    if (optional) {
+      // Aviso breve, sin stack: no es un fallo que deba romper el flujo.
+      console.warn(
+        `[Email] no enviado a ${Array.isArray(to) ? to.join(", ") : to} ` +
+          `(Postmark pendiente de aprobación o dominio no permitido). Asunto: "${subject}".`
+      );
+      return { id: null, mock: false as const, skipped: true as const };
+    }
     // eslint-disable-next-line no-console
     console.error("[Email · error Postmark]", err);
     throw new Error(err instanceof Error ? err.message : "Error al enviar email");
