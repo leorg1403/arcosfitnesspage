@@ -151,7 +151,7 @@ export const MEMBERSHIP_FAQS = [
   },
   {
     q: "¿Hay costo de inscripción?",
-    a: "Sí, varía por membresía. All Access y All Access Gold tienen $5,000 de inscripción. Ejecutiva $1,000. Weekend $1,500. Junior y membresías anticipadas sin inscripción.",
+    a: "Sí, varía por membresía. All Access tiene $5,000 de inscripción. Ejecutiva $1,000. Weekend $1,500. Junior y membresías anticipadas sin inscripción.",
   },
   {
     q: "¿Puedo congelar mi membresía si viajo?",
@@ -163,7 +163,7 @@ export const MEMBERSHIP_FAQS = [
   },
   {
     q: "¿Cómo pago la membresía?",
-    a: "Para tu conveniencia, aceptamos pago con tarjeta de crédito o débito, transferencia y efectivo en recepción.",
+    a: "Para tu conveniencia, aceptamos pago con tarjeta de crédito o débito, transferencia y efectivo. Y también todo esto lo puedes hacer directamente en recepción.",
   },
   {
     q: "¿Puedo cambiar de plan después?",

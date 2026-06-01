@@ -76,7 +76,7 @@ export function CheckoutDialog({ item, open, onOpenChange }: Props) {
       : `$${item.data.price.toLocaleString("es-MX")} MXN · pago único`;
   const subPrice =
     item.kind === "plan" && item.data.inscripcion
-      ? `+ $${item.data.inscripcion.toLocaleString("es-MX")} de inscripción (1er pago)`
+      ? `+ $${item.data.inscripcion.toLocaleString("es-MX")} ${item.data.inscripcionLabel ?? "de inscripción"} (1er pago)`
       : item.kind === "prepayment"
       ? `Ahorras $${(item.data.originalPrice - item.data.price).toLocaleString("es-MX")} (${item.data.discount})`
       : null;
