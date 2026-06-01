@@ -1,10 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { ArrowLeft, Check } from "lucide-react";
+import { ArrowLeft, ArrowRight, Check, Loader2 } from "lucide-react";
 import { type ClassItem, DAY_LABELS, getClassPrice } from "@/lib/classes";
 import { buildWhatsAppLink, WA_MESSAGES } from "@/lib/whatsapp";
 import { WhatsappIcon } from "@/components/layout/SocialIcons";
@@ -16,6 +16,7 @@ import {
   type ClassMeta,
 } from "./StripeEmbeddedCheckoutFrame";
 import type { ConfirmResult } from "@/app/api/checkout/confirm/route";
+import { createReservation } from "@/app/actions/reservations";
 import { cn } from "@/lib/cn";
 
 const Schema = z.object({
@@ -25,6 +26,9 @@ const Schema = z.object({
 });
 type FormValues = z.infer<typeof Schema>;
 
+type Step = "form" | "method" | "payment" | "confirmed";
+type ConfirmedKind = "online" | "reception";
+
 type Props = {
   cls: ClassItem;
   onSuccess?: () => void;
@@ -33,19 +37,25 @@ type Props = {
 };
 
 export function ReservaForm({ cls, onConfirmed }: Props) {
-  const [step, setStep] = useState<"form" | "payment" | "confirmed">("form");
+  const [step, setStep] = useState<Step>("form");
   const [customer, setCustomer] = useState<FormValues | null>(null);
   const [confirmed, setConfirmed] = useState<ConfirmResult | null>(null);
+  const [confirmedKind, setConfirmedKind] = useState<ConfirmedKind>("online");
+  const [reserving, setReserving] = useState(false);
+  const [reserveError, setReserveError] = useState<string | null>(null);
+  const honeypotRef = useRef<HTMLInputElement>(null);
 
   const { register, handleSubmit, formState } = useForm<FormValues>({
     resolver: zodResolver(Schema),
     defaultValues: { name: "", email: "", phone: "" },
   });
 
+  const isOpenGym = cls.category === "open-gym";
   const price = getClassPrice(cls);
   const priceLine = `$${price.toLocaleString("es-MX")} MXN`;
-  const priceDesc =
-    cls.category === "open-gym" ? "Open Gym · pago único" : "Clase individual · pago único";
+  const priceDesc = isOpenGym ? "Open Gym · pago único" : "Clase individual · pago único";
+
+  const dayLabel = `${DAY_LABELS[cls.day]}${cls.dateLabel ? ` ${cls.dateLabel}` : ""}`;
 
   const classMeta: ClassMeta = {
     className: cls.name,
@@ -56,7 +66,7 @@ export function ReservaForm({ cls, onConfirmed }: Props) {
   };
 
   const waLink = buildWhatsAppLink(
-    cls.category === "open-gym"
+    isOpenGym
       ? WA_MESSAGES.openGym(DAY_LABELS[cls.day].toLowerCase())
       : WA_MESSAGES.classBooking({
           name: cls.name,
@@ -68,26 +78,59 @@ export function ReservaForm({ cls, onConfirmed }: Props) {
 
   const onFormSubmit = (values: FormValues) => {
     setCustomer(values);
-    setStep("payment");
+    setReserveError(null);
+    setStep("method");
   };
 
   const handleConfirmed = (result: ConfirmResult) => {
     setConfirmed(result);
+    setConfirmedKind("online");
     setStep("confirmed");
     onConfirmed?.(result);
   };
 
-  const isOpenGym = cls.category === "open-gym";
+  /* Reservar y pagar en recepción — vía Server Action (sin Stripe).
+     Solo manda el id de la clase; el servidor deriva nombre/precio/horario. */
+  const handleReception = async () => {
+    if (!customer || reserving) return;
+    setReserving(true);
+    setReserveError(null);
+    try {
+      const result = await createReservation({
+        classId: cls.id,
+        name: customer.name,
+        email: customer.email,
+        phone: customer.phone,
+        payment: "reception",
+        website: honeypotRef.current?.value ?? "",
+      });
+      if (!result.ok) {
+        setReserveError(
+          result.error || "No se pudo apartar tu lugar. Intenta de nuevo o escríbenos."
+        );
+        return;
+      }
+      setConfirmedKind("reception");
+      setStep("confirmed");
+    } catch {
+      setReserveError("No se pudo apartar tu lugar. Intenta de nuevo o escríbenos.");
+    } finally {
+      setReserving(false);
+    }
+  };
 
   /* ── Confirmed step ─────────────────────────────────────── */
-  if (step === "confirmed" && confirmed) {
+  if (step === "confirmed") {
+    const reception = confirmedKind === "reception";
     return (
       <div className="px-7 md:px-9 py-10 md:py-14 flex flex-col min-h-[400px] md:min-h-[560px]">
         <div className="inline-flex items-center justify-center size-14 rounded-full bg-gold/15 text-gold mb-8">
           <Check className="size-6" strokeWidth={2} />
         </div>
 
-        <Eyebrow tone="gold" withLine>Reserva confirmada</Eyebrow>
+        <Eyebrow tone="gold" withLine>
+          {reception ? "Lugar apartado" : "Reserva confirmada"}
+        </Eyebrow>
 
         <h3 className="mt-5 font-display text-3xl md:text-4xl font-bold tracking-[-0.02em] leading-tight text-paper">
           {isOpenGym ? (
@@ -97,26 +140,57 @@ export function ReservaForm({ cls, onConfirmed }: Props) {
           )}
         </h3>
 
-        <p className="mt-5 text-sm md:text-base leading-relaxed text-paper/75">
-          Tu reserva de{" "}
-          <span className="text-paper font-medium">{confirmed.planName}</span> fue
-          confirmada. Recibiste un email con el detalle.
-        </p>
-        <p className="mt-2 text-sm text-paper/50">
-          Llega 10 minutos antes para registro.
-        </p>
+        {reception ? (
+          <>
+            <p className="mt-5 text-sm md:text-base leading-relaxed text-paper/75">
+              Apartamos tu lugar para el{" "}
+              <span className="text-paper font-medium">{dayLabel}</span>. Te enviamos un
+              correo con el detalle.
+            </p>
+            <p className="mt-2 text-sm text-paper/60">
+              Completa tu pago de <span className="text-paper">{priceLine}</span> en
+              recepción al llegar. Llega 10 minutos antes para registro.
+            </p>
+            <p className="mt-4 font-mono text-[0.6rem] uppercase tracking-[0.18em] text-gold/80">
+              ¿Eres socio? Solo valida tu acceso en recepción.
+            </p>
+          </>
+        ) : (
+          <>
+            <p className="mt-5 text-sm md:text-base leading-relaxed text-paper/75">
+              Tu reserva de{" "}
+              <span className="text-paper font-medium">{confirmed?.planName ?? cls.name}</span>{" "}
+              fue confirmada. Recibiste un email con el detalle.
+            </p>
+            <p className="mt-2 text-sm text-paper/50">
+              Llega 10 minutos antes para registro.
+            </p>
+          </>
+        )}
       </div>
     );
   }
 
-  /* ── Form / Payment steps ────────────────────────────────── */
+  /* ── Form / Method / Payment steps ───────────────────────── */
+  const stepLabel =
+    step === "form"
+      ? "1 / 2 · Tus datos"
+      : step === "method"
+      ? "2 / 2 · Cómo reservar"
+      : "Pago seguro";
+
+  const goBack = () => {
+    setReserveError(null);
+    setStep(step === "payment" ? "method" : "form");
+  };
+
   return (
     <div className="px-7 md:px-9 py-6 md:py-9 flex flex-col min-h-0 md:min-h-[560px]">
       {/* Step indicator */}
       <div className="flex items-center gap-3 mb-4">
-        {step === "payment" && (
+        {step !== "form" && (
           <button
-            onClick={() => setStep("form")}
+            onClick={goBack}
             aria-label="Volver"
             className="text-paper/50 hover:text-paper transition-colors"
           >
@@ -124,7 +198,7 @@ export function ReservaForm({ cls, onConfirmed }: Props) {
           </button>
         )}
         <p className="font-mono text-[0.625rem] uppercase tracking-[0.22em] text-gold">
-          {step === "form" ? "1 / 2 · Tus datos" : "2 / 2 · Pago seguro"}
+          {stepLabel}
         </p>
       </div>
 
@@ -138,8 +212,18 @@ export function ReservaForm({ cls, onConfirmed }: Props) {
         </p>
       </div>
 
-      {step === "form" ? (
+      {step === "form" && (
         <form onSubmit={handleSubmit(onFormSubmit)} className="flex flex-col gap-4 flex-1">
+          {/* Honeypot anti-bot — invisible para humanos, debe quedar vacío */}
+          <input
+            ref={honeypotRef}
+            type="text"
+            name="website"
+            tabIndex={-1}
+            autoComplete="off"
+            aria-hidden="true"
+            className="absolute left-[-9999px] top-0 h-0 w-0 opacity-0"
+          />
           <div className="space-y-4">
             <Field label="Nombre completo" required error={formState.errors.name?.message}>
               <input
@@ -176,7 +260,7 @@ export function ReservaForm({ cls, onConfirmed }: Props) {
                 "hover:bg-gold-soft active:scale-[0.99] transition-all duration-300"
               )}
             >
-              Continuar al pago →
+              Continuar →
             </button>
             <a
               href={waLink}
@@ -189,7 +273,101 @@ export function ReservaForm({ cls, onConfirmed }: Props) {
             </a>
           </div>
         </form>
-      ) : (
+      )}
+
+      {step === "method" && (
+        <div className="flex flex-col gap-3 flex-1">
+          {/* Pagar en recepción */}
+          <button
+            type="button"
+            onClick={handleReception}
+            disabled={reserving}
+            className={cn(
+              "group relative text-left border border-paper/15 px-5 py-4 transition-colors",
+              "hover:border-gold/60 active:bg-paper/[0.03] disabled:cursor-default disabled:opacity-70"
+            )}
+          >
+            <div className="flex items-start justify-between gap-3">
+              <div className="min-w-0">
+                <p className="font-display text-lg font-semibold tracking-tight text-paper">
+                  Pagar en recepción
+                </p>
+                <p className="mt-1 text-sm leading-relaxed text-paper/65">
+                  Aparta tu lugar ahora y paga al llegar al club.
+                </p>
+              </div>
+              <span className="shrink-0 mt-1 text-gold">
+                {reserving ? (
+                  <Loader2 className="size-4 animate-spin" strokeWidth={1.75} />
+                ) : (
+                  <ArrowRight
+                    className="size-4 transition-transform duration-300 group-hover:translate-x-0.5"
+                    strokeWidth={1.75}
+                  />
+                )}
+              </span>
+            </div>
+            <span className="mt-3 inline-block font-mono text-[0.55rem] uppercase tracking-[0.22em] text-paper/40">
+              {reserving ? "Apartando tu lugar…" : "Sin tarjeta"}
+            </span>
+          </button>
+
+          {/* Pagar en línea */}
+          <button
+            type="button"
+            onClick={() => setStep("payment")}
+            disabled={reserving}
+            className="group relative text-left border border-gold/30 bg-gold/[0.06] px-5 py-4 transition-colors hover:border-gold/60 disabled:opacity-70"
+          >
+            <div className="flex items-start justify-between gap-3">
+              <div className="min-w-0">
+                <p className="font-display text-lg font-semibold tracking-tight text-paper">
+                  Pagar en línea
+                </p>
+                <p className="mt-1 text-sm leading-relaxed text-paper/65">
+                  Asegura tu lugar al instante con tarjeta.
+                </p>
+              </div>
+              <ArrowRight
+                className="size-4 shrink-0 mt-1 text-gold transition-transform duration-300 group-hover:translate-x-0.5"
+                strokeWidth={1.75}
+              />
+            </div>
+            <span className="mt-3 inline-block font-mono text-[0.55rem] uppercase tracking-[0.22em] text-gold/80">
+              Inmediato · pago seguro
+            </span>
+          </button>
+
+          {reserveError && (
+            <div className="border border-red-500/30 bg-red-500/5 px-4 py-3">
+              <p className="text-xs leading-relaxed text-red-300">{reserveError}</p>
+              <a
+                href={waLink}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="mt-2 inline-flex items-center gap-1.5 text-gold hover:text-gold-soft font-mono text-[0.65rem] uppercase tracking-[0.18em]"
+              >
+                <WhatsappIcon className="size-3.5" />
+                Reservar por WhatsApp
+              </a>
+            </div>
+          )}
+
+          {/* Leyenda para socios */}
+          <div className="mt-auto pt-4 border-t border-paper/10">
+            <p className="font-mono text-[0.6rem] uppercase tracking-[0.2em] text-gold/80">
+              ¿Ya eres socio?
+            </p>
+            <p className="mt-1.5 text-xs leading-relaxed text-paper/55">
+              Si tu membresía está activa, elige{" "}
+              <span className="text-paper/85">pagar en recepción</span>: tu acceso se valida
+              en el club, sin cobro en línea.
+            </p>
+          </div>
+        </div>
+      )}
+
+      {step === "payment" && (
         /* payment step — tamaño fijo para no mover el modal */
         <div className="flex flex-col flex-1 gap-4">
           {!STRIPE_CONFIGURED_CLIENT ? (
@@ -198,8 +376,8 @@ export function ReservaForm({ cls, onConfirmed }: Props) {
                 Modo demo
               </p>
               <p className="text-sm leading-relaxed text-paper/80">
-                El pago online se habilita cuando se conecte la cuenta de Stripe.
-                Por ahora, contáctanos directo:
+                El pago online se habilita cuando se conecte la cuenta de Stripe. Mientras
+                tanto puedes apartar tu lugar y pagar en recepción, o contáctanos:
               </p>
               <a
                 href={waLink}
@@ -232,4 +410,3 @@ export function ReservaForm({ cls, onConfirmed }: Props) {
     </div>
   );
 }
-

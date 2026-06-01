@@ -2,6 +2,9 @@ import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { stripeIsConfigured, createEmbeddedCheckoutSession } from "@/lib/stripe";
 import { PLANS, PRE_PAYMENTS } from "@/lib/memberships";
+import { CLASSES, DAY_LABELS, getClassPrice } from "@/lib/classes";
+import { GYM_HOURS_BY_DAY } from "@/lib/content";
+import { checkRateLimit } from "@/lib/rate-limit";
 
 export const runtime = "nodejs";
 
@@ -11,20 +14,12 @@ const CustomerSchema = z.object({
   phone: z.string().max(40),
 });
 
-const ClassMetaSchema = z.object({
-  className: z.string().min(1),
-  classDay: z.string().min(1),
-  classTime: z.string().min(1),
-  classInstructor: z.string().min(1),
-  price: z.number().int().positive(),
-});
-
 const CheckoutSchema = z.object({
   itemId: z.string().min(1),
   itemKind: z.enum(["plan", "prepayment", "class"]),
   customer: CustomerSchema,
-  // Solo para itemKind === "class"
-  classMeta: ClassMetaSchema.optional(),
+  // classMeta del cliente se ignora a propósito: el precio/nombre se derivan
+  // del catálogo en el servidor para que no se pueda manipular el monto.
 });
 
 export async function POST(req: NextRequest) {
@@ -36,8 +31,19 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    const ip =
+      req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
+      req.headers.get("x-real-ip") ||
+      "unknown";
+    if ((await checkRateLimit("checkout", { ip, request: req })).rateLimited) {
+      return NextResponse.json(
+        { ok: false, error: "Demasiados intentos. Espera un momento." },
+        { status: 429 }
+      );
+    }
+
     const body = await req.json();
-    const { itemId, itemKind, customer, classMeta } = CheckoutSchema.parse(body);
+    const { itemId, itemKind, customer } = CheckoutSchema.parse(body);
 
     let lineItems;
     let itemName: string;
@@ -95,32 +101,35 @@ export async function POST(req: NextRequest) {
       ];
 
     } else {
-      // class
-      if (!classMeta) {
+      // class — derivamos TODO del catálogo; el precio del cliente se ignora.
+      const cls = CLASSES.find((c) => c.id === itemId);
+      if (!cls) {
         return NextResponse.json(
-          { ok: false, error: "classMeta requerido para itemKind=class" },
-          { status: 400 }
+          { ok: false, error: "Clase no encontrada" },
+          { status: 404 }
         );
       }
-      itemName = `${classMeta.className} · ${classMeta.classDay} ${classMeta.classTime}`;
+      const isOpenGym = cls.category === "open-gym";
+      const classDay = `${DAY_LABELS[cls.day]}${cls.dateLabel ? ` ${cls.dateLabel}` : ""}`;
+      const classTime = isOpenGym ? GYM_HOURS_BY_DAY[cls.day] : cls.time;
+      const price = getClassPrice(cls);
+      itemName = `${cls.name} · ${classDay} ${classTime}`;
       lineItems = [
         {
           inline: {
             name: itemName,
             description:
-              classMeta.classInstructor !== "—"
-                ? classMeta.classInstructor
-                : "Acceso libre",
-            amount: classMeta.price * 100,
+              cls.instructor !== "—" ? cls.instructor : "Acceso libre",
+            amount: price * 100,
             currency: "mxn",
           },
         },
       ];
       extraMeta = {
-        className: classMeta.className,
-        classDay: classMeta.classDay,
-        classTime: classMeta.classTime,
-        classInstructor: classMeta.classInstructor,
+        className: cls.name,
+        classDay,
+        classTime,
+        classInstructor: cls.instructor,
       };
     }
 

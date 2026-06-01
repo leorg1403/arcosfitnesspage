@@ -6,6 +6,7 @@ import { ClientPurchaseEmail } from "@/lib/email/client-purchase";
 import { OwnerPurchaseEmail } from "@/lib/email/owner-purchase";
 import { ClientReservationEmail } from "@/lib/email/client-reservation";
 import { OwnerReservationEmail } from "@/lib/email/owner-reservation";
+import { checkRateLimit } from "@/lib/rate-limit";
 
 export const runtime = "nodejs";
 
@@ -22,6 +23,14 @@ export type ConfirmResult = {
 export async function POST(req: NextRequest) {
   if (!stripeIsConfigured) {
     return NextResponse.json({ ok: false, error: "Stripe no configurado" }, { status: 503 });
+  }
+
+  const ip =
+    req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
+    req.headers.get("x-real-ip") ||
+    "unknown";
+  if ((await checkRateLimit("confirm", { ip, request: req })).rateLimited) {
+    return NextResponse.json({ ok: false, error: "Demasiados intentos" }, { status: 429 });
   }
 
   let sessionId: string;

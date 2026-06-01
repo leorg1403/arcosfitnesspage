@@ -9,6 +9,10 @@ export type ClientReservationProps = {
   classInstructor: string;
   /** Si el pago fue procesado online, incluir monto en centavos */
   amountPaid?: number;
+  /** Reserva sin pago online: pendiente a pagar en recepción */
+  paymentPending?: boolean;
+  /** Monto a pagar en recepción, en centavos */
+  amountDue?: number;
   currency?: string;
 };
 
@@ -21,6 +25,7 @@ function formatMoney(cents: number, currency: string) {
 
 export function ClientReservationEmail(p: ClientReservationProps) {
   const paid = p.amountPaid != null && p.amountPaid > 0;
+  const pending = !paid && p.paymentPending === true;
   const currency = p.currency ?? "mxn";
 
   return (
@@ -28,11 +33,13 @@ export function ClientReservationEmail(p: ClientReservationProps) {
       preview={
         paid
           ? `Reserva confirmada: ${p.className} · ${p.classDay}`
+          : pending
+          ? `Reserva apartada: ${p.className} · ${p.classDay}`
           : `Tu reserva en Arcos: ${p.className} · ${p.classDay}`
       }
     >
       <Text className="text-[#C4A572] text-[11px] uppercase tracking-[0.22em] font-mono m-0">
-        {paid ? "Reserva confirmada" : "Reserva recibida"}
+        {paid ? "Reserva confirmada" : pending ? "Reserva apartada" : "Reserva recibida"}
       </Text>
 
       <Heading className="text-[#0A0A0A] text-3xl font-bold tracking-tight mt-3 mb-0">
@@ -43,6 +50,8 @@ export function ClientReservationEmail(p: ClientReservationProps) {
       <Text className="text-[#0A0A0A] text-base mt-4 mb-0 leading-relaxed">
         {paid
           ? "Tu lugar está confirmado y el pago fue procesado con éxito."
+          : pending
+          ? "Apartamos tu lugar. Completa tu pago en recepción al llegar al club."
           : "Recibimos tu solicitud. El equipo te confirma cupo en menos de una hora en horario laboral."}
       </Text>
 
@@ -62,6 +71,12 @@ export function ClientReservationEmail(p: ClientReservationProps) {
           <Text className="text-[#0A0A0A] text-base mt-3 mb-0">
             Total cobrado:{" "}
             <strong>{formatMoney(p.amountPaid!, currency)}</strong>
+          </Text>
+        )}
+        {pending && p.amountDue != null && p.amountDue > 0 && (
+          <Text className="text-[#0A0A0A] text-base mt-3 mb-0">
+            A pagar en recepción:{" "}
+            <strong>{formatMoney(p.amountDue, currency)}</strong>
           </Text>
         )}
       </Section>
