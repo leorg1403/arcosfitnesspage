@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { sweepExpiredHolds } from "@/lib/db/payments";
-import { purgeOldData, reconcileCapacities } from "@/lib/db/maintenance";
+import { purgeOldData, reconcileCapacities, expireMemberships } from "@/lib/db/maintenance";
 
 export const runtime = "nodejs";
 
@@ -24,6 +24,7 @@ export async function GET(req: NextRequest) {
   }
   const released = await sweepExpiredHolds();
   const reconciled = await reconcileCapacities();
+  const expiredMemberships = await expireMemberships();
   const purged = await purgeOldData();
-  return NextResponse.json({ ok: true, released, ...reconciled, ...purged });
+  return NextResponse.json({ ok: true, released, ...reconciled, ...expiredMemberships, ...purged });
 }

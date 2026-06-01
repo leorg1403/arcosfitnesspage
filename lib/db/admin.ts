@@ -10,6 +10,7 @@ import type {
   SubscriptionStatus,
 } from "@prisma/client";
 import { prisma } from "./client";
+import { upsertCustomer } from "./customers";
 import { cdmxTodayISO } from "@/lib/booking/window";
 
 function isoToDbDate(iso: string): Date {
@@ -148,6 +149,7 @@ export async function getCustomerDetail(id: string) {
       },
       payments: { orderBy: { createdAt: "desc" }, take: 50 },
       subscriptions: { orderBy: { createdAt: "desc" } },
+      memberships: { orderBy: { createdAt: "desc" } },
     },
   });
 }
@@ -197,6 +199,64 @@ export async function setCustomerStatus(id: string, status: CustomerStatus, note
   await prisma.customer.update({
     where: { id },
     data: { status, ...(notes !== undefined ? { notes } : {}) },
+  });
+}
+
+/** Alta/obtención manual de un cliente por correo (recepción). Devuelve el cliente. */
+export async function createOrGetCustomer(input: {
+  name: string;
+  email: string;
+  phone?: string | null;
+}) {
+  return upsertCustomer(prisma, input);
+}
+
+/** Edita datos básicos del cliente. */
+export async function updateCustomer(
+  id: string,
+  data: { name?: string; phone?: string | null; notes?: string | null }
+) {
+  await prisma.customer.update({
+    where: { id },
+    data: {
+      ...(data.name !== undefined ? { name: data.name } : {}),
+      ...(data.phone !== undefined ? { phone: data.phone } : {}),
+      ...(data.notes !== undefined ? { notes: data.notes } : {}),
+    },
+  });
+}
+
+// ─── Membresías manuales ──────────────────────────────────────────────────────
+export type AddMembershipInput = {
+  customerId: string;
+  planId: string;
+  planName: string;
+  priceCents: number;
+  periodicity: string;
+  startsAtISO: string;
+  endsAtISO: string | null;
+  notes?: string | null;
+};
+
+export async function addMembership(input: AddMembershipInput) {
+  await prisma.membership.create({
+    data: {
+      customerId: input.customerId,
+      planId: input.planId,
+      planName: input.planName,
+      priceCents: input.priceCents,
+      periodicity: input.periodicity,
+      startsAt: new Date(`${input.startsAtISO}T00:00:00Z`),
+      endsAt: input.endsAtISO ? new Date(`${input.endsAtISO}T00:00:00Z`) : null,
+      notes: input.notes ?? null,
+    },
+  });
+}
+
+export async function cancelMembership(id: string) {
+  await prisma.membership.updateMany({
+    where: { id, status: "active" },
+    data: { status: "cancelled" },
   });
 }
 
