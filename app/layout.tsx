@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Inter, Instrument_Serif, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import { SiteHeader } from "@/components/layout/SiteHeader";
@@ -33,7 +33,7 @@ const mono = JetBrains_Mono({
 export const metadata: Metadata = {
   metadataBase: new URL("https://www.arcosfitness.com"),
   title: {
-    default: "Arcos Fitness Club — Strength. Recovery. Belonging.",
+    default: "Arcos Fitness Club — Fuerza. Recuperación. Comunidad.",
     template: "%s · Arcos Fitness Club",
   },
   description:
@@ -54,6 +54,10 @@ export const metadata: Metadata = {
   },
   twitter: { card: "summary_large_image" },
   icons: { icon: "/favicon.ico" },
+};
+
+export const viewport: Viewport = {
+  themeColor: "#0A0A0A",
 };
 
 export default function RootLayout({

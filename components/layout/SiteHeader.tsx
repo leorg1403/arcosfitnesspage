@@ -27,10 +27,25 @@ export function SiteHeader() {
     setOpen(false);
   }, [pathname]);
 
+  // iOS Safari ignora `overflow: hidden` en el body, así que el fondo seguía
+  // scrolleando detrás del menú. Bloqueamos con `position: fixed` (técnica que
+  // sí funciona en iOS) y restauramos la posición de scroll al cerrar.
   useEffect(() => {
-    document.body.style.overflow = open ? "hidden" : "";
+    if (!open) return;
+    const scrollY = window.scrollY;
+    const { body } = document;
+    body.style.position = "fixed";
+    body.style.top = `-${scrollY}px`;
+    body.style.left = "0";
+    body.style.right = "0";
+    body.style.width = "100%";
     return () => {
-      document.body.style.overflow = "";
+      body.style.position = "";
+      body.style.top = "";
+      body.style.left = "";
+      body.style.right = "";
+      body.style.width = "";
+      window.scrollTo(0, scrollY);
     };
   }, [open]);
 
@@ -123,7 +138,7 @@ export function SiteHeader() {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.4 }}
-            className="fixed inset-0 z-50 bg-ink text-paper"
+            className="fixed inset-0 z-50 h-[100dvh] overflow-y-auto overscroll-contain bg-ink text-paper"
           >
             <div className="container-app flex h-20 items-center justify-between">
               <Logo />
