@@ -13,6 +13,7 @@ import { ClientPurchaseEmail } from "../lib/email/client-purchase";
 import { OwnerPurchaseEmail } from "../lib/email/owner-purchase";
 import { ClientReservationEmail } from "../lib/email/client-reservation";
 import { OwnerReservationEmail } from "../lib/email/owner-reservation";
+import { OwnerCancellationEmail } from "../lib/email/owner-cancellation";
 
 const OUT_DIR = path.join(__dirname, "..", "templates");
 
@@ -69,6 +70,23 @@ const samples = {
     customerPhone: "55 1234 5678",
     amountPaid: 35000,
     currency: "mxn",
+  }),
+  "client-reservation-cancelable.html": ClientReservationEmail({
+    customerName: "Carlos Ramírez",
+    className: "Hyrox Master Class",
+    classDay: "Lunes 9 de junio",
+    classTime: "07:00",
+    classInstructor: "Coach Andrés",
+    member: true,
+    cancelUrl:
+      "https://www.arcosfitness.com/clases-reservas?cancel=SAMPLE.TOKEN",
+  }),
+  "owner-cancellation.html": OwnerCancellationEmail({
+    className: "Hyrox Master Class",
+    classDay: "Lunes 9 de junio",
+    classTime: "07:00",
+    customerName: "Carlos Ramírez",
+    customerEmail: "carlos.ramirez@example.com",
   }),
 } as const;
 

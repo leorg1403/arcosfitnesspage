@@ -15,6 +15,8 @@ export type ClientReservationProps = {
   amountDue?: number;
   /** Socio: clase incluida en su membresía → sin cobro */
   member?: boolean;
+  /** Link firmado para cancelar (solo socio / pago en recepción) */
+  cancelUrl?: string;
   currency?: string;
 };
 
@@ -113,6 +115,29 @@ export function ClientReservationEmail(p: ClientReservationProps) {
         <Text className="text-[#8A8A88] text-xs mt-4 mb-0">
           En caso de requerir factura acudir a recepción.
         </Text>
+      )}
+
+      {p.cancelUrl && (member || pending) && (
+        <Section className="mt-6">
+          <Text className="text-[#0A0A0A] text-sm mt-0 mb-3 leading-relaxed">
+            ¿Te surgió un imprevisto? Puedes cancelar tu reserva:
+          </Text>
+          <a
+            href={p.cancelUrl}
+            style={{
+              display: "inline-block",
+              color: "#C4A572",
+              border: "1px solid #C4A572",
+              padding: "11px 20px",
+              fontSize: "12px",
+              letterSpacing: "0.18em",
+              textTransform: "uppercase",
+              textDecoration: "none",
+            }}
+          >
+            Cancelar reserva
+          </a>
+        </Section>
       )}
     </EmailLayout>
   );
