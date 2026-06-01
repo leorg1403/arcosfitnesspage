@@ -13,6 +13,7 @@ import {
   ensureDefaultAdmin,
   setAttendance,
   bulkMarkNoShow,
+  markSessionNoShow,
   setCustomerStatus,
   upsertClassTemplate,
   setClassTemplateActive,
@@ -107,6 +108,14 @@ export async function bulkNoShowAction(formData: FormData) {
   const date = z.string().regex(/^\d{4}-\d{2}-\d{2}$/).safeParse(formData.get("date"));
   if (!date.success) return;
   await bulkMarkNoShow(date.data);
+  revalidatePath("/recepcion/reservas");
+}
+
+export async function sessionNoShowAction(formData: FormData) {
+  await assertAdmin();
+  const sid = z.string().min(1).max(40).safeParse(formData.get("sessionId"));
+  if (!sid.success) return;
+  await markSessionNoShow(sid.data);
   revalidatePath("/recepcion/reservas");
 }
 

@@ -92,9 +92,24 @@ export async function listReservationsByDate(dateISO: string) {
       attendance: true,
       paymentStatus: true,
       amountDueCents: true,
-      session: { select: { startTime: true, template: { select: { name: true } } } },
+      session: {
+        select: {
+          id: true,
+          startTime: true,
+          template: { select: { name: true, category: true, durationMin: true } },
+        },
+      },
     },
   });
+}
+
+/** Marca como no-show las reservas PENDIENTES de una sesión concreta. */
+export async function markSessionNoShow(sessionId: string): Promise<number> {
+  const { count } = await prisma.reservation.updateMany({
+    where: { sessionId, attendance: "pending", status: { in: UPCOMING_STATUSES } },
+    data: { attendance: "no_show" },
+  });
+  return count;
 }
 
 /** Fechas (ISO) con reservas, para poblar el selector — próximas y recientes. */
