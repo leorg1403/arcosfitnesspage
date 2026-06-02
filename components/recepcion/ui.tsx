@@ -4,6 +4,19 @@ export function fmtMoney(cents: number, currency = "MXN"): string {
   return new Intl.NumberFormat("es-MX", { style: "currency", currency }).format(cents / 100);
 }
 
+/** Fecha + hora compacta en horario CDMX, p.ej. "01 jun 17:16". */
+export function fmtDateTime(d: Date): string {
+  return new Intl.DateTimeFormat("es-MX", {
+    timeZone: "America/Mexico_City",
+    day: "2-digit",
+    month: "short",
+    hour: "2-digit",
+    minute: "2-digit",
+  })
+    .format(d)
+    .replace(/\./g, "");
+}
+
 export function PageHeader({
   title,
   subtitle,
