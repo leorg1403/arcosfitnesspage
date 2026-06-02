@@ -6,7 +6,7 @@ import {
   updateCustomerAction,
   cancelMembershipAction,
 } from "@/app/actions/admin";
-import { Table, Badge, Card, PageHeader, fmtMoney } from "@/components/recepcion/ui";
+import { Table, Badge, Card, PageHeader, fmtMoney, fmtDateTime } from "@/components/recepcion/ui";
 import { MembershipForm, type MembershipPackage } from "@/components/recepcion/MembershipForm";
 import { PLANS, PRE_PAYMENTS } from "@/lib/memberships";
 import { cdmxTodayISO } from "@/lib/booking/window";
@@ -104,7 +104,7 @@ export default async function CustomerDetailPage({
   ]);
 
   const payRows = c.payments.map((p) => [
-    p.createdAt.toISOString().slice(0, 10),
+    <span key="d" className="whitespace-nowrap">{fmtDateTime(p.createdAt)}</span>,
     <Link key="i" href={`/recepcion/pagos/${p.id}`} className="text-paper hover:text-gold transition-colors">
       {p.itemName}
     </Link>,

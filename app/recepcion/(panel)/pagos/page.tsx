@@ -1,11 +1,11 @@
 import Link from "next/link";
 import { listPayments } from "@/lib/db/admin";
-import { Table, Badge, PageHeader, fmtMoney } from "@/components/recepcion/ui";
+import { Table, Badge, PageHeader, fmtMoney, fmtDateTime } from "@/components/recepcion/ui";
 
 export default async function PagosPage() {
   const payments = await listPayments();
   const rows = payments.map((p) => [
-    p.createdAt.toISOString().slice(0, 10),
+    <span key="d" className="whitespace-nowrap">{fmtDateTime(p.createdAt)}</span>,
     <Badge key="k" tone="neutral">{p.itemKind}</Badge>,
     <Link key="i" href={`/recepcion/pagos/${p.id}`} className="text-paper hover:text-gold transition-colors">
       {p.itemName}
