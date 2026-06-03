@@ -71,6 +71,21 @@ export function membershipBadgeTone(planName: string): BadgeTone {
   return /gold/i.test(planName) ? "gold" : "silver";
 }
 
+/** Etiqueta legible del tipo de pago (ItemKind). */
+export const PAYMENT_TYPE_LABEL: Record<string, string> = {
+  inscripcion: "inscripción",
+  subscription: "membresía",
+  plan: "plan",
+  prepayment: "anticipado",
+  class: "clase",
+};
+
+export function paymentTypeBadge(itemKind: string) {
+  const tone: BadgeTone =
+    itemKind === "inscripcion" ? "gold" : itemKind === "subscription" ? "green" : "neutral";
+  return <Badge tone={tone}>{PAYMENT_TYPE_LABEL[itemKind] ?? itemKind}</Badge>;
+}
+
 export function Badge({
   tone = "neutral",
   children,

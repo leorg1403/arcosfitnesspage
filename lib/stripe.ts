@@ -47,6 +47,9 @@ export type CreateCheckoutOpts = {
   metadata: Record<string, string>;
   /** Epoch (segundos) de expiración de la sesión. Mínimo de Stripe: +30 min. */
   expiresAt?: number;
+  /** Metadata para la SUSCRIPCIÓN creada (solo aplica en mode=subscription). Así
+   *  la suscripción/facturas llevan planId/planName y el webhook arma el desglose. */
+  subscriptionMetadata?: Record<string, string>;
 };
 
 /**
@@ -95,6 +98,9 @@ export async function createEmbeddedCheckoutSession(opts: CreateCheckoutOpts) {
     line_items: lineItems,
     customer_email: opts.customer.email,
     ...(opts.expiresAt && { expires_at: opts.expiresAt }),
+    ...(mode === "subscription" && opts.subscriptionMetadata
+      ? { subscription_data: { metadata: opts.subscriptionMetadata } }
+      : {}),
     metadata: {
       ...opts.metadata,
       customerName: opts.customer.name,

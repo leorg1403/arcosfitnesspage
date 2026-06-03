@@ -255,6 +255,66 @@ export async function finalizeCheckout(input: FinalizeInput): Promise<FinalizeRe
   return result;
 }
 
+/**
+ * Registra un pago tipado originado en una FACTURA de suscripción (inscripción,
+ * mensualidad, renovación). Idempotente por (stripeInvoiceId, itemKind) → seguro
+ * ante reintentos. Liga el pago a la suscripción y al Customer.
+ */
+export async function recordTypedPayment(args: {
+  stripeInvoiceId: string;
+  stripePaymentIntentId?: string | null;
+  stripeSubscriptionId?: string | null;
+  itemKind: ItemKind; // "inscripcion" | "subscription"
+  itemId: string;
+  itemName: string;
+  amountCents: number;
+  currency: string;
+  customerName: string;
+  customerEmail: string;
+  customerPhone?: string | null;
+}): Promise<{ created: boolean }> {
+  const existing = await prisma.payment.findFirst({
+    where: { stripeInvoiceId: args.stripeInvoiceId, itemKind: args.itemKind },
+    select: { id: true },
+  });
+  if (existing) return { created: false };
+
+  const [customer, sub] = await Promise.all([
+    upsertCustomer(prisma, {
+      name: args.customerName,
+      email: args.customerEmail,
+      phone: args.customerPhone,
+    }),
+    args.stripeSubscriptionId
+      ? prisma.subscription.findUnique({
+          where: { stripeSubscriptionId: args.stripeSubscriptionId },
+          select: { id: true },
+        })
+      : Promise.resolve(null),
+  ]);
+
+  await prisma.payment.create({
+    data: {
+      stripeSessionId: null,
+      stripeInvoiceId: args.stripeInvoiceId,
+      stripePaymentIntentId: args.stripePaymentIntentId ?? null,
+      stripeSubscriptionId: args.stripeSubscriptionId ?? null,
+      itemKind: args.itemKind,
+      itemId: args.itemId,
+      itemName: args.itemName,
+      amountTotalCents: args.amountCents,
+      currency: args.currency,
+      status: "paid",
+      customerName: args.customerName,
+      customerEmail: normalizeEmail(args.customerEmail),
+      customerPhone: args.customerPhone ?? null,
+      customerId: customer.id,
+      subscriptionId: sub?.id ?? null,
+    },
+  });
+  return { created: true };
+}
+
 /** Libera (idempotente) el hold de una sesión de Stripe: solo si sigue pending. */
 async function releaseHoldById(id: string, sessionId: string): Promise<void> {
   const { count } = await prisma.reservation.updateMany({

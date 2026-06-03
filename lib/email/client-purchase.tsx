@@ -6,6 +6,8 @@ export type ClientPurchaseProps = {
   planName: string;
   amountTotal: number; // en centavos
   currency: string;
+  /** true => recibo de renovación mensual (no "bienvenida") */
+  renewal?: boolean;
 };
 
 function formatMoney(cents: number, currency: string) {
@@ -18,17 +20,23 @@ function formatMoney(cents: number, currency: string) {
 export function ClientPurchaseEmail(p: ClientPurchaseProps) {
   return (
     <EmailLayout
-      preview={`Bienvenido a Arcos: tu plan ${p.planName} fue activado`}
+      preview={
+        p.renewal
+          ? `Recibo de tu membresía ${p.planName}`
+          : `Bienvenido a Arcos: tu plan ${p.planName} fue activado`
+      }
     >
       <Text className="text-[#C4A572] text-[11px] uppercase tracking-[0.22em] font-mono m-0">
-        Pago confirmado
+        {p.renewal ? "Recibo de membresía" : "Pago confirmado"}
       </Text>
       <Heading className="text-[#0A0A0A] text-3xl font-bold tracking-tight mt-3 mb-0">
-        Bienvenido a Arcos,{" "}
+        {p.renewal ? "Gracias" : "Bienvenido a Arcos"},{" "}
         <span style={{ color: "#C4A572" }}>{p.customerName.split(" ")[0]}</span>.
       </Heading>
       <Text className="text-[#0A0A0A] text-base mt-4 mb-0 leading-relaxed">
-        Tu pago fue procesado con éxito.
+        {p.renewal
+          ? "Renovamos tu membresía. Este es el recibo de tu cobro mensual."
+          : "Tu pago fue procesado con éxito."}
       </Text>
 
       <Hr className="border-[#E5E3DC] my-8" />

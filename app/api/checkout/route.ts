@@ -50,6 +50,10 @@ export async function POST(req: NextRequest) {
     let amountCents: number;
     let extraMeta: Record<string, string> = {};
     let expiresAt: number | undefined;
+    // Solo se setea para planes MENSUALES (mode=subscription). Cuando está, el
+    // desglose (inscripción + mensualidad) y las renovaciones los registra el
+    // webhook desde las facturas → aquí NO creamos un Payment "pending".
+    let subscriptionMetadata: Record<string, string> | undefined;
 
     if (itemKind === "plan") {
       const plan = PLANS.find((p) => p.id === itemId);
@@ -78,6 +82,16 @@ export async function POST(req: NextRequest) {
             currency: "mxn",
           },
         });
+      }
+      if (plan.periodicity === "mensual") {
+        // La inscripción va como línea de pago ÚNICO (sin recurring) → Stripe solo
+        // la cobra en la 1ª factura; la mensualidad es el único item recurrente.
+        subscriptionMetadata = {
+          planId: plan.id,
+          planName: plan.name,
+          customerName: customer.name,
+          ...(customer.phone ? { customerPhone: customer.phone } : {}),
+        };
       }
     } else if (itemKind === "prepayment") {
       const prePayment = PRE_PAYMENTS.find((p) => p.id === itemId);
@@ -161,21 +175,26 @@ export async function POST(req: NextRequest) {
       customer,
       expiresAt,
       metadata: { itemId, itemKind, itemName, ...extraMeta },
+      ...(subscriptionMetadata ? { subscriptionMetadata } : {}),
     });
 
-    // Registrar el Payment pendiente (ligado al Customer y, si es clase, a la reserva).
-    await createPendingPayment({
-      stripeSessionId: session.id,
-      itemKind,
-      itemId,
-      itemName,
-      amountCents,
-      currency: "mxn",
-      customerName: customer.name,
-      customerEmail: customer.email,
-      customerPhone: customer.phone,
-      reservationId: extraMeta.reservationId ?? null,
-    });
+    // Para suscripciones (plan mensual) NO creamos pending: el webhook registra los
+    // pagos tipados (inscripción + mensualidad) desde la factura. Para pagos únicos
+    // (clase / anticipado / drop-in) sí registramos el Payment pendiente.
+    if (!subscriptionMetadata) {
+      await createPendingPayment({
+        stripeSessionId: session.id,
+        itemKind,
+        itemId,
+        itemName,
+        amountCents,
+        currency: "mxn",
+        customerName: customer.name,
+        customerEmail: customer.email,
+        customerPhone: customer.phone,
+        reservationId: extraMeta.reservationId ?? null,
+      });
+    }
 
     return NextResponse.json({
       ok: true,

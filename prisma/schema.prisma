@@ -87,6 +87,8 @@ enum ItemKind {
   plan
   prepayment
   class
+  inscripcion // cuota única de inscripción (parte del alta de una membresía mensual)
+  subscription // cargo de membresía recurrente (primer mes y renovaciones)
 
   @@schema("app")
 }
@@ -295,9 +297,12 @@ model Reservation {
 /// Todo pago de Stripe (clase / plan / anticipado).
 model Payment {
   id                    String        @id @default(cuid())
-  stripeSessionId       String        @unique
+  // Null para pagos originados en facturas de suscripción (renovaciones / desglose
+  // del primer cobro), que no tienen Checkout Session. @unique permite varios null.
+  stripeSessionId       String?       @unique
   stripePaymentIntentId String?
   stripeSubscriptionId  String?
+  stripeInvoiceId       String? // factura de Stripe (cobros de suscripción)
   itemKind              ItemKind
   itemId                String
   itemName              String
@@ -332,6 +337,10 @@ model Subscription {
   customer             Customer?          @relation(fields: [customerId], references: [id])
   customerId           String?
   currentPeriodEnd     DateTime?
+  // Monto recurrente REAL leído de Stripe (solo el item recurrente, p. ej. $2,800),
+  // para verificar de un vistazo que la inscripción NO recurre.
+  recurringAmountCents Int?
+  recurringInterval    String? // "month" | "year"
   payments             Payment[]
   createdAt            DateTime           @default(now())
   updatedAt            DateTime           @updatedAt
