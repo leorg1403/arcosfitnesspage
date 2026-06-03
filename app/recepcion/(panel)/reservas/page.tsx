@@ -38,7 +38,8 @@ function kindBadge(k: string, fitnessApp?: string | null) {
   const app = fitnessAppLabel(fitnessApp);
   if (app) return <Badge tone="gold">App · {app}</Badge>;
   const tone = k === "member" ? "gold" : k === "online" ? "green" : "neutral";
-  const label = k === "member" ? "socio" : k === "online" ? "en línea" : "recepción";
+  const label =
+    k === "member" ? "socio" : k === "online" ? "en línea" : "No socio · Pago en recepción";
   return <Badge tone={tone}>{label}</Badge>;
 }
 function statusBadge(s: string) {

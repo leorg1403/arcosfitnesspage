@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState, useTransition } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Loader2, Mail, Users, Eye, Send, Save, Check, AlertTriangle } from "lucide-react";
 import {
   countAudienceAction,
@@ -48,17 +48,25 @@ const EMPTY_DRAFT: Draft = {
   ctaUrl: "",
 };
 
-export function CampaignComposer({ lists }: { lists: ListOption[] }) {
+export function CampaignComposer({
+  lists,
+  planOptions,
+}: {
+  lists: ListOption[];
+  planOptions: string[];
+}) {
   const [draft, setDraft] = useState<Draft>(EMPTY_DRAFT);
   const [filters, setFilters] = useState<AudienceFilters>(DEFAULT_FILTERS);
   const [selectedListId, setSelectedListId] = useState<string>("");
+  // Control del dropdown de plan: "" = cualquiera | "<plan>" | "__other__" (texto libre).
+  const [planSelect, setPlanSelect] = useState<string>("");
 
   const [count, setCount] = useState<number | null>(null);
   const [counting, setCounting] = useState(false);
 
   const [previewHtml, setPreviewHtml] = useState<string | null>(null);
-  const [, startPreview] = useTransition();
   const [previewing, setPreviewing] = useState(false);
+  const previewReq = useRef(0);
 
   // Envío + doble confirmación
   const [confirmOpen, setConfirmOpen] = useState(false);
@@ -95,20 +103,58 @@ export function CampaignComposer({ lists }: { lists: ListOption[] }) {
     };
   }, [filters, refreshCount]);
 
+  const planSelectFor = useCallback(
+    (plan: string) => (plan ? (planOptions.includes(plan) ? plan : "__other__") : ""),
+    [planOptions]
+  );
+
   const loadList = (id: string) => {
     setSelectedListId(id);
     const l = lists.find((x) => x.id === id);
-    if (l) setFilters(parseFilters(l.filters));
+    if (l) {
+      const f = parseFilters(l.filters);
+      setFilters(f);
+      setPlanSelect(planSelectFor(f.planContains));
+    }
   };
 
-  const doPreview = () => {
-    setPreviewing(true);
-    startPreview(() => {
-      previewCampaignAction(draft)
-        .then((r) => setPreviewHtml(r.ok ? r.html : `<p style="font-family:sans-serif;padding:24px">⚠ ${r.error}</p>`))
-        .finally(() => setPreviewing(false));
-    });
+  const onPlanSelect = (v: string) => {
+    setSelectedListId("");
+    setPlanSelect(v);
+    setFilters((prev) => ({ ...prev, planContains: v === "__other__" ? "" : v }));
   };
+
+  // Vista previa EN VIVO: se regenera (debounced) al cambiar el contenido, sin botón.
+  // Todo setState va dentro del timeout (async) para no disparar renders en cascada.
+  useEffect(() => {
+    const id = ++previewReq.current;
+    const t = setTimeout(() => {
+      const hasContent = Boolean(
+        draft.heading.trim() || draft.body.trim() || draft.subject.trim()
+      );
+      if (!hasContent) {
+        if (previewReq.current === id) {
+          setPreviewHtml(null);
+          setPreviewing(false);
+        }
+        return;
+      }
+      setPreviewing(true);
+      previewCampaignAction(draft)
+        .then((r) => {
+          if (previewReq.current !== id) return; // descarta resultados viejos
+          setPreviewHtml(
+            r.ok
+              ? r.html
+              : `<p style="font-family:sans-serif;padding:24px;color:#b00">⚠ ${r.error}</p>`
+          );
+        })
+        .finally(() => {
+          if (previewReq.current === id) setPreviewing(false);
+        });
+    }, 500);
+    return () => clearTimeout(t);
+  }, [draft]);
 
   const openConfirm = () => {
     setSendMsg(null);
@@ -211,8 +257,26 @@ export function CampaignComposer({ lists }: { lists: ListOption[] }) {
               </select>
             </label>
             <label className="block">
-              <span className={labelCls}>Plan contiene (opcional)</span>
-              <input value={filters.planContains} onChange={(e) => setF("planContains", e.target.value)} placeholder="ej. Gold" className={input} />
+              <span className={labelCls}>Plan</span>
+              <select value={planSelect} onChange={(e) => onPlanSelect(e.target.value)} className={input}>
+                <option value="">Cualquier plan</option>
+                {planOptions.map((p) => (
+                  <option key={p} value={p}>{p}</option>
+                ))}
+                <option value="__other__">Otro (contiene…)</option>
+              </select>
+              {planSelect === "__other__" && (
+                <input
+                  value={filters.planContains}
+                  onChange={(e) => {
+                    setSelectedListId("");
+                    setFilters((prev) => ({ ...prev, planContains: e.target.value }));
+                  }}
+                  placeholder="ej. Gold"
+                  className={input + " mt-2"}
+                  autoFocus
+                />
+              )}
             </label>
           </div>
 
@@ -295,15 +359,15 @@ export function CampaignComposer({ lists }: { lists: ListOption[] }) {
               <Eye className="size-4 text-gold" strokeWidth={1.75} />
               <h2 className="font-mono text-[0.65rem] uppercase tracking-[0.2em] text-gold/80">Vista previa</h2>
             </div>
-            <button
-              type="button"
-              onClick={doPreview}
-              disabled={!draftReady || previewing}
-              className="px-3 py-1.5 inline-flex items-center gap-1.5 border border-paper/15 text-paper/70 hover:border-gold/50 hover:text-gold font-mono text-[0.6rem] uppercase tracking-[0.14em] transition-colors disabled:opacity-50"
-            >
-              {previewing ? <Loader2 className="size-3.5 animate-spin" /> : <Eye className="size-3.5" />}
-              {previewHtml ? "Actualizar" : "Generar"}
-            </button>
+            <span className="inline-flex items-center gap-1.5 font-mono text-[0.6rem] uppercase tracking-[0.14em] text-paper/45">
+              {previewing ? (
+                <>
+                  <Loader2 className="size-3 animate-spin" /> Actualizando…
+                </>
+              ) : (
+                "En vivo"
+              )}
+            </span>
           </div>
           {previewHtml ? (
             <iframe
@@ -315,7 +379,8 @@ export function CampaignComposer({ lists }: { lists: ListOption[] }) {
           ) : (
             <div className="h-[520px] flex items-center justify-center border border-dashed border-paper/15 text-center px-6">
               <p className="text-xs text-paper/40">
-                Completa asunto, encabezado y cuerpo, luego genera la vista previa para ver el correo exacto que recibirán.
+                Empieza a escribir el asunto, el encabezado o el cuerpo y la vista previa del
+                correo aparecerá aquí, actualizándose en vivo.
               </p>
             </div>
           )}
