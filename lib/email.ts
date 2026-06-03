@@ -5,7 +5,20 @@ import type { ReactElement } from "react";
 const apiKey = process.env.POSTMARK_API_KEY;
 const isConfigured = Boolean(apiKey && !apiKey.includes("PLACEHOLDER"));
 
-export const OWNER_EMAIL = process.env.OWNER_EMAIL || "info@arcosfitness.com";
+// Avisos al dueño: OWNER_EMAIL admite VARIOS correos separados por coma
+// (ilimitados), p. ej. "info@arcosfitness.com, adri.arcosfitnessclub@gmail.com".
+// Se parsea a lista (trim + sin vacíos + sin duplicados) y los correos al dueño
+// van a TODOS. Los transaccionales al cliente NO usan esto.
+export const OWNER_EMAILS: string[] = [
+  ...new Set(
+    (process.env.OWNER_EMAIL || "info@arcosfitness.com")
+      .split(",")
+      .map((s) => s.trim())
+      .filter(Boolean)
+  ),
+];
+/** Primer correo del dueño (para usos que requieren uno solo). */
+export const OWNER_EMAIL = OWNER_EMAILS[0] ?? "info@arcosfitness.com";
 export const FROM_EMAIL =
   process.env.FROM_EMAIL || "Arcos Fitness <no-reply@arcosfitness.com>";
 

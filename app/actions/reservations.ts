@@ -3,7 +3,7 @@
 import { z } from "zod";
 import { headers } from "next/headers";
 import { GYM_HOURS_BY_DAY } from "@/lib/content";
-import { sendEmail, OWNER_EMAIL } from "@/lib/email";
+import { sendEmail, OWNER_EMAILS } from "@/lib/email";
 import { OwnerReservationEmail } from "@/lib/email/owner-reservation";
 import { ClientReservationEmail } from "@/lib/email/client-reservation";
 import { checkRateLimit } from "@/lib/rate-limit";
@@ -132,7 +132,7 @@ export async function createReservation(
   // verdad). El correo al cliente es best-effort.
   const [ownerRes, clientRes] = await Promise.allSettled([
     sendEmail({
-      to: OWNER_EMAIL,
+      to: OWNER_EMAILS,
       subject: ownerSubject,
       react: OwnerReservationEmail({
         className,

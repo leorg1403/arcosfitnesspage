@@ -430,3 +430,27 @@ model EmailCampaign {
   @@index([createdAt])
   @@schema("app")
 }
+
+// ─── Analytics propio (estilo Vercel) ─────────────────────────────────────────
+
+/// Evento de visita de página. SIN PII: el visitante se identifica con un hash
+/// cookieless que ROTA a diario (hash(ip+ua+salt+día)) → cuenta visitantes únicos
+/// por día sin poder reidentificar a la persona. Lo escribe POST /api/track.
+model PageView {
+  id           String   @id @default(cuid())
+  day          DateTime @db.Date // día CDMX (para agrupar la serie)
+  path         String // pathname tal cual, p.ej. "/clases-reservas"
+  route        String // normalizado (segmentos dinámicos → :id)
+  host         String // hostname donde ocurrió (p.ej. "www.arcosfitness.com")
+  referrerHost String? // host del referrer externo; null = directo / interno
+  utmSource    String?
+  utmMedium    String?
+  utmCampaign  String?
+  visitorHash  String // hash cookieless con rotación diaria (no es PII)
+  createdAt    DateTime @default(now())
+
+  @@index([day])
+  @@index([path])
+  @@index([referrerHost])
+  @@schema("app")
+}

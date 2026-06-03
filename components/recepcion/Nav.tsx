@@ -13,6 +13,7 @@ const LINKS = [
   { href: "/recepcion/suscripciones", label: "Membresías" },
   { href: "/recepcion/leads", label: "Leads" },
   { href: "/recepcion/marketing", label: "Marketing" },
+  { href: "/recepcion/analytics", label: "Analytics" },
 ];
 
 export function RecepcionNav() {

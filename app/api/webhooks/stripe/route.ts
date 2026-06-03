@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import type Stripe from "stripe";
 import { stripe, stripeIsConfigured } from "@/lib/stripe";
-import { sendEmail, OWNER_EMAIL } from "@/lib/email";
+import { sendEmail, OWNER_EMAILS } from "@/lib/email";
 import { OwnerPurchaseEmail } from "@/lib/email/owner-purchase";
 import { ClientPurchaseEmail } from "@/lib/email/client-purchase";
 import { OwnerReservationEmail } from "@/lib/email/owner-reservation";
@@ -117,7 +117,7 @@ async function sendOwnerAlert(
     detail ? ` · motivo: ${detail}` : ""
   }. Revísalo en Stripe y en /recepcion/pagos.`;
   await sendEmail({
-    to: OWNER_EMAIL,
+    to: OWNER_EMAILS,
     subject: `${title} · ${p.itemName} · ${p.customerName}`,
     react: OwnerAlertEmail({ title, body }),
   });
@@ -198,7 +198,7 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
         }),
       }),
       sendEmail({
-        to: OWNER_EMAIL,
+        to: OWNER_EMAILS,
         subject: `Nueva reserva paga · ${className} · ${customerName}`,
         react: OwnerReservationEmail({
           className,
@@ -222,7 +222,7 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
         react: ClientPurchaseEmail({ customerName, planName: itemName, amountTotal, currency }),
       }),
       sendEmail({
-        to: OWNER_EMAIL,
+        to: OWNER_EMAILS,
         subject: `Nueva compra · ${itemName} · ${customerName}`,
         react: OwnerPurchaseEmail({
           planName: itemName,
