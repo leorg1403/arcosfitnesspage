@@ -2,11 +2,10 @@ import "server-only";
 import { prisma } from "./client";
 import { cdmxTodayISO } from "@/lib/booking/window";
 
-// Agregaciones de analytics. "Visitantes" = COUNT(DISTINCT visitorHash); como el
-// hash rota a diario, equivale a únicos-por-día sumados en el rango (misma
-// metodología cookieless que usan herramientas privacy-first). Todo vía SQL crudo
-// porque Prisma groupBy no soporta COUNT(DISTINCT). Los nombres de columna son
-// literales fijos (no input) — sin riesgo de inyección.
+// Agregaciones de analytics con Prisma normal (sin SQL crudo). "Visitantes" =
+// distintos visitorHash; como el hash rota a diario, equivale a únicos-por-día
+// sumados en el rango (metodología cookieless). El volumen es chico (ventana ≤90
+// días, sitio de un gym) → traemos las filas y agregamos en memoria con Sets.
 
 export type TopRow = { label: string; visitors: number };
 export type SeriesPoint = { day: string; visitors: number };
@@ -27,58 +26,77 @@ function shiftISO(iso: string, deltaDays: number): string {
   return d.toISOString().slice(0, 10);
 }
 
+/** Suma un visitante al bucket `key`, contando únicos vía Set. */
+function bump(map: Map<string, Set<string>>, key: string, visitor: string) {
+  let set = map.get(key);
+  if (!set) {
+    set = new Set();
+    map.set(key, set);
+  }
+  set.add(visitor);
+}
+
+/** Convierte el mapa a top-N por visitantes únicos. */
+function toTop(map: Map<string, Set<string>>, limit = 12): TopRow[] {
+  return [...map.entries()]
+    .map(([label, set]) => ({ label, visitors: set.size }))
+    .sort((a, b) => b.visitors - a.visitors || a.label.localeCompare(b.label))
+    .slice(0, limit);
+}
+
 export async function getAnalytics(days = 7): Promise<AnalyticsData> {
   const todayISO = cdmxTodayISO();
   const fromISO = shiftISO(todayISO, -(days - 1));
+  const fromDate = new Date(`${fromISO}T00:00:00Z`);
 
-  const [seriesRows, totalsRows, pages, routes, hosts, referrers, utms] = await Promise.all([
-    prisma.$queryRaw<{ day: Date; visitors: number }[]>`
-      SELECT day, COUNT(DISTINCT "visitorHash")::int AS visitors
-      FROM "app"."PageView" WHERE day >= ${fromISO}::date
-      GROUP BY day ORDER BY day ASC`,
-    prisma.$queryRaw<{ visitors: number; views: number }[]>`
-      SELECT COUNT(DISTINCT "visitorHash")::int AS visitors, COUNT(*)::int AS views
-      FROM "app"."PageView" WHERE day >= ${fromISO}::date`,
-    prisma.$queryRaw<TopRow[]>`
-      SELECT path AS label, COUNT(DISTINCT "visitorHash")::int AS visitors
-      FROM "app"."PageView" WHERE day >= ${fromISO}::date
-      GROUP BY path ORDER BY visitors DESC, label ASC LIMIT 12`,
-    prisma.$queryRaw<TopRow[]>`
-      SELECT route AS label, COUNT(DISTINCT "visitorHash")::int AS visitors
-      FROM "app"."PageView" WHERE day >= ${fromISO}::date
-      GROUP BY route ORDER BY visitors DESC, label ASC LIMIT 12`,
-    prisma.$queryRaw<TopRow[]>`
-      SELECT host AS label, COUNT(DISTINCT "visitorHash")::int AS visitors
-      FROM "app"."PageView" WHERE day >= ${fromISO}::date
-      GROUP BY host ORDER BY visitors DESC, label ASC LIMIT 12`,
-    prisma.$queryRaw<TopRow[]>`
-      SELECT "referrerHost" AS label, COUNT(DISTINCT "visitorHash")::int AS visitors
-      FROM "app"."PageView" WHERE day >= ${fromISO}::date AND "referrerHost" IS NOT NULL
-      GROUP BY "referrerHost" ORDER BY visitors DESC, label ASC LIMIT 12`,
-    prisma.$queryRaw<TopRow[]>`
-      SELECT "utmSource" AS label, COUNT(DISTINCT "visitorHash")::int AS visitors
-      FROM "app"."PageView" WHERE day >= ${fromISO}::date AND "utmSource" IS NOT NULL
-      GROUP BY "utmSource" ORDER BY visitors DESC, label ASC LIMIT 12`,
-  ]);
+  // El panel /recepcion (admin) NO cuenta: son visitas internas del staff.
+  const rows = await prisma.pageView.findMany({
+    where: { day: { gte: fromDate }, NOT: { path: { startsWith: "/recepcion" } } },
+    select: {
+      day: true,
+      path: true,
+      route: true,
+      host: true,
+      referrerHost: true,
+      utmSource: true,
+      visitorHash: true,
+    },
+  });
+
+  const allVisitors = new Set<string>();
+  const byDay = new Map<string, Set<string>>();
+  const pages = new Map<string, Set<string>>();
+  const routes = new Map<string, Set<string>>();
+  const hosts = new Map<string, Set<string>>();
+  const referrers = new Map<string, Set<string>>();
+  const utms = new Map<string, Set<string>>();
+
+  for (const r of rows) {
+    allVisitors.add(r.visitorHash);
+    bump(byDay, r.day.toISOString().slice(0, 10), r.visitorHash);
+    bump(pages, r.path, r.visitorHash);
+    bump(routes, r.route, r.visitorHash);
+    bump(hosts, r.host, r.visitorHash);
+    if (r.referrerHost) bump(referrers, r.referrerHost, r.visitorHash);
+    if (r.utmSource) bump(utms, r.utmSource, r.visitorHash);
+  }
 
   // Serie continua: rellena días sin datos con 0 para una gráfica sin huecos.
-  const byDay = new Map<string, number>();
-  for (const r of seriesRows) byDay.set(r.day.toISOString().slice(0, 10), r.visitors);
   const series: SeriesPoint[] = [];
   for (let i = 0; i < days; i++) {
     const iso = shiftISO(fromISO, i);
-    series.push({ day: iso, visitors: byDay.get(iso) ?? 0 });
+    series.push({ day: iso, visitors: byDay.get(iso)?.size ?? 0 });
   }
 
   return {
     days,
-    totals: totalsRows[0] ?? { visitors: 0, views: 0 },
+    totals: { visitors: allVisitors.size, views: rows.length },
     series,
-    pages,
-    routes,
-    hosts,
-    referrers,
-    utms,
+    pages: toTop(pages),
+    routes: toTop(routes),
+    hosts: toTop(hosts),
+    referrers: toTop(referrers),
+    utms: toTop(utms),
   };
 }
 

@@ -14,6 +14,7 @@ export function AnalyticsBeacon() {
 
   useEffect(() => {
     if (!pathname) return;
+    if (pathname.startsWith("/recepcion")) return; // el panel de admin no se trackea
     const { hostname, host, search } = window.location;
     if (hostname === "localhost" || hostname === "127.0.0.1") return; // no contaminar dev
 
