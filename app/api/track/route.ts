@@ -50,6 +50,11 @@ export async function POST(req: NextRequest): Promise<Response> {
     if (!parsed.success) return new NextResponse(null, { status: 400 });
     const d = parsed.data;
 
+    // El panel de recepción (admin) NO se trackea — son visitas internas del staff.
+    if (d.path === "/recepcion" || d.path.startsWith("/recepcion/")) {
+      return new NextResponse(null, { status: 204 });
+    }
+
     const host = (d.host || req.headers.get("host") || "").replace(/^https?:\/\//, "").slice(0, 120);
     const dayISO = cdmxTodayISO();
 

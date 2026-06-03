@@ -34,30 +34,30 @@ export async function getAnalytics(days = 7): Promise<AnalyticsData> {
   const [seriesRows, totalsRows, pages, routes, hosts, referrers, utms] = await Promise.all([
     prisma.$queryRaw<{ day: Date; visitors: number }[]>`
       SELECT day, COUNT(DISTINCT "visitorHash")::int AS visitors
-      FROM "app"."PageView" WHERE day >= ${fromISO}::date
+      FROM "app"."PageView" WHERE day >= ${fromISO}::date AND path NOT LIKE '/recepcion%'
       GROUP BY day ORDER BY day ASC`,
     prisma.$queryRaw<{ visitors: number; views: number }[]>`
       SELECT COUNT(DISTINCT "visitorHash")::int AS visitors, COUNT(*)::int AS views
-      FROM "app"."PageView" WHERE day >= ${fromISO}::date`,
+      FROM "app"."PageView" WHERE day >= ${fromISO}::date AND path NOT LIKE '/recepcion%'`,
     prisma.$queryRaw<TopRow[]>`
       SELECT path AS label, COUNT(DISTINCT "visitorHash")::int AS visitors
-      FROM "app"."PageView" WHERE day >= ${fromISO}::date
+      FROM "app"."PageView" WHERE day >= ${fromISO}::date AND path NOT LIKE '/recepcion%'
       GROUP BY path ORDER BY visitors DESC, label ASC LIMIT 12`,
     prisma.$queryRaw<TopRow[]>`
       SELECT route AS label, COUNT(DISTINCT "visitorHash")::int AS visitors
-      FROM "app"."PageView" WHERE day >= ${fromISO}::date
+      FROM "app"."PageView" WHERE day >= ${fromISO}::date AND path NOT LIKE '/recepcion%'
       GROUP BY route ORDER BY visitors DESC, label ASC LIMIT 12`,
     prisma.$queryRaw<TopRow[]>`
       SELECT host AS label, COUNT(DISTINCT "visitorHash")::int AS visitors
-      FROM "app"."PageView" WHERE day >= ${fromISO}::date
+      FROM "app"."PageView" WHERE day >= ${fromISO}::date AND path NOT LIKE '/recepcion%'
       GROUP BY host ORDER BY visitors DESC, label ASC LIMIT 12`,
     prisma.$queryRaw<TopRow[]>`
       SELECT "referrerHost" AS label, COUNT(DISTINCT "visitorHash")::int AS visitors
-      FROM "app"."PageView" WHERE day >= ${fromISO}::date AND "referrerHost" IS NOT NULL
+      FROM "app"."PageView" WHERE day >= ${fromISO}::date AND path NOT LIKE '/recepcion%' AND "referrerHost" IS NOT NULL
       GROUP BY "referrerHost" ORDER BY visitors DESC, label ASC LIMIT 12`,
     prisma.$queryRaw<TopRow[]>`
       SELECT "utmSource" AS label, COUNT(DISTINCT "visitorHash")::int AS visitors
-      FROM "app"."PageView" WHERE day >= ${fromISO}::date AND "utmSource" IS NOT NULL
+      FROM "app"."PageView" WHERE day >= ${fromISO}::date AND path NOT LIKE '/recepcion%' AND "utmSource" IS NOT NULL
       GROUP BY "utmSource" ORDER BY visitors DESC, label ASC LIMIT 12`,
   ]);
 
