@@ -11,6 +11,7 @@ import { resolveOccurrence, createReceptionReservation } from "@/lib/db/reservat
 import { priceMxnFromTemplate } from "@/lib/db/sessions";
 import { reservationCancelUrl } from "@/lib/urls";
 import { WEEKDAY_TO_DAY, weekdayOfISO, formatDateLabel } from "@/lib/booking/window";
+import { FITNESS_APP_VALUES, fitnessAppLabel } from "@/lib/fitness-apps";
 
 /**
  * Reserva de recepción / socio (sin Stripe). El cliente manda SOLO el id de la
@@ -27,6 +28,11 @@ const InputSchema = z.object({
   phone: z.string().min(8).max(40),
   // socio: la clase está incluida en su membresía → sin cobro, validan en recepción
   member: z.boolean().optional(),
+  // app de fitness (TotalPass/Fitpass/Wellhub): el pase cubre la clase → sin cobro,
+  // se valida el pase en recepción. Enum cerrado: el cliente NO puede mandar texto
+  // libre. (Como `member`, es una declaración no verificada en línea; recepción la
+  // valida físicamente. No habilita ningún flujo monetario.)
+  fitnessApp: z.enum(FITNESS_APP_VALUES).optional(),
   // honeypot: debe llegar vacío; si trae algo, es un bot
   website: z.string().max(200).optional(),
 });
@@ -75,9 +81,12 @@ export async function createReservation(
   }
   const template = occ.template;
 
-  // Master Class (onlineOnly) SÍ permite recepción, pero SIN socio: en esos
-  // eventos nadie es socio (todos pagan, en recepción o en línea).
-  const isMember = template.onlineOnly ? false : data.member === true;
+  // Master Class (onlineOnly): nadie entra gratis — todos pagan (recepción o en
+  // línea). Anulamos cualquier reclamo de socio o de app de fitness.
+  const fitnessApp = template.onlineOnly ? null : (data.fitnessApp ?? null);
+  // Acceso incluido (sin cobro) = socio O app de fitness. La clase la cubre su
+  // membresía/pase; recepción valida. Para visitantes (false) queda pendiente de pago.
+  const included = template.onlineOnly ? false : (data.member === true || fitnessApp != null);
 
   // 4) Crear la reserva (upsert Customer + decremento atómico + registro).
   const result = await createReceptionReservation({
@@ -86,7 +95,8 @@ export async function createReservation(
     name: data.name,
     email: data.email,
     phone: data.phone,
-    member: isMember,
+    member: included,
+    fitnessApp,
   });
 
   if (!result.ok) {
@@ -104,12 +114,17 @@ export async function createReservation(
   const classDay = formatDateLabel(data.date);
   const classTime = isOpenGym ? GYM_HOURS_BY_DAY[day] : template.startTime;
   const amountDue = Math.round(priceMxnFromTemplate(template) * 100);
-  const paymentPending = !isMember;
+  const paymentPending = !included;
+  const appLabel = fitnessAppLabel(fitnessApp); // p.ej. "TotalPass" | null
 
-  const ownerSubject = isMember
+  const ownerSubject = appLabel
+    ? `Reserva vía ${appLabel} · validar acceso · ${className} · ${classDay} ${classTime}`
+    : included
     ? `Reserva de socio · verificar membresía · ${className} · ${classDay} ${classTime}`
     : `Reserva pendiente a pago · ${className} · ${classDay} ${classTime}`;
-  const clientSubject = isMember
+  const clientSubject = appLabel
+    ? `Reserva apartada (${appLabel}) · ${className} · ${classDay}`
+    : included
     ? `Reserva apartada (socio) · ${className} · ${classDay}`
     : `Reserva apartada · ${className} · ${classDay}`;
 
@@ -129,7 +144,8 @@ export async function createReservation(
         customerPhone: data.phone,
         paymentPending,
         amountDue,
-        member: isMember,
+        member: included,
+        fitnessAppLabel: appLabel ?? undefined,
         reservationCode: result.shortCode,
       }),
       replyTo: data.email,
@@ -146,7 +162,8 @@ export async function createReservation(
         classInstructor: template.instructor,
         paymentPending,
         amountDue,
-        member: isMember,
+        member: included,
+        fitnessAppLabel: appLabel ?? undefined,
         reservationCode: result.shortCode,
         cancelUrl: reservationCancelUrl(result.code),
       }),

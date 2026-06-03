@@ -1,6 +1,6 @@
 import "server-only";
 import { randomUUID } from "node:crypto";
-import type { ClassTemplate, ReservationStatus } from "@prisma/client";
+import type { ClassTemplate, FitnessApp, ReservationStatus } from "@prisma/client";
 import { prisma } from "./client";
 import { ensureSession, priceMxnFromTemplate } from "./sessions";
 import { upsertCustomer, normalizeEmail } from "./customers";
@@ -50,7 +50,11 @@ type ReceptionArgs = {
   name: string;
   email: string;
   phone: string;
-  member: boolean; // true => socio (sin cobro) | false => visitante (pendiente en recepción)
+  // true => acceso incluido, sin cobro (socio O app de fitness) | false => visitante
+  // (pendiente de pago en recepción). El servidor ya derivó esto; nunca el cliente.
+  member: boolean;
+  // app de fitness por la que entra (sin cobro). null => socio o visitante normal.
+  fitnessApp?: FitnessApp | null;
 };
 
 /**
@@ -63,6 +67,9 @@ export async function createReceptionReservation(args: ReceptionArgs): Promise<R
   const emailLower = normalizeEmail(args.email);
   const amountDueCents = Math.round(priceMxnFromTemplate(template) * 100);
   const { code, shortCode } = makeReservationCode();
+  const fitnessApp = args.fitnessApp ?? null;
+  // "member" = acceso incluido (sin cobro): aplica a socios Y a quienes llegan por
+  // una app de fitness. La columna fitnessApp distingue ambos casos en recepción.
   const kind = args.member ? "member" : "reception";
   const status = args.member ? "confirmed" : "pending";
   const paymentStatus = args.member ? "none" : "pending_reception";
@@ -84,6 +91,7 @@ export async function createReceptionReservation(args: ReceptionArgs): Promise<R
     customerEmailLower: emailLower,
     customerPhone: args.phone.trim(),
     kind,
+    fitnessApp,
     status,
     paymentStatus,
     amountDueCents,

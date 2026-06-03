@@ -12,6 +12,7 @@ import {
 import { cdmxTodayISO, formatDateLabel, startInstant } from "@/lib/booking/window";
 import { Table, Badge, PageHeader } from "@/components/recepcion/ui";
 import { AutoRefresh } from "@/components/recepcion/AutoRefresh";
+import { fitnessAppLabel } from "@/lib/fitness-apps";
 import { cn } from "@/lib/cn";
 
 const CATS = [
@@ -31,7 +32,11 @@ function addMinutesToHHMM(hhmm: string, mins: number): string {
   return `${String(Math.floor((total % 1440) / 60)).padStart(2, "0")}:${String(total % 60).padStart(2, "0")}`;
 }
 
-function kindBadge(k: string) {
+function kindBadge(k: string, fitnessApp?: string | null) {
+  // App de fitness: el badge muestra el proveedor (TotalPass/Fitpass/Wellhub) para
+  // que recepción sepa qué pase validar; la reserva es de acceso incluido (sin cobro).
+  const app = fitnessAppLabel(fitnessApp);
+  if (app) return <Badge tone="gold">App · {app}</Badge>;
   const tone = k === "member" ? "gold" : k === "online" ? "green" : "neutral";
   const label = k === "member" ? "socio" : k === "online" ? "en línea" : "recepción";
   return <Badge tone={tone}>{label}</Badge>;
@@ -169,7 +174,7 @@ export default async function ReservasPage({
                 <div className="text-paper">{r.customerName}</div>
                 <div className="text-xs text-paper/40">{r.customerEmail}</div>
               </div>,
-              kindBadge(r.kind),
+              kindBadge(r.kind, r.fitnessApp),
               statusBadge(r.status),
               attendanceBadge(r.attendance),
               <div key="act" className="flex items-center gap-2">
@@ -326,7 +331,7 @@ export default async function ReservasPage({
                     <div className="text-paper">{r.customerName}</div>
                     <div className="text-xs text-paper/40">{r.customerEmail}</div>
                   </div>,
-                  kindBadge(r.kind),
+                  kindBadge(r.kind, r.fitnessApp),
                   statusBadge(r.status),
                   attendanceBadge(r.attendance),
                   <div key="act" className="flex items-center gap-2">
