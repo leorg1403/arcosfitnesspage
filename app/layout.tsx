@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Inter, Instrument_Serif, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import { Analytics } from "@vercel/analytics/next";
+import { AnalyticsBeacon } from "@/components/AnalyticsBeacon";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -66,6 +67,7 @@ export default function RootLayout({
             (envuelve todas las páginas públicas). /recepcion queda sin ese chrome. */}
         {children}
         <Analytics />
+        <AnalyticsBeacon />
       </body>
     </html>
   );

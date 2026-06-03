@@ -1,6 +1,6 @@
 import "server-only";
 import { cancelReservationCore } from "@/lib/db/reservations";
-import { sendEmail, OWNER_EMAIL } from "@/lib/email";
+import { sendEmail, OWNER_EMAILS } from "@/lib/email";
 import { ClientCancellationEmail } from "@/lib/email/client-cancellation";
 import { OwnerCancellationEmail } from "@/lib/email/owner-cancellation";
 import { formatDateLabel, WEEKDAY_TO_DAY, weekdayOfISO } from "@/lib/booking/window";
@@ -38,7 +38,7 @@ export async function performCancellation(
       }),
     }),
     sendEmail({
-      to: OWNER_EMAIL,
+      to: OWNER_EMAILS,
       subject: `Reserva cancelada (${cancelledBy === "admin" ? "recepción" : "cliente"}) · ${d.className} · ${d.customerName}`,
       replyTo: d.customerEmail,
       react: OwnerCancellationEmail({
