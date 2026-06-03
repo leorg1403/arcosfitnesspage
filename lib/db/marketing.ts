@@ -135,6 +135,31 @@ export async function countAudience(filters: AudienceFilters): Promise<number> {
   return r.length;
 }
 
+/**
+ * Nombres de plan VIGENTES en el CRM (membresías manuales activas + suscripciones
+ * activas). Sirve para el dropdown del filtro "plan contiene" — así el owner elige
+ * de lo que realmente existe, sin teclear.
+ */
+export async function listActivePlanNames(): Promise<string[]> {
+  const today = isoToDbDate(cdmxTodayISO());
+  const [mem, subs] = await Promise.all([
+    prisma.membership.findMany({
+      where: { status: "active", OR: [{ endsAt: null }, { endsAt: { gte: today } }] },
+      select: { planName: true },
+      distinct: ["planName"],
+    }),
+    prisma.subscription.findMany({
+      where: { status: { in: ACTIVE_SUB_STATUSES } },
+      select: { planName: true },
+      distinct: ["planName"],
+    }),
+  ]);
+  const names = new Set<string>();
+  for (const m of mem) if (m.planName?.trim()) names.add(m.planName.trim());
+  for (const s of subs) if (s.planName?.trim()) names.add(s.planName.trim());
+  return [...names].sort((a, b) => a.localeCompare(b, "es"));
+}
+
 // ── EmailList (audiencias guardadas) ───────────────────────────────────────────
 export async function listEmailLists() {
   return prisma.emailList.findMany({ orderBy: { createdAt: "desc" } });

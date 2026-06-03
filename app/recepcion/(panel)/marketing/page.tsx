@@ -1,8 +1,9 @@
-import { listEmailLists, listCampaigns } from "@/lib/db/marketing";
+import { listEmailLists, listCampaigns, listActivePlanNames } from "@/lib/db/marketing";
 import { deleteListAction } from "@/app/actions/marketing";
 import { CampaignComposer, type ListOption } from "@/components/recepcion/CampaignComposer";
 import { PageHeader, Table, Badge, fmtDateTime } from "@/components/recepcion/ui";
 import { parseFilters, describeFilters } from "@/lib/marketing/filters";
+import { PLANS, PRE_PAYMENTS } from "@/lib/memberships";
 import { emailIsConfigured } from "@/lib/email";
 
 function statusBadge(s: string) {
@@ -17,7 +18,11 @@ function statusBadge(s: string) {
 }
 
 export default async function MarketingPage() {
-  const [lists, campaigns] = await Promise.all([listEmailLists(), listCampaigns(30)]);
+  const [lists, campaigns, activePlans] = await Promise.all([
+    listEmailLists(),
+    listCampaigns(30),
+    listActivePlanNames(),
+  ]);
 
   const listOptions: ListOption[] = lists.map((l) => ({
     id: l.id,
@@ -25,6 +30,13 @@ export default async function MarketingPage() {
     description: l.description,
     filters: parseFilters(l.filters),
   }));
+
+  // Planes para el dropdown del filtro: catálogo (lo que ofrecemos) + lo que está
+  // vigente en el CRM, deduplicado y ordenado.
+  const catalogPlans = [...PLANS.map((p) => p.name), ...PRE_PAYMENTS.map((p) => p.label)];
+  const planOptions = [...new Set([...catalogPlans, ...activePlans])].sort((a, b) =>
+    a.localeCompare(b, "es")
+  );
 
   return (
     <>
@@ -42,7 +54,7 @@ export default async function MarketingPage() {
         </div>
       )}
 
-      <CampaignComposer lists={listOptions} />
+      <CampaignComposer lists={listOptions} planOptions={planOptions} />
 
       {/* Listas guardadas */}
       <div className="mt-12">

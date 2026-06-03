@@ -73,11 +73,23 @@ export async function countAudienceAction(filtersInput: unknown): Promise<CountR
 }
 
 // ── Preview (HTML renderizado del correo) ──────────────────────────────────────
+// Esquema TOLERANTE: el preview se actualiza en vivo mientras se escribe, así que
+// se permiten campos vacíos/parciales (acotados con .max()). La URL del CTA NO se
+// valida aquí (sí en el envío) para no romper el preview a media escritura.
+const PreviewSchema = z.object({
+  subject: z.string().max(200).optional().default(""),
+  preheader: z.string().max(200).optional().default(""),
+  heading: z.string().max(150).optional().default(""),
+  body: z.string().max(5000).optional().default(""),
+  ctaLabel: z.string().max(60).optional().default(""),
+  ctaUrl: z.string().max(500).optional().default(""),
+});
+
 export type PreviewResult = { ok: true; html: string } | { ok: false; error: string };
 
 export async function previewCampaignAction(draftInput: unknown): Promise<PreviewResult> {
   await assertAdmin();
-  const parsed = DraftSchema.safeParse(draftInput);
+  const parsed = PreviewSchema.safeParse(draftInput);
   if (!parsed.success) {
     return { ok: false, error: parsed.error.issues[0]?.message ?? "Datos inválidos." };
   }
