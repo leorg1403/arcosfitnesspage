@@ -76,3 +76,70 @@ export async function sendEmail({ to, subject, react, replyTo, optional }: SendO
 }
 
 export const emailIsConfigured = isConfigured;
+
+// ─── Marketing / broadcast ─────────────────────────────────────────────────────
+// Los envíos masivos van por un MessageStream SEPARADO ("broadcast"), no por el
+// transaccional ("outbound"): así Postmark protege la reputación y exige baja.
+// Configurable con POSTMARK_BROADCAST_STREAM.
+export const BROADCAST_STREAM = process.env.POSTMARK_BROADCAST_STREAM || "broadcast";
+
+const BATCH_SIZE = 500; // tope de Postmark por llamada a sendEmailBatch
+
+export type BroadcastRecipient = {
+  to: string;
+  htmlBody: string;
+  textBody: string;
+  /** Cabeceras por destinatario (p. ej. List-Unsubscribe con su token). */
+  headers?: { Name: string; Value: string }[];
+};
+
+/**
+ * Envía un lote de correos de marketing por el stream de broadcast. Cada mensaje
+ * ya viene renderizado y personalizado por el llamador (HTML/Text + cabeceras de
+ * baja). En modo demo (sin Postmark) NO envía: registra un resumen y reporta todo
+ * como "enviado" para que el flujo de UI siga. El llamador debe haber validado
+ * auth + rate limit + audiencia ANTES de llamar aquí.
+ */
+export async function sendBroadcastBatch(
+  subject: string,
+  recipients: BroadcastRecipient[]
+): Promise<{ sent: number; failed: number; mock: boolean }> {
+  if (recipients.length === 0) return { sent: 0, failed: 0, mock: !client };
+
+  if (!client) {
+    console.log(
+      `\n[Email · broadcast · modo demo · no enviado]\n` +
+        JSON.stringify({ subject, recipientCount: recipients.length, stream: BROADCAST_STREAM }, null, 2) +
+        "\n"
+    );
+    return { sent: recipients.length, failed: 0, mock: true };
+  }
+
+  let sent = 0;
+  let failed = 0;
+  for (let i = 0; i < recipients.length; i += BATCH_SIZE) {
+    const chunk = recipients.slice(i, i + BATCH_SIZE);
+    try {
+      const res = await client.sendEmailBatch(
+        chunk.map((r) => ({
+          From: FROM_EMAIL,
+          To: r.to,
+          Subject: subject,
+          HtmlBody: r.htmlBody,
+          TextBody: r.textBody,
+          MessageStream: BROADCAST_STREAM,
+          ...(r.headers ? { Headers: r.headers } : {}),
+        }))
+      );
+      for (const item of res) {
+        if (item.ErrorCode === 0) sent += 1;
+        else failed += 1;
+      }
+    } catch (err) {
+      // Falla del lote completo (red / stream inexistente / cuenta no aprobada).
+      failed += chunk.length;
+      console.error("[Email · broadcast · error Postmark]", err);
+    }
+  }
+  return { sent, failed, mock: false };
+}

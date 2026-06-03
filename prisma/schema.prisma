@@ -56,6 +56,16 @@ enum ReservationKind {
   @@schema("app")
 }
 
+/// Apps de fitness con acceso incluido (su pase cubre la clase, sin cobro).
+/// Opcional en una reserva: solo se llena si el cliente declara que viene de una.
+enum FitnessApp {
+  totalpass
+  fitpass
+  wellhub
+
+  @@schema("app")
+}
+
 enum ReservationStatus {
   pending
   confirmed
@@ -161,6 +171,10 @@ model Customer {
   phone         String?
   status        CustomerStatus @default(active) // blocked => no puede reservar
   notes         String? // notas del dueño (admin)
+  // Baja de marketing (unsubscribe). null => recibe campañas; con fecha => se dio
+  // de baja y queda EXCLUIDO de todo envío de marketing (los transaccionales NO se
+  // ven afectados). Lo setea la página/endpoint público de baja.
+  marketingOptOutAt DateTime?
   firstSeenAt   DateTime       @default(now())
   updatedAt     DateTime       @updatedAt
   reservations  Reservation[]
@@ -253,6 +267,10 @@ model Reservation {
   customerEmailLower String // normalizado para dedupe
   customerPhone      String
   kind               ReservationKind
+  // OPCIONAL: app de fitness por la que entra (TotalPass/Fitpass/Wellhub). Cuando
+  // está presente, el acceso va incluido (sin cobro) y recepción valida el pase.
+  // null = reserva normal (socio / recepción / en línea).
+  fitnessApp         FitnessApp?
   status             ReservationStatus  @default(pending)
   attendance         AttendanceStatus   @default(pending) // lo marca recepción
   paymentStatus      ClassPaymentStatus @default(none)
@@ -357,5 +375,58 @@ model Membership {
 
   @@index([customerId])
   @@index([status])
+  @@schema("app")
+}
+
+// ─── Email marketing (campañas) ───────────────────────────────────────────────
+
+enum EmailCampaignStatus {
+  draft
+  sending
+  sent
+  failed
+
+  @@schema("app")
+}
+
+/// Audiencia GUARDADA y reutilizable. NO es una lista congelada de correos: guarda
+/// los FILTROS (JSON) que la definen; al enviar, el servidor los resuelve contra el
+/// CRM vigente. Así la lista se mantiene al día sola. Forma de `filters` validada
+/// por zod en lib/marketing/filters.ts (membership/plan/origen app/actividad).
+model EmailList {
+  id          String          @id @default(cuid())
+  name        String
+  description String?
+  filters     Json // AudienceFilters serializado
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+  campaigns   EmailCampaign[]
+
+  @@schema("app")
+}
+
+/// Registro de cada campaña enviada (historial). El contenido es snapshot al
+/// momento de enviar; los conteos los llena el envío por lotes.
+model EmailCampaign {
+  id             String              @id @default(cuid())
+  subject        String
+  preheader      String?
+  heading        String
+  body           String // cuerpo (párrafos separados por doble salto de línea)
+  ctaLabel       String?
+  ctaUrl         String?
+  status         EmailCampaignStatus @default(draft)
+  list           EmailList?          @relation(fields: [listId], references: [id])
+  listId         String?
+  filters        Json? // snapshot de los filtros usados (audiencia ad-hoc o de lista)
+  recipientCount Int                 @default(0) // destinatarios resueltos al enviar
+  sentCount      Int                 @default(0) // aceptados por Postmark
+  failedCount    Int                 @default(0)
+  sentAt         DateTime?
+  createdAt      DateTime            @default(now())
+  updatedAt      DateTime            @updatedAt
+
+  @@index([status])
+  @@index([createdAt])
   @@schema("app")
 }

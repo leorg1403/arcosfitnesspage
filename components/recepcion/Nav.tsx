@@ -12,6 +12,7 @@ const LINKS = [
   { href: "/recepcion/pagos", label: "Pagos" },
   { href: "/recepcion/suscripciones", label: "Membresías" },
   { href: "/recepcion/leads", label: "Leads" },
+  { href: "/recepcion/marketing", label: "Marketing" },
 ];
 
 export function RecepcionNav() {

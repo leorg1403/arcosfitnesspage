@@ -15,6 +15,8 @@ export type ClientReservationProps = {
   amountDue?: number;
   /** Socio: clase incluida en su membresía → sin cobro */
   member?: boolean;
+  /** App de fitness (TotalPass/Fitpass/Wellhub): acceso incluido vía su pase */
+  fitnessAppLabel?: string;
   currency?: string;
   /** Código corto de reserva (últimos 6) que el cliente presenta en recepción */
   reservationCode?: string;
@@ -31,8 +33,9 @@ function formatMoney(cents: number, currency: string) {
 
 export function ClientReservationEmail(p: ClientReservationProps) {
   const paid = p.amountPaid != null && p.amountPaid > 0;
-  const member = !paid && p.member === true;
-  const pending = !paid && !member && p.paymentPending === true;
+  const app = !paid ? p.fitnessAppLabel : undefined; // app de fitness (sin cobro)
+  const member = !paid && !app && p.member === true;
+  const pending = !paid && !member && !app && p.paymentPending === true;
   const currency = p.currency ?? "mxn";
 
   return (
@@ -40,6 +43,8 @@ export function ClientReservationEmail(p: ClientReservationProps) {
       preview={
         paid
           ? `Reserva confirmada: ${p.className} · ${p.classDay}`
+          : app
+          ? `Reserva apartada (${app}): ${p.className} · ${p.classDay}`
           : member
           ? `Reserva apartada (socio): ${p.className} · ${p.classDay}`
           : pending
@@ -50,6 +55,8 @@ export function ClientReservationEmail(p: ClientReservationProps) {
       <Text className="text-[#C4A572] text-[11px] uppercase tracking-[0.22em] font-mono m-0">
         {paid
           ? "Reserva confirmada"
+          : app
+          ? `Reserva vía ${app}`
           : member
           ? "Reserva de socio"
           : pending
@@ -65,6 +72,8 @@ export function ClientReservationEmail(p: ClientReservationProps) {
       <Text className="text-[#0A0A0A] text-base mt-4 mb-0 leading-relaxed">
         {paid
           ? "Tu lugar está confirmado y el pago fue procesado con éxito."
+          : app
+          ? `Apartamos tu lugar. Tu acceso vía ${app} no tiene cobro; presenta tu pase de ${app} en recepción al llegar.`
           : member
           ? "Apartamos tu lugar. Tu clase está incluida en tu membresía; en recepción validamos tu acceso, sin cobro."
           : pending
@@ -100,6 +109,11 @@ export function ClientReservationEmail(p: ClientReservationProps) {
           <Text className="text-[#0A0A0A] text-base mt-3 mb-0">
             A pagar en recepción:{" "}
             <strong>{formatMoney(p.amountDue, currency)}</strong>
+          </Text>
+        )}
+        {app && (
+          <Text className="text-[#0A0A0A] text-base mt-3 mb-0">
+            <strong>Acceso vía {app}</strong> · sin cobro
           </Text>
         )}
         {member && (

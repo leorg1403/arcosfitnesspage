@@ -6,6 +6,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { ArrowLeft, ArrowRight, Check, Loader2 } from "lucide-react";
 import { DAY_LABELS } from "@/lib/classes";
+import { FITNESS_APPS, FITNESS_APP_LABEL, type FitnessAppValue } from "@/lib/fitness-apps";
 import type { BookableClass } from "@/lib/types";
 import { buildWhatsAppLink, WA_MESSAGES } from "@/lib/whatsapp";
 import { WhatsappIcon } from "@/components/layout/SocialIcons";
@@ -27,7 +28,7 @@ const Schema = z.object({
 });
 type FormValues = z.infer<typeof Schema>;
 
-type Step = "membership" | "form" | "method" | "payment" | "confirmed";
+type Step = "membership" | "fitnessApp" | "form" | "method" | "payment" | "confirmed";
 type ConfirmedKind = "online" | "reception";
 
 type Props = {
@@ -39,7 +40,10 @@ type Props = {
 
 export function ReservaForm({ cls, onConfirmed }: Props) {
   const [step, setStep] = useState<Step>(cls.onlineOnly ? "form" : "membership");
+  // member = acceso incluido, sin cobro (socio O app de fitness).
   const [member, setMember] = useState<boolean | null>(null);
+  // app de fitness por la que entra (TotalPass/Fitpass/Wellhub). null = socio/visitante.
+  const [fitnessApp, setFitnessApp] = useState<FitnessAppValue | null>(null);
   const [customer, setCustomer] = useState<FormValues | null>(null);
   const [confirmed, setConfirmed] = useState<ConfirmResult | null>(null);
   const [confirmedKind, setConfirmedKind] = useState<ConfirmedKind>("online");
@@ -89,7 +93,10 @@ export function ReservaForm({ cls, onConfirmed }: Props) {
   /* Reservar y pagar en recepción — vía Server Action (sin Stripe).
      Para socios: sin cobro (validan membresía en recepción).
      Para visitantes: pendiente a pago en recepción. */
-  const handleReception = async (cust: FormValues, isMember: boolean) => {
+  const handleReception = async (
+    cust: FormValues,
+    opts: { member: boolean; fitnessApp: FitnessAppValue | null }
+  ) => {
     if (reserving) return;
     setReserving(true);
     setReserveError(null);
@@ -100,7 +107,8 @@ export function ReservaForm({ cls, onConfirmed }: Props) {
         name: cust.name,
         email: cust.email,
         phone: cust.phone,
-        member: isMember,
+        member: opts.member,
+        fitnessApp: opts.fitnessApp ?? undefined,
         website: honeypot,
       });
       if (!result.ok) {
@@ -124,8 +132,9 @@ export function ReservaForm({ cls, onConfirmed }: Props) {
     setCustomer(values);
     setReserveError(null);
     if (member) {
-      // Socio → directo a la reserva en recepción, sin preguntar método.
-      handleReception(values, true);
+      // Acceso incluido (socio o app de fitness) → directo a la reserva en
+      // recepción, sin preguntar método de pago.
+      handleReception(values, { member: true, fitnessApp });
     } else {
       // Visitante → elige cómo pagar.
       setStep("method");
@@ -143,6 +152,8 @@ export function ReservaForm({ cls, onConfirmed }: Props) {
   if (step === "confirmed") {
     const reception = confirmedKind === "reception";
     const memberReception = reception && member === true;
+    // App de fitness: acceso incluido pero validado por el pase, no por membresía.
+    const appLabel = fitnessApp ? FITNESS_APP_LABEL[fitnessApp] : null;
     return (
       <div className="px-7 md:px-9 py-10 md:py-14 flex flex-col min-h-[400px] md:min-h-[560px]">
         <div className="inline-flex items-center justify-center size-14 rounded-full bg-gold/15 text-gold mb-8">
@@ -150,7 +161,13 @@ export function ReservaForm({ cls, onConfirmed }: Props) {
         </div>
 
         <Eyebrow tone="gold" withLine>
-          {memberReception ? "Reserva de socio" : reception ? "Lugar apartado" : "Reserva confirmada"}
+          {appLabel
+            ? `Reserva vía ${appLabel}`
+            : memberReception
+            ? "Reserva de socio"
+            : reception
+            ? "Lugar apartado"
+            : "Reserva confirmada"}
         </Eyebrow>
 
         <h3 className="mt-5 font-display text-3xl md:text-4xl font-bold tracking-[-0.02em] leading-tight text-paper">
@@ -181,8 +198,9 @@ export function ReservaForm({ cls, onConfirmed }: Props) {
                 {clientEmailSent && " Te enviamos un correo con tu confirmación."}
               </p>
               <p className="mt-2 text-sm text-paper/60">
-                Tu clase está incluida en tu membresía, sin cobro. Llega 10 minutos
-                antes para registro.
+                {appLabel
+                  ? `Tu acceso vía ${appLabel} no tiene cobro; presenta tu pase en recepción. Llega 10 minutos antes para registro.`
+                  : "Tu clase está incluida en tu membresía, sin cobro. Llega 10 minutos antes para registro."}
               </p>
             </>
           ) : (
@@ -218,6 +236,8 @@ export function ReservaForm({ cls, onConfirmed }: Props) {
   const stepLabel =
     step === "membership"
       ? "Reserva"
+      : step === "fitnessApp"
+      ? "Tu acceso"
       : step === "form"
       ? "Tus datos"
       : step === "method"
@@ -228,8 +248,10 @@ export function ReservaForm({ cls, onConfirmed }: Props) {
     setReserveError(null);
     if (step === "payment") setStep("method");
     else if (step === "method") setStep("form");
-    else if (step === "form") {
-      setMember(null); // vuelve a la pregunta en estado neutro
+    else if (step === "form" || step === "fitnessApp") {
+      // vuelve a la pregunta inicial en estado neutro
+      setMember(null);
+      setFitnessApp(null);
       setStep("membership");
     }
   };
@@ -250,9 +272,9 @@ export function ReservaForm({ cls, onConfirmed }: Props) {
   );
 
   return (
-    <div className="px-7 md:px-9 py-6 md:py-7 flex flex-col min-h-0 md:min-h-[560px]">
+    <div className="px-7 md:px-9 py-5 md:py-6 flex flex-col min-h-0 md:min-h-[560px]">
       {/* Step indicator */}
-      <div className="flex items-center gap-3 mb-4">
+      <div className="flex items-center gap-3 mb-3">
         {!(step === "membership" || (onlineOnly && step === "form")) && (
           <button
             onClick={goBack}
@@ -268,19 +290,23 @@ export function ReservaForm({ cls, onConfirmed }: Props) {
       </div>
 
       {/* Price — para socios se muestra incluido (sin cobro) */}
-      <div className="mb-4">
+      <div className="mb-3">
         {member === true ? (
           <>
-            <span className="font-display text-3xl md:text-4xl font-light tracking-tight text-paper/40 line-through">
+            <span className="font-display text-3xl font-light tracking-tight text-paper/40 line-through">
               {priceLine}
             </span>
             <p className="font-mono text-[0.65rem] uppercase tracking-[0.22em] text-gold mt-1">
-              Incluido en tu membresía
+              {fitnessApp
+                ? `Incluido · ${FITNESS_APP_LABEL[fitnessApp]}`
+                : step === "fitnessApp"
+                ? "Acceso incluido · sin cobro"
+                : "Incluido en tu membresía"}
             </p>
           </>
         ) : (
           <>
-            <span className="font-display text-3xl md:text-4xl font-light tracking-tight text-paper">
+            <span className="font-display text-3xl font-light tracking-tight text-paper">
               {priceLine}
             </span>
             <p className="font-mono text-[0.65rem] uppercase tracking-[0.22em] text-concrete mt-1">
@@ -291,10 +317,10 @@ export function ReservaForm({ cls, onConfirmed }: Props) {
       </div>
 
       {step === "membership" && (
-        <div className="flex flex-col gap-2 flex-1">
+        <div className="flex flex-col gap-1.5 flex-1">
           <div className="mb-1">
             <p className="font-display text-xl font-semibold tracking-tight text-paper">
-              ¿Ya eres socio?
+              ¿Cómo entras a tu clase?
             </p>
             <p className="mt-1 text-sm text-paper/60">Así procesamos tu reserva correctamente.</p>
           </div>
@@ -304,20 +330,18 @@ export function ReservaForm({ cls, onConfirmed }: Props) {
             type="button"
             onClick={() => {
               setMember(true);
+              setFitnessApp(null);
               setReserveError(null);
               setStep("form");
             }}
-            className="group relative text-left border border-gold/30 bg-gold/[0.06] px-5 py-3 transition-colors hover:border-gold/60"
+            className="group relative text-left border border-gold/30 bg-gold/[0.06] px-5 py-2.5 transition-colors hover:border-gold/60"
           >
             <div className="flex items-start justify-between gap-3">
               <div className="min-w-0">
                 <p className="font-display text-lg font-semibold tracking-tight text-paper">
                   Soy socio
                 </p>
-                <p className="mt-0.5 text-xs font-medium text-gold/90">
-                  o vengo con TotalPass / Wellhub
-                </p>
-                <p className="mt-1.5 text-sm leading-relaxed text-paper/65">
+                <p className="mt-1 text-sm leading-relaxed text-paper/65">
                   Tu acceso está incluido, sin cobro.
                 </p>
               </div>
@@ -326,9 +350,36 @@ export function ReservaForm({ cls, onConfirmed }: Props) {
                 strokeWidth={1.75}
               />
             </div>
-            <span className="mt-2 inline-block font-mono text-[0.55rem] uppercase tracking-[0.22em] text-gold/80">
-              Sin cobro
-            </span>
+          </button>
+
+          {/* Vengo de una app de fitness (TotalPass / Fitpass / Wellhub) */}
+          <button
+            type="button"
+            onClick={() => {
+              setMember(true);
+              setFitnessApp(null);
+              setReserveError(null);
+              setStep("fitnessApp");
+            }}
+            className="group relative text-left border border-gold/30 bg-gold/[0.06] px-5 py-2.5 transition-colors hover:border-gold/60"
+          >
+            <div className="flex items-start justify-between gap-3">
+              <div className="min-w-0">
+                <p className="font-display text-lg font-semibold tracking-tight text-paper">
+                  Vengo de una app de fitness
+                </p>
+                <p className="mt-0.5 text-xs font-medium text-gold/90">
+                  TotalPass · Fitpass · Wellhub
+                </p>
+                <p className="mt-1 text-sm leading-relaxed text-paper/65">
+                  Tu pase cubre la clase.
+                </p>
+              </div>
+              <ArrowRight
+                className="size-4 shrink-0 mt-1 text-gold transition-transform duration-300 group-hover:translate-x-0.5"
+                strokeWidth={1.75}
+              />
+            </div>
           </button>
 
           {/* Aún no soy socio */}
@@ -336,10 +387,11 @@ export function ReservaForm({ cls, onConfirmed }: Props) {
             type="button"
             onClick={() => {
               setMember(false);
+              setFitnessApp(null);
               setReserveError(null);
               setStep("form");
             }}
-            className="group relative text-left border border-paper/15 px-5 py-3 transition-colors hover:border-gold/60 active:bg-paper/[0.03]"
+            className="group relative text-left border border-paper/15 px-5 py-2.5 transition-colors hover:border-gold/60 active:bg-paper/[0.03]"
           >
             <div className="flex items-start justify-between gap-3">
               <div className="min-w-0">
@@ -355,9 +407,6 @@ export function ReservaForm({ cls, onConfirmed }: Props) {
                 strokeWidth={1.75}
               />
             </div>
-            <span className="mt-2 inline-block font-mono text-[0.55rem] uppercase tracking-[0.22em] text-paper/40">
-              Visitante
-            </span>
           </button>
 
           <div className="mt-auto pt-4 border-t border-paper/10">
@@ -369,6 +418,55 @@ export function ReservaForm({ cls, onConfirmed }: Props) {
             >
               <WhatsappIcon className="size-3.5" />
               ¿Dudas? Contáctanos
+            </a>
+          </div>
+        </div>
+      )}
+
+      {step === "fitnessApp" && (
+        <div className="flex flex-col gap-1.5 flex-1">
+          <div className="mb-1">
+            <p className="font-display text-xl font-semibold tracking-tight text-paper">
+              ¿De qué app vienes?
+            </p>
+            <p className="mt-1 text-sm text-paper/60">
+              La registramos para validar tu pase en recepción.
+            </p>
+          </div>
+
+          {FITNESS_APPS.map((app) => (
+            <button
+              key={app.value}
+              type="button"
+              onClick={() => {
+                setMember(true);
+                setFitnessApp(app.value);
+                setReserveError(null);
+                setStep("form");
+              }}
+              className="group relative text-left border border-paper/15 px-5 py-3.5 transition-colors hover:border-gold/60 active:bg-paper/[0.03]"
+            >
+              <div className="flex items-center justify-between gap-3">
+                <p className="font-display text-lg font-semibold tracking-tight text-paper">
+                  {app.label}
+                </p>
+                <ArrowRight
+                  className="size-4 shrink-0 text-paper/50 transition-all duration-300 group-hover:text-gold group-hover:translate-x-0.5"
+                  strokeWidth={1.75}
+                />
+              </div>
+            </button>
+          ))}
+
+          <div className="mt-auto pt-4 border-t border-paper/10">
+            <a
+              href={waLink}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 text-paper/55 hover:text-gold text-xs font-mono uppercase tracking-[0.18em] transition-colors"
+            >
+              <WhatsappIcon className="size-3.5" />
+              ¿Tu app no aparece? Escríbenos
             </a>
           </div>
         </div>
@@ -419,7 +517,9 @@ export function ReservaForm({ cls, onConfirmed }: Props) {
 
           {member && (
             <p className="text-sm leading-relaxed text-paper/60">
-              Solo apartas tu lugar — tu clase está incluida en tu membresía, sin cobro.
+              {fitnessApp
+                ? `Solo apartas tu lugar — tu acceso vía ${FITNESS_APP_LABEL[fitnessApp]} se valida en recepción, sin cobro.`
+                : "Solo apartas tu lugar — tu clase está incluida en tu membresía, sin cobro."}
             </p>
           )}
 
@@ -459,7 +559,7 @@ export function ReservaForm({ cls, onConfirmed }: Props) {
           {/* Pagar en recepción */}
           <button
             type="button"
-            onClick={() => customer && handleReception(customer, false)}
+            onClick={() => customer && handleReception(customer, { member: false, fitnessApp: null })}
             disabled={reserving}
             className={cn(
               "group relative text-left border border-paper/15 px-5 py-4 transition-colors",
@@ -486,7 +586,7 @@ export function ReservaForm({ cls, onConfirmed }: Props) {
                 )}
               </span>
             </div>
-            <span className="mt-2 inline-block font-mono text-[0.55rem] uppercase tracking-[0.22em] text-paper/40">
+            <span className="mt-1.5 inline-block font-mono text-[0.55rem] uppercase tracking-[0.22em] text-paper/40">
               {reserving ? "Apartando tu lugar…" : "Sin tarjeta"}
             </span>
           </button>
@@ -512,7 +612,7 @@ export function ReservaForm({ cls, onConfirmed }: Props) {
                 strokeWidth={1.75}
               />
             </div>
-            <span className="mt-2 inline-block font-mono text-[0.55rem] uppercase tracking-[0.22em] text-gold/80">
+            <span className="mt-1.5 inline-block font-mono text-[0.55rem] uppercase tracking-[0.22em] text-gold/80">
               Inmediato · pago seguro
             </span>
           </button>

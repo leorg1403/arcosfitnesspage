@@ -88,6 +88,7 @@ export async function listReservationsByDate(dateISO: string) {
       customerEmail: true,
       customerPhone: true,
       kind: true,
+      fitnessApp: true,
       status: true,
       attendance: true,
       paymentStatus: true,
@@ -120,6 +121,7 @@ export async function findReservationsByCode(query: string) {
       customerName: true,
       customerEmail: true,
       kind: true,
+      fitnessApp: true,
       status: true,
       attendance: true,
       session: {

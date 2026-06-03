@@ -18,6 +18,8 @@ export type OwnerReservationProps = {
   amountDue?: number;
   /** Socio: clase incluida en su membresía → sin cobro, verificar membresía */
   member?: boolean;
+  /** App de fitness (TotalPass/Fitpass/Wellhub): acceso incluido → validar el pase */
+  fitnessAppLabel?: string;
   currency?: string;
   /** Código corto de reserva (últimos 6) */
   reservationCode?: string;
@@ -32,14 +34,17 @@ function formatMoney(cents: number, currency: string) {
 
 export function OwnerReservationEmail(p: OwnerReservationProps) {
   const paid = p.amountPaid != null && p.amountPaid > 0;
-  const member = !paid && p.member === true;
-  const pending = !paid && !member && p.paymentPending === true;
+  const app = !paid ? p.fitnessAppLabel : undefined; // app de fitness (sin cobro)
+  const member = !paid && !app && p.member === true;
+  const pending = !paid && !member && !app && p.paymentPending === true;
   const currency = p.currency ?? "mxn";
 
   return (
     <EmailLayout
       preview={
-        member
+        app
+          ? `Reserva vía ${app} (validar acceso): ${p.className} · ${p.customerName}`
+          : member
           ? `Reserva de socio (verificar membresía): ${p.className} · ${p.customerName}`
           : pending
           ? `Reserva pendiente a pago: ${p.className} · ${p.customerName}`
@@ -49,6 +54,8 @@ export function OwnerReservationEmail(p: OwnerReservationProps) {
       <Text className="text-[#C4A572] text-[11px] uppercase tracking-[0.22em] font-mono m-0">
         {paid
           ? `Nueva reserva paga · ${formatMoney(p.amountPaid!, currency)}`
+          : app
+          ? `Reserva vía ${app} · validar acceso`
           : member
           ? "Reserva de socio · verificar membresía"
           : pending
@@ -67,6 +74,11 @@ export function OwnerReservationEmail(p: OwnerReservationProps) {
           <strong style={{ color: "#0A0A0A", letterSpacing: "0.1em" }}>
             {p.reservationCode}
           </strong>
+        </Text>
+      )}
+      {app && (
+        <Text className="text-[#0A0A0A] text-base mt-3 mb-0">
+          {app} · <strong>sin cobro</strong> — validar el pase de {app} en recepción.
         </Text>
       )}
       {member && (
