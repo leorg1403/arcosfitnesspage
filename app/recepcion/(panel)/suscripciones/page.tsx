@@ -1,7 +1,11 @@
 import Link from "next/link";
 import { listSubscriptions, listMemberships } from "@/lib/db/admin";
-import { Table, Badge, PageHeader, membershipBadgeTone, type BadgeTone } from "@/components/recepcion/ui";
+import { Table, Badge, PageHeader, fmtMoney, membershipBadgeTone, type BadgeTone } from "@/components/recepcion/ui";
 import { cdmxTodayISO } from "@/lib/booking/window";
+
+function intervalLabel(i: string | null): string {
+  return i === "year" ? "año" : "mes";
+}
 
 const FILTERS = [
   { key: "all", label: "Todas" },
@@ -18,6 +22,7 @@ type UnifiedRow = {
   statusLabel: string;
   statusTone: BadgeTone;
   until: string;
+  recurring: string; // cobro recurrente real ($2,800/mes) — verifica que NO es el total
   created: number;
 };
 
@@ -47,6 +52,10 @@ export default async function MembresiasPage({
       statusLabel: s.status,
       statusTone: tone,
       until: s.currentPeriodEnd ? s.currentPeriodEnd.toISOString().slice(0, 10) : "—",
+      recurring:
+        s.recurringAmountCents != null
+          ? `${fmtMoney(s.recurringAmountCents, "MXN")}/${intervalLabel(s.recurringInterval)}`
+          : "—",
       created: s.createdAt.getTime(),
     };
   });
@@ -65,6 +74,7 @@ export default async function MembresiasPage({
       statusLabel: label,
       statusTone: tone,
       until: ends ?? "—",
+      recurring: `${fmtMoney(m.priceCents, "MXN")}${m.periodicity === "mensual" ? "/mes" : ""}`,
       created: m.createdAt.getTime(),
     };
   });
@@ -83,6 +93,7 @@ export default async function MembresiasPage({
     ),
     <Badge key="p" tone={membershipBadgeTone(r.planName)}>{r.planName}</Badge>,
     <Badge key="o" tone={r.source === "Stripe" ? "neutral" : "silver"}>{r.source}</Badge>,
+    <span key="r" className="tabular-nums text-paper/85">{r.recurring}</span>,
     <Badge key="s" tone={r.statusTone}>{r.statusLabel}</Badge>,
     r.until,
   ]);
@@ -112,10 +123,14 @@ export default async function MembresiasPage({
         }
       />
       <Table
-        columns={["Cliente", "Plan", "Origen", "Estado", "Vigente hasta"]}
+        columns={["Cliente", "Plan", "Origen", "Cobro recurrente", "Estado", "Vigente hasta"]}
         rows={rows}
         empty="Sin membresías"
       />
+      <p className="mt-4 text-[0.65rem] leading-relaxed text-paper/35">
+        &quot;Cobro recurrente&quot; es lo que Stripe cobra cada periodo (solo la mensualidad). La
+        inscripción es un cargo único de la primera factura y NO se repite.
+      </p>
     </>
   );
 }

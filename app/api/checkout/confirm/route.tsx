@@ -42,14 +42,18 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ ok: false, error: "Validación" }, { status: 400 });
   }
 
-  // 1) Fuente de verdad: el Payment que finalizó el webhook.
+  // 1) Fuente de verdad: el Payment que finalizó el webhook. (Los pagos de
+  // suscripción no tienen session → este lookup solo ve pagos únicos; aun así
+  // acotamos itemKind a los tipos que entiende la UI.)
   const payment = await getPaymentBySession(sessionId);
   if (payment && payment.status === "paid") {
+    const uiKind: ConfirmResult["itemKind"] =
+      payment.itemKind === "prepayment" || payment.itemKind === "class" ? payment.itemKind : "plan";
     return NextResponse.json({
       ok: true,
-      itemKind: payment.itemKind,
+      itemKind: uiKind,
       planName: payment.itemName,
-      ...(payment.itemKind === "class" && {
+      ...(uiKind === "class" && {
         className: payment.itemName,
         reservationCode: payment.reservation?.shortCode,
       }),

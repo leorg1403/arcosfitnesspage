@@ -22,6 +22,10 @@ export type ClientReservationProps = {
   reservationCode?: string;
   /** Enlace único de cancelación (UUID). Si se omite, no se muestra. */
   cancelUrl?: string;
+  /** Enlace para REAGENDAR (mover) una reserva pagada. Prioritario sobre cancelUrl. */
+  rescheduleUrl?: string;
+  /** true => correo de confirmación de un reagendado (la reserva cambió de clase). */
+  rescheduled?: boolean;
 };
 
 function formatMoney(cents: number, currency: string) {
@@ -36,12 +40,15 @@ export function ClientReservationEmail(p: ClientReservationProps) {
   const app = !paid ? p.fitnessAppLabel : undefined; // app de fitness (sin cobro)
   const member = !paid && !app && p.member === true;
   const pending = !paid && !member && !app && p.paymentPending === true;
+  const rescheduled = p.rescheduled === true;
   const currency = p.currency ?? "mxn";
 
   return (
     <EmailLayout
       preview={
-        paid
+        rescheduled
+          ? `Reserva reagendada: ${p.className} · ${p.classDay}`
+          : paid
           ? `Reserva confirmada: ${p.className} · ${p.classDay}`
           : app
           ? `Reserva apartada (${app}): ${p.className} · ${p.classDay}`
@@ -53,7 +60,9 @@ export function ClientReservationEmail(p: ClientReservationProps) {
       }
     >
       <Text className="text-[#C4A572] text-[11px] uppercase tracking-[0.22em] font-mono m-0">
-        {paid
+        {rescheduled
+          ? "Reserva reagendada"
+          : paid
           ? "Reserva confirmada"
           : app
           ? `Reserva vía ${app}`
@@ -70,7 +79,9 @@ export function ClientReservationEmail(p: ClientReservationProps) {
       </Heading>
 
       <Text className="text-[#0A0A0A] text-base mt-4 mb-0 leading-relaxed">
-        {paid
+        {rescheduled
+          ? "Movimos tu reserva a esta clase. No se realizó ningún cobro nuevo; tu pago anterior se mantiene."
+          : paid
           ? "Tu lugar está confirmado y el pago fue procesado con éxito."
           : app
           ? `Apartamos tu lugar. Tu acceso vía ${app} no tiene cobro; presenta tu pase de ${app} en recepción al llegar.`
@@ -133,7 +144,16 @@ export function ClientReservationEmail(p: ClientReservationProps) {
         .
       </Text>
 
-      {p.cancelUrl && (
+      {p.rescheduleUrl ? (
+        <Text className="text-[#8A8A88] text-xs mt-4 mb-0 leading-relaxed">
+          ¿No puedes asistir?{" "}
+          <a href={p.rescheduleUrl} style={{ color: "#C4A572" }}>
+            Reagenda tu clase aquí
+          </a>
+          . Puedes reagendar a otra clase hasta <strong>2 horas antes</strong> del inicio
+          (siempre que no hayas asistido).
+        </Text>
+      ) : p.cancelUrl ? (
         <Text className="text-[#8A8A88] text-xs mt-4 mb-0">
           ¿No podrás asistir?{" "}
           <a href={p.cancelUrl} style={{ color: "#C4A572" }}>
@@ -141,7 +161,7 @@ export function ClientReservationEmail(p: ClientReservationProps) {
           </a>
           .
         </Text>
-      )}
+      ) : null}
 
       {paid && (
         <Text className="text-[#8A8A88] text-xs mt-4 mb-0">

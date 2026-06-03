@@ -5,3 +5,8 @@ export const SITE_URL = process.env.SITE_URL ?? "https://www.arcosfitness.com";
 export function reservationCancelUrl(code: string): string {
   return `${SITE_URL}/cancelar/${code}`;
 }
+
+/** Enlace para reagendar (mover) una reserva pagada. `code` (UUID) = token. */
+export function reservationRescheduleUrl(code: string): string {
+  return `${SITE_URL}/reagendar/${code}`;
+}

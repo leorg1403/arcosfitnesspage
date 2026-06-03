@@ -2,7 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { ReactNode } from "react";
 import { getPaymentDetail } from "@/lib/db/admin";
-import { Badge, Card, PageHeader, fmtMoney } from "@/components/recepcion/ui";
+import { Badge, Card, PageHeader, fmtMoney, PAYMENT_TYPE_LABEL } from "@/components/recepcion/ui";
 
 function fmtDateTime(d: Date): string {
   return new Intl.DateTimeFormat("es-MX", {
@@ -59,13 +59,20 @@ export default async function PaymentDetailPage({ params }: { params: Promise<{ 
         <Card>
           <p className="font-mono text-[0.6rem] uppercase tracking-[0.2em] text-gold/80 mb-3">Pago</p>
           <Row label="Concepto">{p.itemName}</Row>
-          <Row label="Tipo">{p.itemKind}</Row>
+          <Row label="Tipo">{PAYMENT_TYPE_LABEL[p.itemKind] ?? p.itemKind}</Row>
           <Row label="Monto">{fmtMoney(p.amountTotalCents, currency)}</Row>
           <Row label="Estado">{p.status}</Row>
           <Row label="Fecha">{fmtDateTime(p.createdAt)}</Row>
-          <Row label="Stripe session">
-            <span className="font-mono text-xs">{p.stripeSessionId}</span>
-          </Row>
+          {p.stripeSessionId && (
+            <Row label="Stripe session">
+              <span className="font-mono text-xs">{p.stripeSessionId}</span>
+            </Row>
+          )}
+          {p.stripeInvoiceId && (
+            <Row label="Factura Stripe">
+              <span className="font-mono text-xs">{p.stripeInvoiceId}</span>
+            </Row>
+          )}
           {p.stripePaymentIntentId && (
             <Row label="Payment intent">
               <span className="font-mono text-xs">{p.stripePaymentIntentId}</span>

@@ -32,7 +32,16 @@ export type UpsertSubscriptionInput = {
   customerEmail: string;
   customerPhone?: string | null;
   currentPeriodEndUnix?: number | null;
+  // Monto recurrente REAL del item de suscripción (solo la mensualidad, sin
+  // inscripción) leído de Stripe. Para mostrar/verificar en el panel.
+  recurringAmountCents?: number | null;
+  recurringInterval?: string | null;
 };
+
+/** Lectura de la suscripción por su id de Stripe (para el webhook de facturas). */
+export async function getSubscriptionByStripeId(stripeSubscriptionId: string) {
+  return prisma.subscription.findUnique({ where: { stripeSubscriptionId } });
+}
 
 /** Crea/actualiza la suscripción y la liga al Customer (CRM). */
 export async function upsertSubscription(input: UpsertSubscriptionInput): Promise<void> {
@@ -46,6 +55,8 @@ export async function upsertSubscription(input: UpsertSubscriptionInput): Promis
     phone: input.customerPhone,
   });
 
+  const recurring = input.recurringAmountCents ?? null;
+  const interval = input.recurringInterval ?? null;
   await prisma.subscription.upsert({
     where: { stripeSubscriptionId: input.stripeSubscriptionId },
     create: {
@@ -58,12 +69,16 @@ export async function upsertSubscription(input: UpsertSubscriptionInput): Promis
       customerEmail: input.customerEmail.trim().toLowerCase(),
       customerPhone: input.customerPhone ?? null,
       currentPeriodEnd,
+      recurringAmountCents: recurring,
+      recurringInterval: interval,
       customerId: customer.id,
     },
     update: {
       status,
       planName: input.planName,
       ...(currentPeriodEnd ? { currentPeriodEnd } : {}),
+      ...(recurring != null ? { recurringAmountCents: recurring } : {}),
+      ...(interval ? { recurringInterval: interval } : {}),
       customerId: customer.id,
     },
   });
