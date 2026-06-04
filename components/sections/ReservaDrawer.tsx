@@ -78,7 +78,7 @@ export function ReservaDrawer({ cls, open, onOpenChange }: Props) {
                     <p className="mt-3 text-sm text-paper/70">Acceso al gym y clases.</p>
                   ) : (
                     <p className="mt-3 text-sm text-paper/70">
-                      {cls.durationMin} min · {cls.room} · {cls.level}
+                      {cls.durationMin} min
                     </p>
                   )}
                 </div>
