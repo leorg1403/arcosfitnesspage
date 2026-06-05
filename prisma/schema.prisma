@@ -239,19 +239,35 @@ model ClassSession {
 
 /// Dudas / contacto (formulario de ContactSection). Registro APARTE del CRM.
 model Lead {
-  id              String     @id @default(cuid())
+  id              String      @id @default(cuid())
   firstName       String
   lastName        String
   email           String
   message         String
-  dedupeHash      String     @unique // hash(emailLower + '|' + mensaje normalizado)
-  resubmitCount   Int        @default(0) // reenvíos idénticos (dedupe silencioso)
-  source          String     @default("contact-form")
-  status          LeadStatus @default(new)
-  createdAt       DateTime   @default(now())
-  lastSubmittedAt DateTime   @default(now())
+  dedupeHash      String      @unique // hash(emailLower + '|' + mensaje normalizado)
+  resubmitCount   Int         @default(0) // reenvíos idénticos (dedupe silencioso)
+  source          String      @default("contact-form")
+  status          LeadStatus  @default(new)
+  createdAt       DateTime    @default(now())
+  lastSubmittedAt DateTime    @default(now())
+  replies         LeadReply[]
 
   @@index([email])
+  @@schema("app")
+}
+
+/// Respuesta enviada a un lead desde el panel (historial visible en
+/// /recepcion/leads). Snapshot del correo tal como se envió.
+model LeadReply {
+  id        String   @id @default(cuid())
+  lead      Lead     @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  leadId    String
+  subject   String
+  body      String
+  sentBy    String // nombre o correo del admin que respondió
+  createdAt DateTime @default(now())
+
+  @@index([leadId])
   @@schema("app")
 }
 

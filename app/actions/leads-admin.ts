@@ -8,7 +8,7 @@ import { assertAdmin } from "@/lib/admin/guard";
 import { checkRateLimit } from "@/lib/rate-limit";
 import { sendEmail, OWNER_EMAIL } from "@/lib/email";
 import { LeadReplyEmail } from "@/lib/email/lead-reply";
-import { getLead, setLeadStatus } from "@/lib/db/admin";
+import { getLead, setLeadStatus, recordLeadReply } from "@/lib/db/admin";
 import { REPLY_DEFAULTS } from "@/lib/lead-reply-defaults";
 
 /**
@@ -66,7 +66,7 @@ export type LeadReplyResult =
   | { ok: false; error: string };
 
 export async function replyToLeadAction(input: unknown): Promise<LeadReplyResult> {
-  await assertAdmin();
+  const admin = await assertAdmin();
 
   // Rate limit (enviar correo es caro/abusable). Regla Firewall: "lead-reply".
   const { ip, hdrs } = await clientIp();
@@ -102,6 +102,13 @@ export async function replyToLeadAction(input: unknown): Promise<LeadReplyResult
       replyTo: OWNER_EMAIL,
     });
 
+    // Historial: snapshot de la respuesta tal como se envió (visible en el panel).
+    await recordLeadReply({
+      leadId: lead.id,
+      subject: d.subject,
+      body: d.body,
+      sentBy: admin.name || admin.email,
+    });
     if (lead.status === "new") await setLeadStatus(lead.id, "contacted");
     revalidatePath("/recepcion/leads");
     return { ok: true, mock: res.mock };

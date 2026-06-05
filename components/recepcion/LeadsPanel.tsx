@@ -17,6 +17,13 @@ const input =
   "w-full bg-transparent border border-paper/15 focus:border-gold px-3 py-2 text-sm text-paper outline-none [color-scheme:dark] placeholder:text-paper/25";
 const labelCls = "block font-mono text-[0.55rem] uppercase tracking-[0.18em] text-paper/50 mb-1";
 
+export type LeadReplyRow = {
+  subject: string;
+  body: string;
+  sentBy: string;
+  date: string; // formateada en el server (fmtDateTime)
+};
+
 export type LeadRow = {
   id: string;
   date: string; // ISO yyyy-mm-dd (lastSubmittedAt)
@@ -26,6 +33,7 @@ export type LeadRow = {
   message: string;
   status: "new" | "contacted" | "converted" | "archived";
   resubmitCount: number;
+  replies: LeadReplyRow[];
 };
 
 const STATUS_META: Record<LeadRow["status"], { label: string; tone: BadgeTone }> = {
@@ -45,6 +53,15 @@ export function LeadsPanel({ leads }: { leads: LeadRow[] }) {
     <span key="e" className="text-xs text-paper/55">{l.email}</span>,
     <span key="m" className="block max-w-md whitespace-normal text-paper/80">{l.message}</span>,
     <StatusCell key="s" lead={l} onChanged={() => router.refresh()} />,
+    l.replies.length > 0 ? (
+      <span key="rs" className="inline-flex items-center gap-1.5 text-xs text-paper/55">
+        <Send className="size-3 text-green-400" strokeWidth={1.75} />
+        {l.replies.length > 1 ? `${l.replies.length} · ` : ""}
+        {l.replies[l.replies.length - 1].date}
+      </span>
+    ) : (
+      <span key="rs" className="text-paper/25">—</span>
+    ),
     l.resubmitCount > 0 ? <Badge key="r" tone="amber">{`+${l.resubmitCount}`}</Badge> : "",
     <button
       key="a"
@@ -60,7 +77,7 @@ export function LeadsPanel({ leads }: { leads: LeadRow[] }) {
   return (
     <>
       <Table
-        columns={["Fecha", "Nombre", "Correo", "Mensaje", "Status", "Reenvíos", ""]}
+        columns={["Fecha", "Nombre", "Correo", "Mensaje", "Status", "Respuestas", "Reenvíos", ""]}
         rows={rows}
         empty="Sin leads"
       />
@@ -141,6 +158,11 @@ function ReplyModal({
   const [sending, setSending] = useState(false);
   const [sendMsg, setSendMsg] = useState<{ kind: "ok" | "err"; text: string } | null>(null);
 
+  // Respuestas enviadas en esta sesión del modal (el prop `lead` no se
+  // re-renderiza al refrescar la página de fondo).
+  const [sentNow, setSentNow] = useState<LeadReplyRow[]>([]);
+  const history = [...lead.replies, ...sentNow];
+
   // Cerrar con Escape (si no está enviando).
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -185,6 +207,12 @@ function ReplyModal({
               ? "Modo demo: no se envió (Postmark no configurado)."
               : `Respuesta enviada a ${lead.email}.`,
           });
+          setSentNow((prev) => [
+            ...prev,
+            { subject: effectiveSubject, body: effectiveBody, sentBy: "ti", date: "ahora" },
+          ]);
+          setSubject("");
+          setBody("");
           setConfirmOpen(false);
           onSent();
         } else {
@@ -237,6 +265,28 @@ function ReplyModal({
                 {lead.firstName} {lead.lastName} · {lead.email}
               </p>
             </div>
+
+            {/* Historial: lo que ya se le respondió a este lead */}
+            {history.length > 0 && (
+              <div className="space-y-2">
+                <p className="font-mono text-[0.55rem] uppercase tracking-[0.18em] text-paper/50">
+                  Respuestas enviadas ({history.length})
+                </p>
+                <div className="max-h-48 space-y-2 overflow-y-auto pr-1">
+                  {history.map((r, i) => (
+                    <div key={i} className="border border-green-500/20 bg-green-500/[0.04] p-3">
+                      <p className="font-mono text-[0.55rem] uppercase tracking-[0.16em] text-green-400/80">
+                        {r.date} · por {r.sentBy}
+                      </p>
+                      <p className="mt-1.5 text-xs font-medium text-paper/80">{r.subject}</p>
+                      <p className="mt-1 text-xs leading-relaxed text-paper/55 whitespace-pre-wrap">
+                        {r.body}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
 
             <label className="block">
               <span className={labelCls}>Asunto</span>

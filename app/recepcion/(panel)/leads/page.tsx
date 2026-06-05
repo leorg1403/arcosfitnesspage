@@ -1,5 +1,5 @@
 import { listLeads } from "@/lib/db/admin";
-import { PageHeader } from "@/components/recepcion/ui";
+import { PageHeader, fmtDateTime } from "@/components/recepcion/ui";
 import { LeadsPanel, type LeadRow } from "@/components/recepcion/LeadsPanel";
 
 export default async function LeadsPage() {
@@ -13,12 +13,18 @@ export default async function LeadsPage() {
     message: l.message,
     status: l.status,
     resubmitCount: l.resubmitCount,
+    replies: l.replies.map((r) => ({
+      subject: r.subject,
+      body: r.body,
+      sentBy: r.sentBy,
+      date: fmtDateTime(r.createdAt),
+    })),
   }));
   return (
     <>
       <PageHeader
         title="Leads"
-        subtitle="Dudas del formulario de contacto. Responde desde aquí: al enviar la respuesta el lead se marca como contactado."
+        subtitle="Dudas del formulario de contacto. Responde desde aquí: al enviar la respuesta el lead se marca como contactado y queda en el historial."
       />
       <LeadsPanel leads={rows} />
     </>

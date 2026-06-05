@@ -265,7 +265,11 @@ export async function listSubscriptions(filter: "active" | "expired" | "all" = "
 }
 
 export async function listLeads(limit = 200) {
-  return prisma.lead.findMany({ orderBy: { lastSubmittedAt: "desc" }, take: limit });
+  return prisma.lead.findMany({
+    orderBy: { lastSubmittedAt: "desc" },
+    take: limit,
+    include: { replies: { orderBy: { createdAt: "asc" } } },
+  });
 }
 
 export async function getLead(id: string) {
@@ -274,6 +278,16 @@ export async function getLead(id: string) {
 
 export async function setLeadStatus(id: string, status: LeadStatus) {
   await prisma.lead.update({ where: { id }, data: { status } });
+}
+
+/** Guarda el snapshot de una respuesta enviada a un lead (historial del panel). */
+export async function recordLeadReply(input: {
+  leadId: string;
+  subject: string;
+  body: string;
+  sentBy: string;
+}) {
+  await prisma.leadReply.create({ data: input });
 }
 
 export async function listClassTemplates() {
