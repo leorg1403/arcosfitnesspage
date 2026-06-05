@@ -1,23 +1,32 @@
 import { listLeads } from "@/lib/db/admin";
-import { Table, Badge, PageHeader } from "@/components/recepcion/ui";
+import { PageHeader, fmtDateTime } from "@/components/recepcion/ui";
+import { LeadsPanel, type LeadRow } from "@/components/recepcion/LeadsPanel";
 
 export default async function LeadsPage() {
   const leads = await listLeads();
-  const rows = leads.map((l) => [
-    l.lastSubmittedAt.toISOString().slice(0, 10),
-    `${l.firstName} ${l.lastName}`,
-    <span key="e" className="text-xs text-paper/55">{l.email}</span>,
-    <span key="m" className="block max-w-md whitespace-normal text-paper/80">{l.message}</span>,
-    l.resubmitCount > 0 ? <Badge key="r" tone="amber">{`+${l.resubmitCount}`}</Badge> : "",
-  ]);
+  const rows: LeadRow[] = leads.map((l) => ({
+    id: l.id,
+    date: l.lastSubmittedAt.toISOString().slice(0, 10),
+    firstName: l.firstName,
+    lastName: l.lastName,
+    email: l.email,
+    message: l.message,
+    status: l.status,
+    resubmitCount: l.resubmitCount,
+    replies: l.replies.map((r) => ({
+      subject: r.subject,
+      body: r.body,
+      sentBy: r.sentBy,
+      date: fmtDateTime(r.createdAt),
+    })),
+  }));
   return (
     <>
-      <PageHeader title="Leads" subtitle="Dudas del formulario de contacto (registro aparte del CRM)." />
-      <Table
-        columns={["Fecha", "Nombre", "Correo", "Mensaje", "Reenvíos"]}
-        rows={rows}
-        empty="Sin leads"
+      <PageHeader
+        title="Leads"
+        subtitle="Dudas del formulario de contacto. Responde desde aquí: al enviar la respuesta el lead se marca como contactado y queda en el historial."
       />
+      <LeadsPanel leads={rows} />
     </>
   );
 }

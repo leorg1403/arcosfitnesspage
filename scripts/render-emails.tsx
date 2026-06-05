@@ -13,6 +13,9 @@ import { ClientPurchaseEmail } from "../lib/email/client-purchase";
 import { OwnerPurchaseEmail } from "../lib/email/owner-purchase";
 import { ClientReservationEmail } from "../lib/email/client-reservation";
 import { OwnerReservationEmail } from "../lib/email/owner-reservation";
+import { OwnerLeadEmail } from "../lib/email/owner-lead";
+import { LeadReplyEmail } from "../lib/email/lead-reply";
+import { REPLY_DEFAULTS } from "../lib/lead-reply-defaults";
 
 const OUT_DIR = path.join(__dirname, "..", "templates");
 
@@ -69,6 +72,18 @@ const samples = {
     customerPhone: "55 1234 5678",
     amountPaid: 35000,
     currency: "mxn",
+  }),
+  "owner-lead.html": OwnerLeadEmail({
+    firstName: "Ana",
+    lastName: "Torres",
+    email: "ana.torres@example.com",
+    message: "Hola, ¿qué costo tiene la membresía mensual y hay clases de prueba?",
+    panelUrl: "https://www.arcosfitness.com/recepcion/leads",
+  }),
+  "lead-reply.html": LeadReplyEmail({
+    recipientName: "Ana",
+    body: REPLY_DEFAULTS.body,
+    originalMessage: "Hola, ¿qué costo tiene la membresía mensual y hay clases de prueba?",
   }),
 } as const;
 

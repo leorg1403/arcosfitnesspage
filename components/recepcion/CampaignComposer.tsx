@@ -48,6 +48,22 @@ const EMPTY_DRAFT: Draft = {
   ctaUrl: "",
 };
 
+/**
+ * Contenido de ejemplo: se muestra como `placeholder` en los campos y alimenta
+ * la vista previa mientras el campo esté vacío (escribir lo reemplaza, nada
+ * que borrar). Es solo guía visual: el ENVÍO sigue exigiendo contenido
+ * tecleado (`draftReady`), para no mandar una campaña con texto de muestra.
+ */
+const SAMPLE: Draft = {
+  subject: "Novedades del club · Arcos Fitness",
+  preheader: "Nuevos horarios, clases y más",
+  heading: "Esta semana en Arcos",
+  body:
+    "Te compartimos las novedades del club: nuevos horarios de clases y lugares disponibles en Hyrox.\n\nReserva tu lugar desde el sitio o escríbenos por WhatsApp.",
+  ctaLabel: "",
+  ctaUrl: "",
+};
+
 export function CampaignComposer({
   lists,
   planOptions,
@@ -125,22 +141,23 @@ export function CampaignComposer({
   };
 
   // Vista previa EN VIVO: se regenera (debounced) al cambiar el contenido, sin botón.
+  // Mientras un campo esté vacío, el preview usa el contenido de ejemplo (SAMPLE)
+  // — el mismo que se ve como placeholder — así la vista previa aparece desde el
+  // inicio y escribir reemplaza campo por campo.
   // Todo setState va dentro del timeout (async) para no disparar renders en cascada.
   useEffect(() => {
     const id = ++previewReq.current;
     const t = setTimeout(() => {
-      const hasContent = Boolean(
-        draft.heading.trim() || draft.body.trim() || draft.subject.trim()
-      );
-      if (!hasContent) {
-        if (previewReq.current === id) {
-          setPreviewHtml(null);
-          setPreviewing(false);
-        }
-        return;
-      }
+      const effective: Draft = {
+        subject: draft.subject.trim() ? draft.subject : SAMPLE.subject,
+        preheader: draft.preheader.trim() ? draft.preheader : SAMPLE.preheader,
+        heading: draft.heading.trim() ? draft.heading : SAMPLE.heading,
+        body: draft.body.trim() ? draft.body : SAMPLE.body,
+        ctaLabel: draft.ctaLabel,
+        ctaUrl: draft.ctaUrl,
+      };
       setPreviewing(true);
-      previewCampaignAction(draft)
+      previewCampaignAction(effective)
         .then((r) => {
           if (previewReq.current !== id) return; // descarta resultados viejos
           setPreviewHtml(
@@ -323,19 +340,19 @@ export function CampaignComposer({
           <div className="space-y-3">
             <label className="block">
               <span className={labelCls}>Asunto</span>
-              <input value={draft.subject} onChange={(e) => setD("subject", e.target.value)} maxLength={200} placeholder="Asunto del correo" className={input} />
+              <input value={draft.subject} onChange={(e) => setD("subject", e.target.value)} maxLength={200} placeholder={SAMPLE.subject} className={input} />
             </label>
             <label className="block">
               <span className={labelCls}>Preheader (texto de vista previa en bandeja)</span>
-              <input value={draft.preheader} onChange={(e) => setD("preheader", e.target.value)} maxLength={200} placeholder="Opcional" className={input} />
+              <input value={draft.preheader} onChange={(e) => setD("preheader", e.target.value)} maxLength={200} placeholder={SAMPLE.preheader} className={input} />
             </label>
             <label className="block">
               <span className={labelCls}>Encabezado</span>
-              <input value={draft.heading} onChange={(e) => setD("heading", e.target.value)} maxLength={150} placeholder="Título del mensaje" className={input} />
+              <input value={draft.heading} onChange={(e) => setD("heading", e.target.value)} maxLength={150} placeholder={SAMPLE.heading} className={input} />
             </label>
             <label className="block">
               <span className={labelCls}>Cuerpo (separa párrafos con una línea en blanco)</span>
-              <textarea value={draft.body} onChange={(e) => setD("body", e.target.value)} maxLength={5000} rows={7} placeholder="Escribe el contenido…" className={cn(input, "resize-y")} />
+              <textarea value={draft.body} onChange={(e) => setD("body", e.target.value)} maxLength={5000} rows={7} placeholder={SAMPLE.body} className={cn(input, "resize-y")} />
             </label>
             <div className="grid sm:grid-cols-2 gap-3">
               <label className="block">
@@ -377,11 +394,8 @@ export function CampaignComposer({
               className="w-full h-[520px] bg-white border border-paper/10"
             />
           ) : (
-            <div className="h-[520px] flex items-center justify-center border border-dashed border-paper/15 text-center px-6">
-              <p className="text-xs text-paper/40">
-                Empieza a escribir el asunto, el encabezado o el cuerpo y la vista previa del
-                correo aparecerá aquí, actualizándose en vivo.
-              </p>
+            <div className="h-[520px] flex items-center justify-center border border-dashed border-paper/15">
+              <Loader2 className="size-4 animate-spin text-paper/30" />
             </div>
           )}
         </section>
@@ -400,7 +414,9 @@ export function CampaignComposer({
                 Enviar campaña{count ? ` a ${count}` : ""}
               </button>
               {!draftReady && (
-                <p className="mt-2 text-[0.65rem] text-paper/45">Falta asunto, encabezado o cuerpo.</p>
+                <p className="mt-2 text-[0.65rem] text-paper/45">
+                  Falta asunto, encabezado o cuerpo. El texto gris es solo ejemplo: no se envía.
+                </p>
               )}
               {draftReady && !count && (
                 <p className="mt-2 text-[0.65rem] text-paper/45">La audiencia está vacía.</p>

@@ -94,10 +94,16 @@ export function SiteFooter() {
         {/* Hairline gold */}
         <div className="mt-20 mb-8 h-px bg-gold/30" />
 
-        <div className="flex items-center justify-between gap-6">
+        <div className="flex flex-wrap items-center justify-between gap-x-6 gap-y-3">
           <p className="font-mono text-[0.625rem] text-paper/40 uppercase tracking-[0.22em]">
             © {new Date().getFullYear()} Arcos Fitness Club · Todos los derechos reservados®
           </p>
+          <FooterNavLink
+            href="/aviso-de-privacidad"
+            className="font-mono text-[0.625rem] text-paper/40 uppercase tracking-[0.22em] hover:text-gold transition-colors duration-300"
+          >
+            Aviso de Privacidad
+          </FooterNavLink>
         </div>
        </div>
       </div>
