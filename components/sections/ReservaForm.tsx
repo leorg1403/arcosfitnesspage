@@ -541,6 +541,19 @@ export function ReservaForm({ cls, onConfirmed }: Props) {
                   : "Reservar mi lugar →"
                 : "Continuar →"}
             </button>
+            {/* Aviso simplificado en punto de recolección (LFPDPPP). */}
+            <p className="text-[0.65rem] leading-relaxed text-paper/40 text-center">
+              Al continuar aceptas nuestro{" "}
+              <a
+                href="/aviso-de-privacidad"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="underline underline-offset-2 hover:text-gold transition-colors"
+              >
+                Aviso de Privacidad
+              </a>
+              .
+            </p>
             <a
               href={waLink}
               target="_blank"

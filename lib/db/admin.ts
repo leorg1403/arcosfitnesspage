@@ -6,6 +6,7 @@ import type {
   ClassCategory,
   ClassLevel,
   ClassKind,
+  LeadStatus,
   ReservationStatus,
   SubscriptionStatus,
 } from "@prisma/client";
@@ -265,6 +266,14 @@ export async function listSubscriptions(filter: "active" | "expired" | "all" = "
 
 export async function listLeads(limit = 200) {
   return prisma.lead.findMany({ orderBy: { lastSubmittedAt: "desc" }, take: limit });
+}
+
+export async function getLead(id: string) {
+  return prisma.lead.findUnique({ where: { id } });
+}
+
+export async function setLeadStatus(id: string, status: LeadStatus) {
+  await prisma.lead.update({ where: { id }, data: { status } });
 }
 
 export async function listClassTemplates() {

@@ -4,6 +4,9 @@ import { z } from "zod";
 import { headers } from "next/headers";
 import { checkRateLimit } from "@/lib/rate-limit";
 import { recordLead } from "@/lib/db/leads";
+import { sendEmail, OWNER_EMAILS } from "@/lib/email";
+import { OwnerLeadEmail } from "@/lib/email/owner-lead";
+import { SITE_URL } from "@/lib/urls";
 
 /**
  * Server Action del formulario de contacto. Endpoint público hostil:
@@ -47,12 +50,32 @@ export async function submitLead(input: unknown): Promise<SubmitLeadResult> {
   if (rateLimited) return { ok: true };
 
   try {
-    await recordLead({
+    const { created } = await recordLead({
       firstName: data.firstName,
       lastName: data.lastName,
       email: data.email,
       message: data.message,
     });
+
+    // Aviso al dueño SOLO en lead nuevo (los reenvíos dedupeados no
+    // re-notifican). Destinatario fijo OWNER_EMAILS (no influenciable por el
+    // cliente) y contenido capado por zod. Best-effort: el lead YA está en BD;
+    // si falla el correo no rompemos la UX.
+    if (created) {
+      await sendEmail({
+        to: OWNER_EMAILS,
+        subject: `Nuevo lead · ${data.firstName} ${data.lastName}`,
+        optional: true,
+        react: OwnerLeadEmail({
+          firstName: data.firstName,
+          lastName: data.lastName,
+          email: data.email,
+          message: data.message,
+          panelUrl: `${SITE_URL}/recepcion/leads`,
+        }),
+        replyTo: data.email,
+      });
+    }
   } catch (err) {
     // No rompemos la UX: el lead es best-effort. Logueamos para el dueño.
     console.error("[submitLead] error:", err);

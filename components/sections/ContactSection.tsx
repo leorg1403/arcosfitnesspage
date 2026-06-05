@@ -198,6 +198,17 @@ export function ContactSection({
                     >
                       {formState.isSubmitting ? "Enviando…" : "Enviar mensaje"}
                     </button>
+                    {/* Aviso simplificado en punto de recolección (LFPDPPP). */}
+                    <p className="mt-3 text-[0.65rem] leading-relaxed text-paper/40">
+                      Al enviar aceptas nuestro{" "}
+                      <a
+                        href="/aviso-de-privacidad"
+                        className="underline underline-offset-2 hover:text-gold transition-colors"
+                      >
+                        Aviso de Privacidad
+                      </a>
+                      .
+                    </p>
                   </div>
                 </motion.form>
               ) : (
