@@ -47,7 +47,11 @@ export const metadata: Metadata = {
     description: "Un club privado en Bosques de las Lomas. Reserva tu visita por WhatsApp.",
   },
   twitter: { card: "summary_large_image" },
-  icons: { icon: "/favicon.ico" },
+  icons: {
+    icon: "/favicon.png",
+    shortcut: "/favicon.png",
+    apple: "/favicon.png",
+  },
 };
 
 export const viewport: Viewport = {
