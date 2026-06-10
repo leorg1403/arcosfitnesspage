@@ -3,6 +3,7 @@ import { Inter, Instrument_Serif, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import { Analytics } from "@vercel/analytics/next";
 import { AnalyticsBeacon } from "@/components/AnalyticsBeacon";
+import { MetaPixel } from "@/components/MetaPixel";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -72,6 +73,7 @@ export default function RootLayout({
         {children}
         <Analytics />
         <AnalyticsBeacon />
+        <MetaPixel />
       </body>
     </html>
   );
