@@ -6,6 +6,7 @@ import { Reveal } from "@/components/primitives/Reveal";
 import { PRE_PAYMENTS, type PrePayment } from "@/lib/memberships";
 import { CheckoutDialog, type CheckoutItem } from "./CheckoutDialog";
 import { fadeUp } from "@/lib/motion";
+import { pixel } from "@/lib/pixel";
 
 export function PrePaymentTable() {
   const [item, setItem] = useState<CheckoutItem | null>(null);
@@ -13,6 +14,7 @@ export function PrePaymentTable() {
 
   const openCheckout = (p: PrePayment) => {
     setItem({ kind: "prepayment", data: p });
+    pixel.viewContent(p.label);
     setOpen(true);
   };
 

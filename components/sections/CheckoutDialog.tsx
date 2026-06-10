@@ -16,6 +16,7 @@ import {
 } from "./StripeEmbeddedCheckoutFrame";
 import type { ConfirmResult } from "@/app/api/checkout/confirm/route";
 import { easeExpo } from "@/lib/motion";
+import { pixel } from "@/lib/pixel";
 
 type CheckoutItem =
   | { kind: "plan"; data: Plan }
@@ -89,11 +90,14 @@ export function CheckoutDialog({ item, open, onOpenChange }: Props) {
 
   const onFormSubmit = (values: FormValues) => {
     setCustomer(values);
+    pixel.completeRegistration();
+    pixel.initiateCheckout();
     setStep("payment");
   };
 
   const handleConfirmed = (result: ConfirmResult) => {
     setConfirmed(result);
+    pixel.purchase(totalCents / 100);
     setStep("confirmed");
   };
 

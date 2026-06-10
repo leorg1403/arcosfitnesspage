@@ -20,6 +20,7 @@ import {
 import type { ConfirmResult } from "@/app/api/checkout/confirm/route";
 import { createReservation } from "@/app/actions/reservations";
 import { cn } from "@/lib/cn";
+import { pixel } from "@/lib/pixel";
 
 const Schema = z.object({
   name: z.string().min(2, "Mínimo 2 caracteres").max(80),
@@ -120,6 +121,7 @@ export function ReservaForm({ cls, onConfirmed }: Props) {
       setClientEmailSent(result.clientEmailSent);
       setReservationCode(result.shortCode || null);
       setConfirmedKind("reception");
+      pixel.schedule();
       setStep("confirmed");
     } catch {
       setReserveError("No se pudo apartar tu lugar. Intenta de nuevo o escríbenos.");
@@ -131,12 +133,10 @@ export function ReservaForm({ cls, onConfirmed }: Props) {
   const onFormSubmit = (values: FormValues) => {
     setCustomer(values);
     setReserveError(null);
+    pixel.completeRegistration();
     if (member) {
-      // Acceso incluido (socio o app de fitness) → directo a la reserva en
-      // recepción, sin preguntar método de pago.
       handleReception(values, { member: true, fitnessApp });
     } else {
-      // Visitante → elige cómo pagar.
       setStep("method");
     }
   };
@@ -144,6 +144,7 @@ export function ReservaForm({ cls, onConfirmed }: Props) {
   const handleConfirmed = (result: ConfirmResult) => {
     setConfirmed(result);
     setConfirmedKind("online");
+    pixel.schedule();
     setStep("confirmed");
     onConfirmed?.(result);
   };
@@ -607,7 +608,7 @@ export function ReservaForm({ cls, onConfirmed }: Props) {
           {/* Pagar en línea */}
           <button
             type="button"
-            onClick={() => setStep("payment")}
+            onClick={() => { pixel.initiateCheckout(); setStep("payment"); }}
             disabled={reserving}
             className="group relative text-left border border-gold/30 bg-gold/[0.06] px-5 py-4 transition-colors hover:border-gold/60 disabled:opacity-70"
           >

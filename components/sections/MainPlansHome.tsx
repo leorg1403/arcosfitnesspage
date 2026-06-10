@@ -9,6 +9,7 @@ import { MAIN_PLANS, type Plan } from "@/lib/memberships";
 import { CheckoutDialog, type CheckoutItem } from "./CheckoutDialog";
 import { cn } from "@/lib/cn";
 import { fadeUp } from "@/lib/motion";
+import { pixel } from "@/lib/pixel";
 
 type Props = {
   /** Mostrar el header con eyebrow + headline + cta a /membresias */
@@ -32,6 +33,7 @@ export function MainPlansHome({
 
   const openCheckout = (plan: Plan) => {
     setCheckoutItem({ kind: "plan", data: plan });
+    pixel.viewContent(plan.name);
     setOpen(true);
   };
 

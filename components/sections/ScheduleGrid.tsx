@@ -17,6 +17,7 @@ import { GYM_HOURS_BY_DAY } from "@/lib/content";
 import { ReservaDrawer } from "./ReservaDrawer";
 import { FilterRail } from "./FilterRail";
 import { cn } from "@/lib/cn";
+import { pixel } from "@/lib/pixel";
 
 type Props = {
   /** Horario reservable (próxima ocurrencia por clase + cupos) servido por el server. */
@@ -99,6 +100,8 @@ export function ScheduleGrid({
   const handleSelect = (cls: BookableClass) => {
     setActiveClass(cls);
     setDrawerOpen(true);
+    pixel.selectDate(cls.name);
+    pixel.viewContent(cls.name);
   };
 
   const handleCategoryChange = (next: ClassCategory | "all") => {

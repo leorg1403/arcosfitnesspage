@@ -6,6 +6,7 @@ import { Reveal } from "@/components/primitives/Reveal";
 import { SEGMENT_PLANS, type Plan } from "@/lib/memberships";
 import { CheckoutDialog, type CheckoutItem } from "./CheckoutDialog";
 import { fadeUp } from "@/lib/motion";
+import { pixel } from "@/lib/pixel";
 
 export function SegmentPlans() {
   const [item, setItem] = useState<CheckoutItem | null>(null);
@@ -13,6 +14,7 @@ export function SegmentPlans() {
 
   const openCheckout = (plan: Plan) => {
     setItem({ kind: "plan", data: plan });
+    pixel.viewContent(plan.name);
     setOpen(true);
   };
 

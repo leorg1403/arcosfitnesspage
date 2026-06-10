@@ -11,6 +11,7 @@ import { SplitHeadline } from "@/components/primitives/SplitHeadline";
 import { Eyebrow } from "@/components/primitives/Eyebrow";
 import { Field } from "@/components/primitives/Field";
 import { submitLead } from "@/lib/leads";
+import { pixel } from "@/lib/pixel";
 import { heroStagger, fadeUp, easeExpo } from "@/lib/motion";
 import { useInViewSafe } from "@/lib/useInViewSafe";
 import { cn } from "@/lib/cn";
@@ -51,6 +52,7 @@ export function ContactSection({
   const onSubmit = async (values: FormValues) => {
     // La acción SIEMPRE devuelve ok; el usuario nunca sabe de dedupe/rate-limit.
     await submitLead({ ...values, website: honeypot });
+    pixel.lead();
     reset();
     setHoneypot("");
     setSubmitted(true);
