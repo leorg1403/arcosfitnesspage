@@ -12,6 +12,7 @@ import {
   type ClassCategory,
   type DayKey,
 } from "@/lib/classes";
+import { WEEKDAY_TO_DAY, CDMX_TZ } from "@/lib/booking/window";
 import type { BookableClass } from "@/lib/types";
 import { GYM_HOURS_BY_DAY } from "@/lib/content";
 import { ReservaDrawer } from "./ReservaDrawer";
@@ -79,6 +80,19 @@ export function ScheduleGrid({
     return () => window.removeEventListener("resize", onResize);
   }, []);
 
+  const rotatedDayOrder = useMemo<DayKey[]>(() => {
+    const todayISO = new Intl.DateTimeFormat("en-CA", {
+      timeZone: CDMX_TZ,
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+    }).format(new Date());
+    const weekday = new Date(`${todayISO}T00:00:00Z`).getUTCDay();
+    const todayKey = WEEKDAY_TO_DAY[weekday];
+    const idx = DAY_ORDER.indexOf(todayKey);
+    return [...DAY_ORDER.slice(idx), ...DAY_ORDER.slice(0, idx)];
+  }, []);
+
   const grouped = useMemo(() => {
     const map: Record<DayKey, BookableClass[]> = {
       lun: [], mar: [], mie: [], jue: [], vie: [], sab: [], dom: [],
@@ -94,7 +108,7 @@ export function ScheduleGrid({
     return map;
   }, [category, entries]);
 
-  const visibleDays = DAY_ORDER.filter((day) => grouped[day].length > 0);
+  const visibleDays = rotatedDayOrder.filter((day) => grouped[day].length > 0);
   const categoryLabel = CATEGORIES.find((c) => c.key === category)?.label ?? "";
 
   const handleSelect = (cls: BookableClass) => {
@@ -154,7 +168,7 @@ export function ScheduleGrid({
               transition={LAYOUT_TRANSITION}
               className="grid grid-cols-7 gap-px bg-line-soft"
             >
-              {DAY_ORDER.map((day) => (
+              {rotatedDayOrder.map((day) => (
                 <motion.div
                   layout
                   transition={LAYOUT_TRANSITION}
