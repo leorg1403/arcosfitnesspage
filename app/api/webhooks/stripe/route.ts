@@ -21,6 +21,8 @@ import {
 } from "@/lib/db/subscriptions";
 import { PLANS } from "@/lib/memberships";
 import { reservationRescheduleUrl } from "@/lib/urls";
+import { writeAuditLog } from "@/lib/audit/log";
+import { AUDIT_AREAS, AUDIT_ACTIONS } from "@/lib/audit/types";
 
 export const runtime = "nodejs";
 
@@ -72,9 +74,35 @@ export async function POST(req: NextRequest) {
       case "checkout.session.expired": {
         const session = event.data.object as Stripe.Checkout.Session;
         await releaseHoldByStripeSession(session.id);
+        await writeAuditLog({
+          actorKind: "system",
+          action: AUDIT_ACTIONS.STRIPE_CHECKOUT_EXPIRED,
+          area: AUDIT_AREAS.PAGOS,
+          entityKind: "Payment",
+          entityId: session.id,
+          summary: `Sesión de pago ${session.id} expirada, hold liberado`,
+          after: { stripeSessionId: session.id },
+        });
         break;
       }
-      case "customer.subscription.updated":
+      case "customer.subscription.updated": {
+        const sub = event.data.object as Stripe.Subscription;
+        await updateSubscriptionStatus(
+          sub.id,
+          sub.status,
+          (sub as unknown as { current_period_end?: number }).current_period_end ?? null
+        );
+        await writeAuditLog({
+          actorKind: "system",
+          action: AUDIT_ACTIONS.STRIPE_SUBSCRIPTION_UPDATED,
+          area: AUDIT_AREAS.PAGOS,
+          entityKind: "Subscription",
+          entityId: sub.id,
+          summary: `Suscripción ${sub.id} actualizada → ${sub.status}`,
+          after: { stripeSubscriptionId: sub.id, status: sub.status },
+        });
+        break;
+      }
       case "customer.subscription.deleted": {
         const sub = event.data.object as Stripe.Subscription;
         await updateSubscriptionStatus(
@@ -82,6 +110,15 @@ export async function POST(req: NextRequest) {
           sub.status,
           (sub as unknown as { current_period_end?: number }).current_period_end ?? null
         );
+        await writeAuditLog({
+          actorKind: "system",
+          action: AUDIT_ACTIONS.STRIPE_SUBSCRIPTION_DELETED,
+          area: AUDIT_AREAS.PAGOS,
+          entityKind: "Subscription",
+          entityId: sub.id,
+          summary: `Suscripción ${sub.id} cancelada (${sub.status})`,
+          after: { stripeSubscriptionId: sub.id, status: sub.status },
+        });
         break;
       }
       case "invoice.payment_succeeded": {
@@ -97,7 +134,18 @@ export async function POST(req: NextRequest) {
         const pi = strId(dispute.payment_intent);
         if (pi) {
           const p = await markPaymentByIntent(pi, "disputed");
-          if (p) await sendOwnerAlert("Contracargo recibido", p, dispute.reason);
+          if (p) {
+            await sendOwnerAlert("Contracargo recibido", p, dispute.reason);
+            await writeAuditLog({
+              actorKind: "system",
+              action: AUDIT_ACTIONS.STRIPE_DISPUTE,
+              area: AUDIT_AREAS.PAGOS,
+              entityKind: "Payment",
+              entityId: pi,
+              summary: `Contracargo: ${p.itemName} · ${p.customerName} (${p.customerEmail}) · motivo: ${dispute.reason ?? "—"}`,
+              after: { paymentIntentId: pi, status: "disputed", reason: dispute.reason },
+            });
+          }
         }
         break;
       }
@@ -106,7 +154,18 @@ export async function POST(req: NextRequest) {
         const pi = strId(charge.payment_intent);
         if (pi) {
           const p = await markPaymentByIntent(pi, "refunded");
-          if (p) await sendOwnerAlert("Reembolso aplicado", p);
+          if (p) {
+            await sendOwnerAlert("Reembolso aplicado", p);
+            await writeAuditLog({
+              actorKind: "system",
+              action: AUDIT_ACTIONS.STRIPE_REFUND,
+              area: AUDIT_AREAS.PAGOS,
+              entityKind: "Payment",
+              entityId: pi,
+              summary: `Reembolso: ${p.itemName} · ${p.customerName} (${p.customerEmail})`,
+              after: { paymentIntentId: pi, status: "refunded" },
+            });
+          }
         }
         break;
       }
@@ -159,10 +218,6 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
     return;
   }
 
-  // ── Membresía mensual (suscripción) ───────────────────────────────────────
-  // Crea/actualiza la suscripción con el monto recurrente REAL (solo la
-  // mensualidad) + welcome. Los pagos (inscripción + mensualidad + renovaciones)
-  // los registran las facturas en invoice.payment_succeeded.
   if (session.mode === "subscription" && subscriptionId) {
     let recurringAmountCents: number | null = null;
     let recurringInterval: string | null = null;
@@ -215,6 +270,16 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
         }),
       }),
     ]);
+
+    await writeAuditLog({
+      actorKind: "system",
+      action: AUDIT_ACTIONS.STRIPE_CHECKOUT_COMPLETED,
+      area: AUDIT_AREAS.PAGOS,
+      entityKind: "Subscription",
+      entityId: subscriptionId,
+      summary: `Nueva membresía completada: "${itemName}" · ${customerName} (${customerEmail}) · ${(amountTotal / 100).toFixed(2)} ${currency.toUpperCase()}`,
+      after: { stripeSessionId: session.id, subscriptionId, itemKind: "subscription", itemId, itemName, customerEmail, amountTotal },
+    });
     return;
   }
 
@@ -239,7 +304,6 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
     );
   }
 
-  // Correos (ÚNICA fuente). best-effort: no rompen el webhook.
   if (itemKind === "class") {
     const classDay = m.classDay ?? "";
     const classTime = m.classTime ?? "";
@@ -258,7 +322,6 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
           amountPaid: amountTotal,
           currency,
           reservationCode: finalize.reservationCode ?? undefined,
-          // Clase pagada en línea: en vez de cancelar, ofrecemos REAGENDAR (mover).
           rescheduleUrl: finalize.reservationFullCode
             ? reservationRescheduleUrl(finalize.reservationFullCode)
             : undefined,
@@ -303,11 +366,28 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
       }),
     ]);
   }
+
+  await writeAuditLog({
+    actorKind: "system",
+    action: AUDIT_ACTIONS.STRIPE_CHECKOUT_COMPLETED,
+    area: AUDIT_AREAS.PAGOS,
+    entityKind: "Payment",
+    entityId: session.id,
+    summary: `Pago completado: "${itemName}" · ${customerName} (${customerEmail}) · ${(amountTotal / 100).toFixed(2)} ${currency.toUpperCase()}`,
+    after: {
+      stripeSessionId: session.id,
+      paymentIntentId,
+      itemKind,
+      itemId,
+      itemName,
+      customerEmail,
+      amountTotal,
+      refundNeeded: finalize.refundNeeded ?? false,
+    },
+  });
 }
 
 // ── Facturas de suscripción ──────────────────────────────────────────────────
-// La forma del objeto Invoice cambió entre versiones de API (subscription pasó a
-// invoice.parent). Leemos defensivamente solo lo que necesitamos.
 type InvoiceLike = {
   id?: string | null;
   billing_reason?: string | null;
@@ -332,7 +412,6 @@ type SubInfo = {
   customerPhone: string | null;
 };
 
-/** Resuelve plan/cliente de una factura: primero nuestra fila, si no, Stripe. */
 async function resolveSubInfo(subId: string, inv: InvoiceLike): Promise<SubInfo | null> {
   const our = await getSubscriptionByStripeId(subId);
   if (our) {
@@ -365,7 +444,7 @@ async function resolveSubInfo(subId: string, inv: InvoiceLike): Promise<SubInfo 
 async function handleInvoicePaid(invoice: Stripe.Invoice): Promise<void> {
   const inv = invoice as unknown as InvoiceLike;
   const subId = invoiceSubId(inv);
-  if (!subId || !inv.id) return; // no es factura de suscripción
+  if (!subId || !inv.id) return;
   const info = await resolveSubInfo(subId, inv);
   if (!info || !info.customerEmail) return;
 
@@ -383,8 +462,6 @@ async function handleInvoicePaid(invoice: Stripe.Invoice): Promise<void> {
   };
 
   if (reason === "subscription_create") {
-    // Primer cobro: desglose inscripción (única) + mensualidad. El welcome ya salió
-    // en checkout.session.completed → aquí NO mandamos correo extra.
     if (plan?.inscripcion) {
       await recordTypedPayment({
         ...base,
@@ -401,11 +478,20 @@ async function handleInvoicePaid(invoice: Stripe.Invoice): Promise<void> {
       itemName: `Membresía · ${info.planName}`,
       amountCents: plan ? plan.price * 100 : inv.amount_paid ?? 0,
     });
+
+    await writeAuditLog({
+      actorKind: "system",
+      action: AUDIT_ACTIONS.STRIPE_INVOICE_PAID,
+      area: AUDIT_AREAS.PAGOS,
+      entityKind: "Payment",
+      entityId: inv.id,
+      summary: `Factura de alta pagada: "${info.planName}" · ${info.customerName} (${info.customerEmail})`,
+      after: { stripeInvoiceId: inv.id, subId, planName: info.planName, reason, amountPaid: inv.amount_paid },
+    });
     return;
   }
 
   if (reason === "subscription_cycle") {
-    // Renovación mensual: un cargo de mensualidad + recibo al cliente.
     const amountCents = inv.amount_paid ?? (plan ? plan.price * 100 : 0);
     await recordTypedPayment({
       ...base,
@@ -426,8 +512,17 @@ async function handleInvoicePaid(invoice: Stripe.Invoice): Promise<void> {
         renewal: true,
       }),
     });
+
+    await writeAuditLog({
+      actorKind: "system",
+      action: AUDIT_ACTIONS.STRIPE_INVOICE_PAID,
+      area: AUDIT_AREAS.PAGOS,
+      entityKind: "Payment",
+      entityId: inv.id,
+      summary: `Renovación de membresía pagada: "${info.planName}" · ${info.customerName} (${info.customerEmail}) · ${(amountCents / 100).toFixed(2)} ${currency.toUpperCase()}`,
+      after: { stripeInvoiceId: inv.id, subId, planName: info.planName, reason, amountCents },
+    });
   }
-  // otros motivos (subscription_update / manual): se ignoran por ahora.
 }
 
 async function handleInvoiceFailed(invoice: Stripe.Invoice): Promise<void> {
@@ -443,5 +538,15 @@ async function handleInvoiceFailed(invoice: Stripe.Invoice): Promise<void> {
       title: "Cobro de membresía rechazado",
       body: `${info.customerName} (${info.customerEmail}) · ${info.planName}. La tarjeta fue rechazada (la membresía quedará en past_due). Revísalo en Stripe y pide al cliente actualizar su método de pago.`,
     }),
+  });
+
+  await writeAuditLog({
+    actorKind: "system",
+    action: AUDIT_ACTIONS.STRIPE_INVOICE_FAILED,
+    area: AUDIT_AREAS.PAGOS,
+    entityKind: "Subscription",
+    entityId: subId,
+    summary: `Cobro fallido: "${info.planName}" · ${info.customerName} (${info.customerEmail})`,
+    after: { subId, planName: info.planName, customerEmail: info.customerEmail },
   });
 }
