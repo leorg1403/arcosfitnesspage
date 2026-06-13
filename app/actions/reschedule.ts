@@ -11,6 +11,8 @@ import { OwnerAlertEmail } from "@/lib/email/owner-alert";
 import { GYM_HOURS_BY_DAY } from "@/lib/content";
 import { reservationRescheduleUrl } from "@/lib/urls";
 import { WEEKDAY_TO_DAY, weekdayOfISO, formatDateLabel } from "@/lib/booking/window";
+import { writeAuditLog } from "@/lib/audit/log";
+import { AUDIT_AREAS, AUDIT_ACTIONS } from "@/lib/audit/types";
 
 const Schema = z.object({
   code: z.string().min(1).max(80),
@@ -56,7 +58,6 @@ export async function rescheduleByCustomer(formData: FormData) {
   const classDay = formatDateLabel(det.dateISO);
   const classTime = det.isOpenGym ? GYM_HOURS_BY_DAY[day] : det.startTime;
 
-  // Correos best-effort (no rompen el flujo).
   await Promise.allSettled([
     sendEmail({
       to: det.customerEmail,
@@ -82,6 +83,18 @@ export async function rescheduleByCustomer(formData: FormData) {
       }),
     }),
   ]);
+
+  await writeAuditLog({
+    actorKind: "customer",
+    ip,
+    action: AUDIT_ACTIONS.RESERVATION_RESCHEDULE,
+    area: AUDIT_AREAS.RESERVAS,
+    entityKind: "Reservation",
+    entityId: det.code,
+    summary: `${det.customerName} (${det.customerEmail}) reagendó #${det.shortCode} de "${det.fromClassName}" a "${det.className}" (${classDay})`,
+    before: { className: det.fromClassName, date: det.fromDateISO, startTime: det.fromStartTime },
+    after: { className: det.className, date: det.dateISO, startTime: det.startTime },
+  });
 
   redirect(`/reagendar/${encodeURIComponent(d.code)}?done=1`);
 }

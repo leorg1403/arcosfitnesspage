@@ -5,6 +5,9 @@ import { redirect } from "next/navigation";
 import { z } from "zod";
 import { checkRateLimit } from "@/lib/rate-limit";
 import { performCancellation } from "@/lib/cancellations";
+import { prisma } from "@/lib/db/client";
+import { writeAuditLog } from "@/lib/audit/log";
+import { AUDIT_AREAS, AUDIT_ACTIONS } from "@/lib/audit/types";
 
 /**
  * Cancelación por el CLIENTE desde su enlace único (/cancelar/[code]). El `code`
@@ -25,6 +28,27 @@ export async function cancelByCustomer(formData: FormData): Promise<void> {
   });
   if (rateLimited) redirect(`/cancelar/${code}?e=rate`);
 
-  await performCancellation({ code }, "customer"); // cancela + manda los dos correos
+  // Pre-fetch para el log (la reserva aún existe antes de cancelar).
+  const reservation = await prisma.reservation.findUnique({
+    where: { code },
+    select: { id: true, shortCode: true, customerName: true, customerEmail: true },
+  });
+
+  const result = await performCancellation({ code }, "customer");
+
+  if (result.ok && reservation) {
+    await writeAuditLog({
+      actorKind: "customer",
+      ip,
+      action: AUDIT_ACTIONS.RESERVATION_CANCEL_CUSTOMER,
+      area: AUDIT_AREAS.RESERVAS,
+      entityKind: "Reservation",
+      entityId: reservation.id,
+      summary: `${reservation.customerName} (${reservation.customerEmail}) canceló su reserva #${reservation.shortCode}`,
+      before: { status: "confirmed" },
+      after: { status: "cancelled" },
+    });
+  }
+
   redirect(`/cancelar/${code}?done=1`);
 }

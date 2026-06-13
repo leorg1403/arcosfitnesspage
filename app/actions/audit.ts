@@ -2,24 +2,23 @@
 
 import { revalidatePath } from "next/cache";
 import { assertAdmin } from "@/lib/admin/guard";
-import { clearPageViews } from "@/lib/db/analytics";
+import { deleteOldAuditLogs } from "@/lib/db/audit";
 import { writeAuditLog } from "@/lib/audit/log";
 import { AUDIT_AREAS, AUDIT_ACTIONS } from "@/lib/audit/types";
 
-/** Borra TODAS las analíticas. Admin-only (botón con confirmación en el panel). */
-export async function clearAnalyticsAction() {
+/** Borra registros de auditoría con más de 2 semanas. Admin-only. */
+export async function clearOldAuditLogsAction() {
   const admin = await assertAdmin();
-  const count = await clearPageViews();
-  revalidatePath("/recepcion/analytics");
-
+  const count = await deleteOldAuditLogs();
   await writeAuditLog({
     actorKind: "admin",
     adminId: admin.id,
     adminEmail: admin.email,
     adminName: admin.name,
-    action: AUDIT_ACTIONS.ANALYTICS_CLEAR,
-    area: AUDIT_AREAS.ANALYTICS,
-    summary: `${admin.name} borró todas las analíticas (${count} registros)`,
+    action: AUDIT_ACTIONS.AUDIT_PURGE_OLD,
+    area: AUDIT_AREAS.SISTEMA,
+    summary: `${admin.name} eliminó ${count} registros de auditoría con más de 2 semanas`,
     after: { deletedCount: count },
   });
+  revalidatePath("/recepcion/logs");
 }

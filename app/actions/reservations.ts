@@ -12,6 +12,8 @@ import { priceMxnFromTemplate } from "@/lib/db/sessions";
 import { reservationCancelUrl } from "@/lib/urls";
 import { WEEKDAY_TO_DAY, weekdayOfISO, formatDateLabel } from "@/lib/booking/window";
 import { FITNESS_APP_VALUES, fitnessAppLabel } from "@/lib/fitness-apps";
+import { writeAuditLog } from "@/lib/audit/log";
+import { AUDIT_AREAS, AUDIT_ACTIONS } from "@/lib/audit/types";
 
 /**
  * Reserva de recepción / socio (sin Stripe). El cliente manda SOLO el id de la
@@ -26,12 +28,7 @@ const InputSchema = z.object({
   name: z.string().min(2).max(80),
   email: z.string().email().max(120),
   phone: z.string().min(8).max(40),
-  // socio: la clase está incluida en su membresía → sin cobro, validan en recepción
   member: z.boolean().optional(),
-  // app de fitness (TotalPass/Fitpass/Wellhub): el pase cubre la clase → sin cobro,
-  // se valida el pase en recepción. Enum cerrado: el cliente NO puede mandar texto
-  // libre. (Como `member`, es una declaración no verificada en línea; recepción la
-  // valida físicamente. No habilita ningún flujo monetario.)
   fitnessApp: z.enum(FITNESS_APP_VALUES).optional(),
   // honeypot: debe llegar vacío; si trae algo, es un bot
   website: z.string().max(200).optional(),
@@ -44,7 +41,6 @@ export type CreateReservationResult =
 export async function createReservation(
   input: unknown
 ): Promise<CreateReservationResult> {
-  // 1) Rate limit por IP.
   const hdrs = await headers();
   const ip =
     hdrs.get("x-forwarded-for")?.split(",")[0]?.trim() ||
@@ -58,17 +54,15 @@ export async function createReservation(
     return { ok: false, error: "Demasiados intentos. Espera un momento e inténtalo de nuevo." };
   }
 
-  // 2) Validar payload.
   const parsed = InputSchema.safeParse(input);
   if (!parsed.success) return { ok: false, error: "Datos inválidos." };
   const data = parsed.data;
 
-  // 2b) Honeypot: fingimos éxito para no darle señal al bot.
+  // Honeypot: fingimos éxito sin loguear (no dar señal al bot).
   if (data.website && data.website.trim() !== "") {
     return { ok: true, clientEmailSent: false, code: "", shortCode: "" };
   }
 
-  // 3) Revalidar la ocurrencia en el servidor (plantilla activa + fecha vigente).
   const occ = await resolveOccurrence(data.templateId, data.date);
   if (!occ.ok) {
     return {
@@ -81,14 +75,9 @@ export async function createReservation(
   }
   const template = occ.template;
 
-  // Master Class (onlineOnly): nadie entra gratis — todos pagan (recepción o en
-  // línea). Anulamos cualquier reclamo de socio o de app de fitness.
   const fitnessApp = template.onlineOnly ? null : (data.fitnessApp ?? null);
-  // Acceso incluido (sin cobro) = socio O app de fitness. La clase la cubre su
-  // membresía/pase; recepción valida. Para visitantes (false) queda pendiente de pago.
   const included = template.onlineOnly ? false : (data.member === true || fitnessApp != null);
 
-  // 4) Crear la reserva (upsert Customer + decremento atómico + registro).
   const result = await createReceptionReservation({
     template,
     dateISO: data.date,
@@ -107,7 +96,6 @@ export async function createReservation(
     return { ok: false, error: msg };
   }
 
-  // 5) Datos derivados para los correos.
   const day = WEEKDAY_TO_DAY[weekdayOfISO(data.date)];
   const isOpenGym = template.category === "open_gym";
   const className = template.name;
@@ -115,7 +103,7 @@ export async function createReservation(
   const classTime = isOpenGym ? GYM_HOURS_BY_DAY[day] : template.startTime;
   const amountDue = Math.round(priceMxnFromTemplate(template) * 100);
   const paymentPending = !included;
-  const appLabel = fitnessAppLabel(fitnessApp); // p.ej. "TotalPass" | null
+  const appLabel = fitnessAppLabel(fitnessApp);
 
   const ownerSubject = appLabel
     ? `Reserva vía ${appLabel} · validar acceso · ${className} · ${classDay} ${classTime}`
@@ -128,8 +116,6 @@ export async function createReservation(
     ? `Reserva apartada (socio) · ${className} · ${classDay}`
     : `Reserva apartada · ${className} · ${classDay}`;
 
-  // El correo al owner es el registro secundario (la fila ya es el registro de
-  // verdad). El correo al cliente es best-effort.
   const [ownerRes, clientRes] = await Promise.allSettled([
     sendEmail({
       to: OWNER_EMAILS,
@@ -171,7 +157,6 @@ export async function createReservation(
   ]);
 
   if (ownerRes.status === "rejected") {
-    // La reserva YA está registrada en BD; solo falló el correo de aviso.
     console.error("[createReservation] owner email error:", ownerRes.reason);
   }
 
@@ -179,6 +164,25 @@ export async function createReservation(
     clientRes.status === "fulfilled" &&
     clientRes.value.mock === false &&
     clientRes.value.id != null;
+
+  await writeAuditLog({
+    actorKind: "customer",
+    ip,
+    action: AUDIT_ACTIONS.RESERVATION_CREATE_CUSTOMER,
+    area: AUDIT_AREAS.RESERVAS,
+    entityKind: "Reservation",
+    entityId: result.code,
+    summary: `${data.name} (${data.email}) reservó ${className} el ${data.date} (${result.shortCode})`,
+    after: {
+      shortCode: result.shortCode,
+      templateId: data.templateId,
+      date: data.date,
+      customerName: data.name,
+      customerEmail: data.email,
+      member: included,
+      fitnessApp: fitnessApp ?? null,
+    },
+  });
 
   return { ok: true, clientEmailSent, code: result.code, shortCode: result.shortCode };
 }
