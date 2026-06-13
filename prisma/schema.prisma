@@ -456,6 +456,34 @@ model EmailCampaign {
   @@schema("app")
 }
 
+// ─── Auditoría / Logging ──────────────────────────────────────────────────────
+
+/// Registro inmutable de toda mutación de datos. Escrito best-effort: si falla
+/// la escritura, la mutación real ya se completó y el error solo queda en logs.
+/// action y area son texto libre; la fuente de verdad es lib/audit/types.ts.
+model AuditLog {
+  id         String   @id @default(cuid())
+  occurredAt DateTime @default(now())
+  actorKind  String // "admin" | "customer" | "system"
+  adminId    String? // snapshot del admin autenticado (solo actorKind=admin)
+  adminEmail String?
+  adminName  String?
+  ip         String? // ip del cliente cuando aplica
+  action     String // e.g. "reservation.cancel.admin" — ver lib/audit/types.ts
+  area       String // e.g. "reservas"               — ver lib/audit/types.ts
+  entityKind String? // e.g. "Reservation"
+  entityId   String? // id de la entidad afectada
+  summary    String // texto legible en español
+  before     Json? // estado antes (para updates/deletes)
+  after      Json? // estado después (para creates/updates)
+
+  @@index([occurredAt(sort: Desc)])
+  @@index([area])
+  @@index([action])
+  @@index([adminId])
+  @@schema("app")
+}
+
 // ─── Analytics propio (estilo Vercel) ─────────────────────────────────────────
 
 /// Evento de visita de página. SIN PII: el visitante se identifica con un hash
