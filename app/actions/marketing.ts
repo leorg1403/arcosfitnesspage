@@ -22,13 +22,12 @@ import {
   unsubscribePageUrl,
   unsubscribeOneClickUrl,
 } from "@/lib/marketing/unsubscribe";
+import { writeAuditLog } from "@/lib/audit/log";
+import { AUDIT_AREAS, AUDIT_ACTIONS } from "@/lib/audit/types";
+import { prisma } from "@/lib/db/client";
 
-// Tope duro de destinatarios por campaña (cordura / anti-runaway).
 const MAX_RECIPIENTS = 5000;
 
-// Contenido de la campaña. El cuerpo lo escribe el admin (autenticado) → es
-// contenido de confianza; aun así acotamos TODO con .max() (anti-DoS por payloads
-// gigantes) y validamos la URL del CTA.
 const DraftSchema = z.object({
   subject: z.string().trim().min(1, "Falta el asunto").max(200),
   preheader: z.string().trim().max(200).optional().default(""),
@@ -41,7 +40,6 @@ const DraftSchema = z.object({
 const SendSchema = DraftSchema.extend({
   filters: AudienceFiltersSchema,
   listId: z.string().max(40).optional().nullable(),
-  // doble confirmación: debe coincidir con el conteo real resuelto en el servidor.
   confirmCount: z.coerce.number().int().min(0).max(MAX_RECIPIENTS),
 });
 
@@ -61,7 +59,7 @@ async function clientIp(): Promise<{ ip: string; hdrs: Headers }> {
   return { ip, hdrs };
 }
 
-// ── Conteo de audiencia (en vivo) ──────────────────────────────────────────────
+// ── Conteo de audiencia ────────────────────────────────────────────────────────
 export type CountResult = { ok: true; count: number } | { ok: false; error: string };
 
 export async function countAudienceAction(filtersInput: unknown): Promise<CountResult> {
@@ -72,10 +70,7 @@ export async function countAudienceAction(filtersInput: unknown): Promise<CountR
   return { ok: true, count: audience.length };
 }
 
-// ── Preview (HTML renderizado del correo) ──────────────────────────────────────
-// Esquema TOLERANTE: el preview se actualiza en vivo mientras se escribe, así que
-// se permiten campos vacíos/parciales (acotados con .max()). La URL del CTA NO se
-// valida aquí (sí en el envío) para no romper el preview a media escritura.
+// ── Preview ────────────────────────────────────────────────────────────────────
 const PreviewSchema = z.object({
   subject: z.string().max(200).optional().default(""),
   preheader: z.string().max(200).optional().default(""),
@@ -108,15 +103,14 @@ export async function previewCampaignAction(draftInput: unknown): Promise<Previe
   return { ok: true, html };
 }
 
-// ── Envío real (doble confirmación) ────────────────────────────────────────────
+// ── Envío real ─────────────────────────────────────────────────────────────────
 export type SendResult =
   | { ok: true; sent: number; failed: number; recipients: number; mock: boolean }
   | { ok: false; error: string; count?: number };
 
 export async function sendCampaignAction(input: unknown): Promise<SendResult> {
-  await assertAdmin();
+  const admin = await assertAdmin();
 
-  // Rate limit (envío masivo es caro y abusable). Ventanas estrictas.
   const { ip, hdrs } = await clientIp();
   const { rateLimited } = await checkRateLimit("marketing-send", {
     ip,
@@ -134,20 +128,16 @@ export async function sendCampaignAction(input: unknown): Promise<SendResult> {
   }
   const d = parsed.data;
 
-  // El link de baja es obligatorio en marketing → exige secreto para firmarlo.
   const secret = unsubscribeSecret();
   if (!secret) {
     return { ok: false, error: "Falta UNSUBSCRIBE_SECRET / ADMIN_SESSION_SECRET en el servidor." };
   }
 
-  // Resolver audiencia EN EL SERVIDOR (nunca confiamos en una lista del cliente).
   const audience = await resolveAudience(d.filters);
   if (audience.length === 0) return { ok: false, error: "La audiencia quedó vacía.", count: 0 };
   if (audience.length > MAX_RECIPIENTS) {
     return { ok: false, error: `Audiencia demasiado grande (máx. ${MAX_RECIPIENTS}).`, count: audience.length };
   }
-  // Doble confirmación: el número que tecleó el admin debe coincidir con la
-  // audiencia real AHORA (si cambió desde el preview, abortamos).
   if (d.confirmCount !== audience.length) {
     return {
       ok: false,
@@ -156,7 +146,6 @@ export async function sendCampaignAction(input: unknown): Promise<SendResult> {
     };
   }
 
-  // Render ÚNICO con marcadores; se personaliza por destinatario con replace.
   const NAME = "%%NAME%%";
   const UNSUB = "%%UNSUB_PAGE%%";
   const reactEl = MarketingEmail({
@@ -173,7 +162,6 @@ export async function sendCampaignAction(input: unknown): Promise<SendResult> {
     render(reactEl, { plainText: true }),
   ]);
 
-  // Historial: lo creamos en estado "sending" antes de mandar.
   const campaign = await createCampaign({
     subject: d.subject,
     preheader: d.preheader || null,
@@ -186,7 +174,6 @@ export async function sendCampaignAction(input: unknown): Promise<SendResult> {
     recipientCount: audience.length,
   });
 
-  // Construir mensajes personalizados (nombre + link de baja con token firmado).
   const recipients: BroadcastRecipient[] = await Promise.all(
     audience.map(async (r) => {
       const token = await signUnsubscribe(r.id, secret);
@@ -218,10 +205,25 @@ export async function sendCampaignAction(input: unknown): Promise<SendResult> {
     failedCount: res.failed,
   });
   revalidatePath("/recepcion/marketing");
+
+  await writeAuditLog({
+    actorKind: "admin",
+    adminId: admin.id,
+    adminEmail: admin.email,
+    adminName: admin.name,
+    ip,
+    action: AUDIT_ACTIONS.CAMPAIGN_SEND,
+    area: AUDIT_AREAS.MARKETING,
+    entityKind: "EmailCampaign",
+    entityId: campaign.id,
+    summary: `${admin.name} envió campaña "${d.subject}" a ${audience.length} destinatarios (${res.sent} enviados, ${res.failed} fallidos)`,
+    after: { campaignId: campaign.id, subject: d.subject, recipientCount: audience.length, sentCount: res.sent, failedCount: res.failed, mock: res.mock },
+  });
+
   return { ok: true, sent: res.sent, failed: res.failed, recipients: audience.length, mock: res.mock };
 }
 
-// ── Listas guardadas (audiencias) ──────────────────────────────────────────────
+// ── Listas guardadas ───────────────────────────────────────────────────────────
 const SaveListSchema = z.object({
   name: z.string().trim().min(1, "Falta el nombre").max(80),
   description: z.string().trim().max(200).optional().default(""),
@@ -231,24 +233,57 @@ const SaveListSchema = z.object({
 export type SaveListResult = { ok: true } | { ok: false; error: string };
 
 export async function saveListAction(input: unknown): Promise<SaveListResult> {
-  await assertAdmin();
+  const admin = await assertAdmin();
   const parsed = SaveListSchema.safeParse(input);
   if (!parsed.success) {
     return { ok: false, error: parsed.error.issues[0]?.message ?? "Datos inválidos." };
   }
-  await createEmailList({
+  const list = await createEmailList({
     name: parsed.data.name,
     description: parsed.data.description || null,
     filters: parsed.data.filters,
   });
   revalidatePath("/recepcion/marketing");
+
+  await writeAuditLog({
+    actorKind: "admin",
+    adminId: admin.id,
+    adminEmail: admin.email,
+    adminName: admin.name,
+    action: AUDIT_ACTIONS.LIST_SAVE,
+    area: AUDIT_AREAS.MARKETING,
+    entityKind: "EmailList",
+    entityId: list.id,
+    summary: `${admin.name} guardó lista de audiencia "${parsed.data.name}"`,
+    after: { name: parsed.data.name, description: parsed.data.description || null },
+  });
+
   return { ok: true };
 }
 
 export async function deleteListAction(formData: FormData) {
-  await assertAdmin();
+  const admin = await assertAdmin();
   const id = z.string().min(1).max(40).safeParse(formData.get("id"));
   if (!id.success) return;
+
+  const prev = await prisma.emailList.findUnique({
+    where: { id: id.data },
+    select: { name: true },
+  });
+
   await deleteEmailList(id.data);
   revalidatePath("/recepcion/marketing");
+
+  await writeAuditLog({
+    actorKind: "admin",
+    adminId: admin.id,
+    adminEmail: admin.email,
+    adminName: admin.name,
+    action: AUDIT_ACTIONS.LIST_DELETE,
+    area: AUDIT_AREAS.MARKETING,
+    entityKind: "EmailList",
+    entityId: id.data,
+    summary: `${admin.name} eliminó lista de audiencia "${prev?.name ?? id.data}"`,
+    before: prev ? { name: prev.name } : null,
+  });
 }

@@ -10,6 +10,8 @@ import { sendEmail, OWNER_EMAIL } from "@/lib/email";
 import { LeadReplyEmail } from "@/lib/email/lead-reply";
 import { getLead, setLeadStatus, recordLeadReply } from "@/lib/db/admin";
 import { REPLY_DEFAULTS } from "@/lib/lead-reply-defaults";
+import { writeAuditLog } from "@/lib/audit/log";
+import { AUDIT_AREAS, AUDIT_ACTIONS } from "@/lib/audit/types";
 
 /**
  * Acciones del panel de leads. Toda Server Action es un endpoint público →
@@ -25,8 +27,6 @@ async function clientIp(): Promise<{ ip: string; hdrs: Headers }> {
 }
 
 // ── Preview (HTML renderizado de la respuesta) ─────────────────────────────────
-// Esquema TOLERANTE: se actualiza en vivo mientras se escribe (acotado con .max()).
-// El nombre y el mensaje original salen de la BD por leadId, no del cliente.
 const PreviewSchema = z.object({
   leadId: z.string().min(1).max(40),
   subject: z.string().max(200).optional().default(""),
@@ -68,7 +68,6 @@ export type LeadReplyResult =
 export async function replyToLeadAction(input: unknown): Promise<LeadReplyResult> {
   const admin = await assertAdmin();
 
-  // Rate limit (enviar correo es caro/abusable). Regla Firewall: "lead-reply".
   const { ip, hdrs } = await clientIp();
   const { rateLimited } = await checkRateLimit("lead-reply", {
     ip,
@@ -86,7 +85,6 @@ export async function replyToLeadAction(input: unknown): Promise<LeadReplyResult
   }
   const d = parsed.data;
 
-  // El destinatario SIEMPRE sale de la BD (existencia verificada).
   const lead = await getLead(d.leadId);
   if (!lead) return { ok: false, error: "Lead no encontrado." };
 
@@ -102,7 +100,6 @@ export async function replyToLeadAction(input: unknown): Promise<LeadReplyResult
       replyTo: OWNER_EMAIL,
     });
 
-    // Historial: snapshot de la respuesta tal como se envió (visible en el panel).
     await recordLeadReply({
       leadId: lead.id,
       subject: d.subject,
@@ -111,13 +108,28 @@ export async function replyToLeadAction(input: unknown): Promise<LeadReplyResult
     });
     if (lead.status === "new") await setLeadStatus(lead.id, "contacted");
     revalidatePath("/recepcion/leads");
+
+    await writeAuditLog({
+      actorKind: "admin",
+      adminId: admin.id,
+      adminEmail: admin.email,
+      adminName: admin.name,
+      ip,
+      action: AUDIT_ACTIONS.LEAD_REPLY,
+      area: AUDIT_AREAS.LEADS,
+      entityKind: "Lead",
+      entityId: lead.id,
+      summary: `${admin.name} respondió al lead ${lead.firstName} ${lead.lastName} (${lead.email})`,
+      after: { subject: d.subject, mock: res.mock },
+    });
+
     return { ok: true, mock: res.mock };
   } catch {
     return { ok: false, error: "No se pudo enviar el correo. Intenta de nuevo." };
   }
 }
 
-// ── Cambio manual de status (contactado / convertido / archivado) ──────────────
+// ── Cambio manual de status ────────────────────────────────────────────────────
 const StatusSchema = z.object({
   leadId: z.string().min(1).max(40),
   status: z.enum(["new", "contacted", "converted", "archived"]),
@@ -126,14 +138,30 @@ const StatusSchema = z.object({
 export type LeadStatusResult = { ok: true } | { ok: false; error: string };
 
 export async function updateLeadStatusAction(input: unknown): Promise<LeadStatusResult> {
-  await assertAdmin();
+  const admin = await assertAdmin();
   const parsed = StatusSchema.safeParse(input);
   if (!parsed.success) return { ok: false, error: "Datos inválidos." };
 
   const lead = await getLead(parsed.data.leadId);
   if (!lead) return { ok: false, error: "Lead no encontrado." };
 
+  const prevStatus = lead.status;
   await setLeadStatus(lead.id, parsed.data.status);
   revalidatePath("/recepcion/leads");
+
+  await writeAuditLog({
+    actorKind: "admin",
+    adminId: admin.id,
+    adminEmail: admin.email,
+    adminName: admin.name,
+    action: AUDIT_ACTIONS.LEAD_STATUS,
+    area: AUDIT_AREAS.LEADS,
+    entityKind: "Lead",
+    entityId: lead.id,
+    summary: `${admin.name} cambió estado del lead ${lead.firstName} ${lead.lastName} → ${parsed.data.status}`,
+    before: { status: prevStatus },
+    after: { status: parsed.data.status },
+  });
+
   return { ok: true };
 }
